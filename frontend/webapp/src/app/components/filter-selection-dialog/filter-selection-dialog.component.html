@@ -1,0 +1,67 @@
+<div>
+  <h1 mat-dialog-title>
+    Select <em>{{ _.startCase(data.type) }}</em> filters for
+    <em>{{ _.startCase(data.scope) }}</em>
+  </h1>
+  <app-component-spinner [loading]="loading"></app-component-spinner>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Disease or Code"
+      />
+    </mat-form-field>
+    <div class="bui-filter-selection-table">
+      <table mat-table [dataSource]="dataSourceFilters">
+        @for (column of displayedColumnsFilters; track column) {
+          <ng-container [matColumnDef]="column">
+            <th mat-header-cell *matHeaderCellDef>{{ _.startCase(column) }}</th>
+            <td mat-cell *matCellDef="let element">
+              @switch (column) {
+                @default {
+                  <pre>{{ element[column] }}</pre>
+                }
+                @case ("selected") {
+                  <div>
+                    <mat-checkbox
+                      color="primary"
+                      [checked]="_.get(selected, element.id, false)"
+                      (change)="select(element, $event)"
+                    ></mat-checkbox>
+                  </div>
+                }
+              }
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsFilters"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsFilters"></tr>
+      </table>
+      <br />
+    </div>
+    <mat-paginator
+      [style.display]="dataSourceFilters.data.length ? '' : 'none'"
+      #paginatorFilters
+      [pageSizeOptions]="[100, 200]"
+      [length]="total"
+      page
+    ></mat-paginator>
+    @if (!dataSourceFilters.data.length && !loading) {
+      <p>No filters available in the selected scope</p>
+    }
+    <div>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="cancel()"
+        style="margin-right: 10px"
+      >
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" (click)="done()">Done</button>
+    </div>
+  </div>
+</div>

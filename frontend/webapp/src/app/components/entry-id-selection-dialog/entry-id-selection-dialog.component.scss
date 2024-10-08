@@ -1,0 +1,12 @@
+.bui-filter-selection-table {
+  width: 800px;
+  overflow-x: auto;
+
+  @media (width < 800px) {
+    width: 100%;
+  }
+
+  @media (height < 800px) {
+    max-height: 100%;
+  }
+}

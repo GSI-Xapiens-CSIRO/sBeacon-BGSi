@@ -1,0 +1,29 @@
+<h1 mat-dialog-title>Please provide a query description</h1>
+<div mat-dialog-content>
+  <mat-form-field style="width: 400px; margin-top: 5px">
+    <mat-label>Description</mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="data.text"
+      placeholder="Eg: Individuals with SNOMED:ABC condition"
+    ></textarea>
+  </mat-form-field>
+  <div>
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="cancel()"
+      style="margin-right: 10px"
+    >
+      Cancel
+    </button>
+    <button
+      [disabled]="!data.text"
+      mat-raised-button
+      color="primary"
+      [mat-dialog-close]="data.text"
+    >
+      Save
+    </button>
+  </div>
+</div>

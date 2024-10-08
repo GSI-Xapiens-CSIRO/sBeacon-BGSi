@@ -1,0 +1,55 @@
+<mat-card>
+  <div style="margin: 10px">
+    <h3>Word Cloud</h3>
+    <h6>
+      Note: the size of each word depicts the frequency of its appearance in the
+      results returned. Actual frequencies may vary from page to page. Navigate
+      through pages using skip and limit to examine frequencies in other pagees.
+    </h6>
+    <h6>Click on words to investigate further.</h6>
+    <div style="margin: auto; overflow: auto">
+      @defer {
+        <app-word-cloud-plot [counts]="counts"></app-word-cloud-plot>
+      }
+    </div>
+  </div>
+</mat-card>
+<br />
+<mat-card>
+  <div style="margin: 10px">
+    <h3>Frequency of terms in the response</h3>
+    <h6>
+      Note: the frequencies depicted are for the returned set of results. Actual
+      frequencies may vary from page to page. Navigate through pages using skip
+      and limit to examine frequencies in other pagees.
+    </h6>
+    <h6>Click on bars of the plot to investigate further.</h6>
+    <div style="margin: auto; align-items: center">
+      @defer {
+        <app-term-freq-plot [counts]="counts"></app-term-freq-plot>
+      }
+    </div>
+  </div>
+</mat-card>
+@if (
+  scope === ScopeTypes.BIOSAMEPLES &&
+  _.get(results, "response.resultSets.0.results", []).length > 1
+) {
+  <br />
+  <mat-card>
+    <div style="margin: 10px">
+      <h3>Time series representation</h3>
+      <h6>
+        Note: the frequencies depicted are for the returned set of results.
+        Actual frequencies may vary from page to page. Navigate through pages
+        using skip and limit to examine frequencies in other pagees.
+      </h6>
+      <!-- <h6>Click on bars of the plot to investigate further.</h6> -->
+      <div style="margin: auto; align-items: center">
+        <!-- @defer { -->
+        <app-time-series-plot [results]="results"></app-time-series-plot>
+        <!-- } -->
+      </div>
+    </div>
+  </mat-card>
+}

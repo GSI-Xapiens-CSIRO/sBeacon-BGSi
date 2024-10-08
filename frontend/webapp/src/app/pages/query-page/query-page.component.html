@@ -1,0 +1,11 @@
+<app-tab-bar (changed)="changed($event)" />
+<br />
+@for (page of pages; track page) {
+  <div
+    [hidden]="page !== active"
+    [@navigate]="page === active ? 'open' : 'closed'"
+    [class]="page === active ? 'bui-page-open' : 'bui-page-closed'"
+  >
+    <app-query-tab [page]="page" />
+  </div>
+}

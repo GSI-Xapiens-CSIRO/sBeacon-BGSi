@@ -1,0 +1,28 @@
+<mat-card>
+  <mat-card-content>
+    <h2>Term frequencies</h2>
+    @if (loading) {
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+        "
+      >
+        <h3 style="display: flex; flex-grow: 1">Loading</h3>
+        <mat-progress-bar
+          style="display: flex; flex-grow: 2"
+          mode="determinate"
+          [value]="(100 * completed) / terms.length"
+        ></mat-progress-bar>
+      </div>
+    } @else if (counts.length > 0) {
+      <div style="margin: auto; align-items: center">
+        <app-entity-counts-by-term-plot
+          [counts]="counts"
+        ></app-entity-counts-by-term-plot>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,125 @@
+<mat-card>
+  <mat-card-content>
+    <h2>Add new user</h2>
+    <form [formGroup]="newUserForm">
+      <div
+        class="grid max-w-[500px] md:max-w-full md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
+        <mat-form-field>
+          <mat-label>First name</mat-label>
+          <input
+            matInput
+            type="text"
+            placeholder="John"
+            formControlName="firstName"
+          />
+          <mat-error>Field is required</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Last name</mat-label>
+          <input
+            matInput
+            type="text"
+            placeholder="Doe"
+            formControlName="lastName"
+          />
+          <mat-error>Field is required</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Email address</mat-label>
+          <input
+            matInput
+            type="email"
+            placeholder="user@domain.com"
+            formControlName="email"
+          />
+          <mat-error>Valid email is required</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex space-x-[10px]">
+        <button
+          class="w-[100px]"
+          (click)="newUserForm.reset()"
+          form="filters"
+          mat-raised-button
+          color="primary"
+        >
+          Reset
+        </button>
+        <button
+          class="w-[100px]"
+          (click)="createUser()"
+          [disabled]="newUserForm.invalid"
+          form="filters"
+          mat-raised-button
+          color="primary"
+        >
+          Add User
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+  <mat-card-content class="overflow-x-auto relative">
+    <app-component-spinner [loading]="usersLoading"></app-component-spinner>
+    <h2>Users</h2>
+    <form [formGroup]="filterUsersForm" (ngSubmit)="filterUsers()">
+      <div
+        class="grid max-w-[500px] md:max-w-full md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
+        <mat-form-field>
+          <mat-label>Select filter</mat-label>
+          <mat-select required formControlName="key">
+            <mat-option [value]="false">None</mat-option>
+            <mat-option value="given_name">First name</mat-option>
+            <mat-option value="family_name">Last name</mat-option>
+            <mat-option value="email">Email</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Filter value</mat-label>
+          <input matInput formControlName="query" />
+        </mat-form-field>
+      </div>
+      <button
+        (click)="filterUsers()"
+        [disabled]="filterUsersForm.invalid"
+        type="submit"
+        form="filters"
+        mat-raised-button
+        color="primary"
+        style="margin-bottom: 10px; width: 110px"
+      >
+        Filter
+      </button>
+    </form>
+    <table mat-table [dataSource]="usersTableDataSource">
+      @for (column of usersTableDisplayedColumns; track column) {
+        <ng-container [matColumnDef]="column">
+          <th class="whitespace-nowrap" mat-header-cell *matHeaderCellDef>
+            {{ column }}
+          </th>
+          <td
+            (click)="userClick(element)"
+            class="whitespace-nowrap"
+            mat-cell
+            *matCellDef="let element"
+          >
+            {{ element[column] }}
+          </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="usersTableDisplayedColumns"></tr>
+      <tr
+        mat-row
+        class="hover:bg-slate-100 cursor-pointer"
+        *matRowDef="let row; columns: usersTableDisplayedColumns"
+      ></tr>
+    </table>
+    <mat-paginator
+      #paginator
+      [pageSizeOptions]="[10, 50]"
+      [pageSize]="pageSize"
+      length="9999"
+    ></mat-paginator>
+  </mat-card-content>
+</mat-card>

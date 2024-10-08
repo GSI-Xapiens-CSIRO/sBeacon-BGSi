@@ -1,0 +1,8 @@
+terraform {
+  backend "s3" {
+    bucket         = "bui-terraform-states"
+    key            = "bui"
+    region         = "ap-southeast-2"
+    dynamodb_table = "bui-state-locks"
+  }
+}

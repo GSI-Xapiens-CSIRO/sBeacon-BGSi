@@ -1,0 +1,29 @@
+<mat-card>
+  <div class="flex overflow-x-auto whitespace-nowrap flex-nowrap">
+    <mat-chip-listbox
+      class="inline-flex [&>div]:flex-nowrap [&>div]:flex-row mx-1 mr-[54px]"
+      ariaOrientation="horizontal"
+    >
+      @for (page of pages; track page) {
+        <mat-chip
+          (removed)="close(page)"
+          (click)="active = page; changed.emit({ pages, active })"
+          class="[&>span]:!cursor-pointer"
+          [highlighted]="page === active"
+        >
+          Tab {{ page }}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      }
+    </mat-chip-listbox>
+    <mat-chip-listbox class="absolute right-1" ariaOrientation="horizontal">
+      <mat-chip (click)="append()">
+        <div class="h-full flex">
+          <mat-icon class="my-auto">add</mat-icon>
+        </div>
+      </mat-chip>
+    </mat-chip-listbox>
+  </div>
+</mat-card>

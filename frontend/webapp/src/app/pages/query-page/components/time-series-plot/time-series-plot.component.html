@@ -1,0 +1,11 @@
+<h5 class="cursor-pointer" (click)="openTermPicker()">
+  Show/hide filters in the response
+</h5>
+
+<plotly-plot
+  #figure
+  [style]="{ overflow: 'auto' }"
+  [layout]="layout"
+  [data]="data"
+  (plotlyClick)="pointClick($event)"
+></plotly-plot>

@@ -1,0 +1,8 @@
+terraform {
+  backend "s3" {
+    bucket         = "XXXX"
+    key            = "sbeacon"
+    region         = "XXXX"
+    dynamodb_table = "XXXX"
+  }
+}

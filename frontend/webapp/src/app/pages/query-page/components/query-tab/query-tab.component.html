@@ -1,0 +1,442 @@
+<mat-card>
+  <mat-card-content style="margin-bottom: 10px">
+    <h2>Select on from saved queries</h2>
+  </mat-card-content>
+  <mat-card-content style="margin-bottom: 10px" [@.disabled]="disableAnimation">
+    <mat-accordion>
+      <mat-expansion-panel
+        [expanded]="openPanels[0]"
+        (opened)="openPanel(0)"
+        (closed)="closePanel(0)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ openPanels[0] ? "Hide" : "View" }} pre-built queries
+          </mat-panel-title>
+          <mat-panel-description>
+            This contains pre-built queries
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div>
+          @for (example of examples; track example) {
+            <div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: left;
+                  gap: 10px;
+                  margin-bottom: 5px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <button
+                    style="transform: scale(0.7)"
+                    mat-mini-fab
+                    [routerLink]="[]"
+                    color="primary"
+                    (click)="loadExample(example)"
+                  >
+                    <mat-icon>double_arrow</mat-icon>
+                  </button>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <div
+                    style="cursor: pointer"
+                    [routerLink]="[]"
+                    (click)="loadExample(example)"
+                    [innerHTML]="example.text"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel
+        [expanded]="openPanels[1]"
+        (opened)="openPanel(1)"
+        (closed)="closePanel(1)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ openPanels[1] ? "Hide" : "View" }} saved queries
+          </mat-panel-title>
+          <mat-panel-description>
+            This contains queries saved in you browser
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div>
+          @if (!savedQueries.length) {
+            <span>No saved queries</span>
+          }
+          @for (savedQuery of savedQueries; track savedQuery; let i = $index) {
+            <div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: left;
+                  gap: 10px;
+                  margin-bottom: 5px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <button
+                    style="transform: scale(0.7)"
+                    mat-mini-fab
+                    [routerLink]="[]"
+                    color="primary"
+                    (click)="loadExample(savedQuery)"
+                  >
+                    <mat-icon>double_arrow</mat-icon>
+                  </button>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <button
+                    style="transform: scale(0.7)"
+                    mat-mini-fab
+                    [routerLink]="[]"
+                    color="primary"
+                    (click)="deleteSavedQuery(i)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <div
+                    style="cursor: pointer"
+                    [routerLink]="[]"
+                    (click)="loadExample(savedQuery)"
+                    [innerHTML]="savedQuery.text"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel
+        [expanded]="openPanels[2]"
+        (opened)="openPanel(2)"
+        (closed)="closePanel(2)"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ openPanels[2] ? "Hide" : "View" }} specialised queries
+          </mat-panel-title>
+          <mat-panel-description>
+            Specialised queries combine multi step "and" queries for a
+            pre-defined workflow
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <div>
+          @if (!customQueries.length) {
+            <span>No custom queries</span>
+          }
+          @for (
+            customQuery of customQueries;
+            track customQuery;
+            let i = $index
+          ) {
+            <div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: left;
+                  gap: 10px;
+                  margin-bottom: 5px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <button
+                    style="transform: scale(0.7)"
+                    mat-mini-fab
+                    [routerLink]="[]"
+                    color="primary"
+                    (click)="runCustomQuery(customQuery)"
+                  >
+                    <mat-icon>double_arrow</mat-icon>
+                  </button>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                  "
+                >
+                  <div
+                    style="cursor: pointer"
+                    [routerLink]="[]"
+                    (click)="runCustomQuery(customQuery)"
+                    [innerHTML]="customQuery.text"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </mat-card-content>
+  @if (!customQuery) {
+    <mat-card-content style="margin-bottom: 10px">
+      <h2>Choose query parameters</h2>
+    </mat-card-content>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="run()">
+        <h3>Select scope and granularity</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-4">
+          <mat-form-field>
+            <mat-label>Scope</mat-label>
+            <mat-select formControlName="scope" required>
+              <mat-option value="individuals">Individuals</mat-option>
+              <mat-option value="biosamples">Biosamples</mat-option>
+              <mat-option value="runs">Runs</mat-option>
+              <mat-option value="analyses">Analyses</mat-option>
+              <mat-option value="g_variants">Genomic Variants</mat-option>
+              <mat-option value="datasets">Datasets</mat-option>
+              <mat-option value="cohorts">Cohorts</mat-option>
+            </mat-select>
+            <mat-hint>Main scope to query</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Granularity</mat-label>
+            <mat-select formControlName="granularity" required>
+              <mat-option
+                [disabled]="
+                  !(auth.userGroups | async)!.has('record-access-user-group')
+                "
+                value="record"
+                >Record</mat-option
+              >
+              <mat-option
+                [disabled]="
+                  !(auth.userGroups | async)!.has('boolean-access-user-group')
+                "
+                value="boolean"
+                >Boolean</mat-option
+              >
+              <mat-option
+                [disabled]="
+                  !(auth.userGroups | async)!.has('count-access-user-group')
+                "
+                value="count"
+                >Count</mat-option
+              >
+            </mat-select>
+            <mat-hint>Format of returned result</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Skip</mat-label>
+            <input
+              matInput
+              formControlName="skip"
+              [defaultValue]="0"
+              min="0"
+              type="number"
+            />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Limit</mat-label>
+            <input
+              matInput
+              formControlName="limit"
+              [defaultValue]="100"
+              min="1"
+              max="500"
+              type="number"
+            />
+          </mat-form-field>
+        </div>
+        <div class="bui-custom-entry-checkbox-container">
+          <h3>
+            Custom entry returns<mat-checkbox
+              formControlName="customReturn"
+              color="primary"
+            ></mat-checkbox>
+          </h3>
+          <span>(enable to fetch entries from a different scope)</span>
+        </div>
+        @if (form.value.customReturn) {
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-4">
+            <mat-form-field>
+              <mat-label>{{ _.startCase(form.value.scope) }} Id</mat-label>
+              <input matInput formControlName="id" />
+              @if (
+                form.value.customReturn &&
+                form.value.scope !== scopeTypes.GENOMIC_VARIANTS
+              ) {
+                <mat-hint
+                  ><a [routerLink]="[]" (click)="searchEntries()"
+                    >Search</a
+                  ></mat-hint
+                >
+              }
+              @if (
+                form.value.customReturn &&
+                form.value.scope !== scopeTypes.GENOMIC_VARIANTS
+              ) {
+                <mat-error
+                  >Required (<a [routerLink]="[]" (click)="searchEntries()"
+                    >Search</a
+                  >)</mat-error
+                >
+              }
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Scope</mat-label>
+              <mat-select formControlName="return" required>
+                @if (
+                  _.get(allowedReturns[form.value.scope], "individuals", false)
+                ) {
+                  <mat-option value="individuals">Individuals</mat-option>
+                }
+                @if (
+                  _.get(allowedReturns[form.value.scope], "biosamples", false)
+                ) {
+                  <mat-option value="biosamples">Biosamples</mat-option>
+                }
+                @if (_.get(allowedReturns[form.value.scope], "runs", false)) {
+                  <mat-option value="runs">Runs</mat-option>
+                }
+                @if (
+                  _.get(allowedReturns[form.value.scope], "analyses", false)
+                ) {
+                  <mat-option value="analyses">Analyses</mat-option>
+                }
+                @if (
+                  _.get(allowedReturns[form.value.scope], "g_variants", false)
+                ) {
+                  <mat-option value="g_variants">Genomic Variants</mat-option>
+                }
+                @if (
+                  _.get(allowedReturns[form.value.scope], "datasets", false)
+                ) {
+                  <mat-option value="datasets">Datasets</mat-option>
+                }
+                @if (
+                  _.get(allowedReturns[form.value.scope], "cohorts", false)
+                ) {
+                  <mat-option value="cohorts">Cohorts</mat-option>
+                }
+              </mat-select>
+              @if (form.value.customReturn) {
+                <mat-error>Required</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        }
+        @if (form.controls["requestParameters"].enabled) {
+          <h3>Select request parameters</h3>
+          <app-variant-editor formGroupName="requestParameters" />
+        }
+        <div formArrayName="filters">
+          <h3>Add filters</h3>
+          @for (
+            filter of $any(form.get("filters")).controls;
+            track filter;
+            let fi = $index
+          ) {
+            <app-filter-editor
+              [formGroupName]="fi"
+              (removeFilterClicked)="removeFilter(fi)"
+              (searchFiltersClicked)="searchFilters(filter, fi)"
+            />
+          }
+          <br />
+          <button
+            type="button"
+            (click)="addFilter($any(form).get('filters'))"
+            mat-raised-button
+            color="primary"
+            style="margin-bottom: 10px; width: 110px"
+          >
+            Add Filter
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  }
+  <mat-card-content>
+    <h3>Execute</h3>
+    <button
+      type="button"
+      (click)="reset()"
+      mat-raised-button
+      color="primary"
+      style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+    >
+      Reset
+    </button>
+    @if (!customQuery) {
+      <button
+        type="button"
+        [disabled]="form.invalid"
+        (click)="saveQuery()"
+        mat-raised-button
+        color="primary"
+        style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+      >
+        Save
+      </button>
+      <button
+        type="button"
+        (click)="run()"
+        [disabled]="form.invalid"
+        mat-raised-button
+        color="primary"
+        style="margin-bottom: 10px; width: 110px"
+      >
+        Run query
+      </button>
+    }
+  </mat-card-content>
+</mat-card>
+@if (results) {
+  <br />
+  <app-query-result-viewer-container
+    [results]="results"
+    [endpoint]="endpoint"
+    [query]="query"
+    [scope]="scope"
+  ></app-query-result-viewer-container>
+}

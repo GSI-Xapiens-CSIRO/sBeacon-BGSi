@@ -1,0 +1,78 @@
+<div>
+  <h1 mat-dialog-title>
+    Select a <em>{{ _.startCase(data.scope) }}</em> entry
+  </h1>
+  <app-component-spinner [loading]="loading"></app-component-spinner>
+  <div mat-dialog-content>
+    <div class="bui-filter-selection-table">
+      <table mat-table [dataSource]="entries">
+        @for (column of displayedColumnsEntries; track column) {
+          <ng-container [matColumnDef]="column">
+            <th
+              [style.width]="column === 'selected' ? '100px' : ''"
+              mat-header-cell
+              *matHeaderCellDef
+            >
+              {{ _.startCase(column) }}
+            </th>
+            <td mat-cell *matCellDef="let element">
+              @switch (column) {
+                @default {
+                  <div>
+                    @if (
+                      _.isString(element[column]) || _.isNumber(element[column])
+                    ) {
+                      <pre>{{ element[column] }}</pre>
+                    } @else {
+                      #showJSON;|
+                    }
+                    <ng-template #showJSON>
+                      <ngx-json-viewer
+                        style="text-wrap: nowrap"
+                        [expanded]="false"
+                        [json]="element[column]"
+                      ></ngx-json-viewer>
+                    </ng-template>
+                  </div>
+                }
+                @case ("selected") {
+                  <div>
+                    <mat-checkbox
+                      color="primary"
+                      [checked]="selected === element.id"
+                      (change)="select(element, $event)"
+                    ></mat-checkbox>
+                  </div>
+                }
+              }
+            </td>
+          </ng-container>
+        }
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsEntries"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsEntries"></tr>
+      </table>
+      <br />
+    </div>
+    <mat-paginator
+      #paginator
+      [pageSizeOptions]="[10, 50, 100]"
+      [length]="total"
+      page
+    ></mat-paginator>
+    @if (!entries.length && !loading) {
+      <p>No entries available in the selected scope</p>
+    }
+    <div>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="cancel()"
+        style="margin-right: 10px"
+      >
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" (click)="done()">Done</button>
+    </div>
+  </div>
+</div>

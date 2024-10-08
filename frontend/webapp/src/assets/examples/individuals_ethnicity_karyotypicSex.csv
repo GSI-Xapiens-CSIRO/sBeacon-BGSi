@@ -1,0 +1,781 @@
+id,ethnicity,karyotypicSex
+AXE_1-1,Congolese,XXY
+AXE_1-10,Yanomama,XXXY
+AXE_1-2,Tamils,XXYY
+AXE_1-3,Aymara,XXX
+AXE_1-4,Onge,XYY
+AXE_1-5,Tamils,XXXX
+AXE_1-6,Papuans,XX
+AXE_1-7,Atacamenos,XXXY
+AXE_1-8,Alacaluf,XX
+AXE_1-9,Guamians,XXXX
+BBB_1-1,Congolese,XXY
+BBB_1-10,Yanomama,XXXY
+BBB_1-2,Tamils,XXYY
+BBB_1-3,Aymara,XXX
+BBB_1-4,Onge,XYY
+BBB_1-5,Tamils,XXXX
+BBB_1-6,Papuans,XX
+BBB_1-7,Atacamenos,XXXY
+BBB_1-8,Alacaluf,XX
+BBB_1-9,Guamians,XXXX
+CSS_1-1,Congolese,XXY
+CSS_1-10,Yanomama,XXXY
+CSS_1-2,Tamils,XXYY
+CSS_1-3,Aymara,XXX
+CSS_1-4,Onge,XYY
+CSS_1-5,Tamils,XXXX
+CSS_1-6,Papuans,XX
+CSS_1-7,Atacamenos,XXXY
+CSS_1-8,Alacaluf,XX
+CSS_1-9,Guamians,XXXX
+MON_1-1,Congolese,XXY
+MON_1-10,Yanomama,XXXY
+MON_1-2,Tamils,XXYY
+MON_1-3,Aymara,XXX
+MON_1-4,Onge,XYY
+MON_1-5,Tamils,XXXX
+MON_1-6,Papuans,XX
+MON_1-7,Atacamenos,XXXY
+MON_1-8,Alacaluf,XX
+MON_1-9,Guamians,XXXX
+UNK_1-1,Congolese,XXY
+UNK_1-10,Yanomama,XXXY
+UNK_1-2,Tamils,XXYY
+UNK_1-3,Aymara,XXX
+UNK_1-4,Onge,XYY
+UNK_1-5,Tamils,XXXX
+UNK_1-6,Papuans,XX
+UNK_1-7,Atacamenos,XXXY
+UNK_1-8,Alacaluf,XX
+UNK_1-9,Guamians,XXXX
+UNQ_1-1,Congolese,XXY
+UNQ_1-10,Yanomama,XXXY
+UNQ_1-2,Tamils,XXYY
+UNQ_1-3,Aymara,XXX
+UNQ_1-4,Onge,XYY
+UNQ_1-5,Tamils,XXXX
+UNQ_1-6,Papuans,XX
+UNQ_1-7,Atacamenos,XXXY
+UNQ_1-8,Alacaluf,XX
+UNQ_1-9,Guamians,XXXX
+dia-individual-1-1,African American,XX
+dia-individual-1-10,African American,XX
+dia-individual-1-100,African American,XX
+dia-individual-1-101,African American,XX
+dia-individual-1-102,African American,XX
+dia-individual-1-103,Caucasian,XX
+dia-individual-1-104,Caucasian,XX
+dia-individual-1-105,Caucasian,XX
+dia-individual-1-106,Caucasian,XX
+dia-individual-1-107,African American,XX
+dia-individual-1-108,African American,XX
+dia-individual-1-109,African American,XY
+dia-individual-1-11,African American,XY
+dia-individual-1-110,African American,XX
+dia-individual-1-111,Caucasian,XX
+dia-individual-1-112,Caucasian,XY
+dia-individual-1-113,African American,XX
+dia-individual-1-114,Caucasian,XX
+dia-individual-1-115,African American,XX
+dia-individual-1-116,Caucasian,XX
+dia-individual-1-117,African American,XX
+dia-individual-1-118,African American,XX
+dia-individual-1-119,African American,XY
+dia-individual-1-12,Caucasian,XY
+dia-individual-1-120,Caucasian,XX
+dia-individual-1-13,African American,XY
+dia-individual-1-14,African American,XX
+dia-individual-1-15,Caucasian,XX
+dia-individual-1-16,Caucasian,XX
+dia-individual-1-17,Caucasian,XY
+dia-individual-1-18,Caucasian,XY
+dia-individual-1-19,African American,XX
+dia-individual-1-2,African American,XX
+dia-individual-1-20,Caucasian,XX
+dia-individual-1-21,African American,XY
+dia-individual-1-22,African American,XX
+dia-individual-1-23,African American,XX
+dia-individual-1-24,African American,XX
+dia-individual-1-25,Caucasian,XY
+dia-individual-1-26,African American,XX
+dia-individual-1-27,Caucasian,XX
+dia-individual-1-28,Caucasian,XX
+dia-individual-1-29,African American,XX
+dia-individual-1-3,Caucasian,XX
+dia-individual-1-30,Caucasian,XX
+dia-individual-1-31,Caucasian,XX
+dia-individual-1-32,African American,XX
+dia-individual-1-33,African American,XX
+dia-individual-1-34,Caucasian,XY
+dia-individual-1-35,African American,XY
+dia-individual-1-36,Caucasian,XY
+dia-individual-1-37,Caucasian,XX
+dia-individual-1-38,Caucasian,XY
+dia-individual-1-39,African American,XX
+dia-individual-1-4,Caucasian,XX
+dia-individual-1-40,Caucasian,XY
+dia-individual-1-41,Caucasian,XX
+dia-individual-1-42,African American,XX
+dia-individual-1-43,Caucasian,XX
+dia-individual-1-44,African American,XX
+dia-individual-1-45,Caucasian,XX
+dia-individual-1-46,Caucasian,XX
+dia-individual-1-47,Caucasian,XX
+dia-individual-1-48,African American,XX
+dia-individual-1-49,Caucasian,XX
+dia-individual-1-5,African American,XY
+dia-individual-1-50,African American,XX
+dia-individual-1-51,African American,XY
+dia-individual-1-52,African American,XX
+dia-individual-1-53,African American,XX
+dia-individual-1-54,African American,XY
+dia-individual-1-55,Caucasian,XX
+dia-individual-1-56,Caucasian,XX
+dia-individual-1-57,African American,XY
+dia-individual-1-58,Caucasian,XX
+dia-individual-1-59,African American,XX
+dia-individual-1-6,Caucasian,XX
+dia-individual-1-60,Caucasian,XX
+dia-individual-1-61,Caucasian,XY
+dia-individual-1-62,Caucasian,XY
+dia-individual-1-63,African American,XX
+dia-individual-1-64,Caucasian,XY
+dia-individual-1-65,Caucasian,XX
+dia-individual-1-66,African American,XX
+dia-individual-1-67,Caucasian,XX
+dia-individual-1-68,Caucasian,XY
+dia-individual-1-69,Caucasian,XX
+dia-individual-1-7,Caucasian,XY
+dia-individual-1-70,Caucasian,XX
+dia-individual-1-71,Caucasian,XX
+dia-individual-1-72,African American,XX
+dia-individual-1-73,Caucasian,XX
+dia-individual-1-74,African American,XY
+dia-individual-1-75,African American,XX
+dia-individual-1-76,Caucasian,XY
+dia-individual-1-77,African American,XY
+dia-individual-1-78,African American,XX
+dia-individual-1-79,Caucasian,XY
+dia-individual-1-8,African American,XY
+dia-individual-1-80,African American,XX
+dia-individual-1-81,African American,XX
+dia-individual-1-82,Caucasian,XX
+dia-individual-1-83,African American,XX
+dia-individual-1-84,Caucasian,XX
+dia-individual-1-85,African American,XX
+dia-individual-1-86,Caucasian,XY
+dia-individual-1-87,Caucasian,XX
+dia-individual-1-88,African American,XX
+dia-individual-1-89,African American,XX
+dia-individual-1-9,African American,XX
+dia-individual-1-90,Caucasian,XY
+dia-individual-1-91,African American,XY
+dia-individual-1-92,African American,XY
+dia-individual-1-93,African American,XX
+dia-individual-1-94,African American,XX
+dia-individual-1-95,African American,XX
+dia-individual-1-96,Caucasian,XX
+dia-individual-1-97,Caucasian,XX
+dia-individual-1-98,Caucasian,XX
+dia-individual-1-99,Caucasian,XX
+dia-individual-2-1,African American,XX
+dia-individual-2-10,African American,XX
+dia-individual-2-100,African American,XX
+dia-individual-2-101,African American,XX
+dia-individual-2-102,African American,XX
+dia-individual-2-103,Caucasian,XX
+dia-individual-2-104,Caucasian,XX
+dia-individual-2-105,Caucasian,XX
+dia-individual-2-106,Caucasian,XX
+dia-individual-2-107,African American,XX
+dia-individual-2-108,African American,XX
+dia-individual-2-109,African American,XY
+dia-individual-2-11,African American,XY
+dia-individual-2-110,African American,XX
+dia-individual-2-111,Caucasian,XX
+dia-individual-2-112,Caucasian,XY
+dia-individual-2-113,African American,XX
+dia-individual-2-114,Caucasian,XX
+dia-individual-2-115,African American,XX
+dia-individual-2-116,Caucasian,XX
+dia-individual-2-117,African American,XX
+dia-individual-2-118,African American,XX
+dia-individual-2-119,African American,XY
+dia-individual-2-12,Caucasian,XY
+dia-individual-2-120,Caucasian,XX
+dia-individual-2-121,Caucasian,XY
+dia-individual-2-122,African American,XX
+dia-individual-2-123,Caucasian,XY
+dia-individual-2-124,African American,XX
+dia-individual-2-125,Caucasian,XX
+dia-individual-2-126,Caucasian,XX
+dia-individual-2-127,Caucasian,XX
+dia-individual-2-128,Caucasian,XX
+dia-individual-2-129,Caucasian,XY
+dia-individual-2-13,African American,XY
+dia-individual-2-130,Caucasian,XX
+dia-individual-2-131,African American,XY
+dia-individual-2-132,Caucasian,XX
+dia-individual-2-133,African American,XX
+dia-individual-2-134,Caucasian,XX
+dia-individual-2-135,Caucasian,XX
+dia-individual-2-136,African American,XY
+dia-individual-2-137,African American,XX
+dia-individual-2-138,African American,XX
+dia-individual-2-139,Caucasian,XX
+dia-individual-2-14,African American,XX
+dia-individual-2-140,African American,XX
+dia-individual-2-141,Caucasian,XX
+dia-individual-2-142,Caucasian,XX
+dia-individual-2-143,Caucasian,XX
+dia-individual-2-144,African American,XY
+dia-individual-2-145,Caucasian,XX
+dia-individual-2-146,African American,XY
+dia-individual-2-147,African American,XX
+dia-individual-2-148,Caucasian,XY
+dia-individual-2-149,African American,XX
+dia-individual-2-15,Caucasian,XX
+dia-individual-2-150,Caucasian,XY
+dia-individual-2-151,African American,XX
+dia-individual-2-152,Caucasian,XX
+dia-individual-2-153,Caucasian,XX
+dia-individual-2-154,Caucasian,XX
+dia-individual-2-155,African American,XX
+dia-individual-2-156,Caucasian,XX
+dia-individual-2-157,African American,XY
+dia-individual-2-158,Caucasian,XY
+dia-individual-2-159,Caucasian,XX
+dia-individual-2-16,Caucasian,XX
+dia-individual-2-160,Caucasian,XX
+dia-individual-2-161,African American,XX
+dia-individual-2-162,Caucasian,XX
+dia-individual-2-163,Caucasian,XX
+dia-individual-2-164,Caucasian,XX
+dia-individual-2-165,African American,XX
+dia-individual-2-166,African American,XY
+dia-individual-2-167,African American,XX
+dia-individual-2-168,African American,XY
+dia-individual-2-169,African American,XY
+dia-individual-2-17,Caucasian,XY
+dia-individual-2-170,African American,XX
+dia-individual-2-171,Caucasian,XY
+dia-individual-2-172,Caucasian,XX
+dia-individual-2-173,Caucasian,XX
+dia-individual-2-174,Caucasian,XY
+dia-individual-2-175,African American,XX
+dia-individual-2-176,Caucasian,XX
+dia-individual-2-177,African American,XY
+dia-individual-2-178,African American,XX
+dia-individual-2-179,Caucasian,XY
+dia-individual-2-18,Caucasian,XY
+dia-individual-2-180,African American,XY
+dia-individual-2-19,African American,XX
+dia-individual-2-2,African American,XX
+dia-individual-2-20,Caucasian,XX
+dia-individual-2-21,African American,XY
+dia-individual-2-22,African American,XX
+dia-individual-2-23,African American,XX
+dia-individual-2-24,African American,XX
+dia-individual-2-25,Caucasian,XY
+dia-individual-2-26,African American,XX
+dia-individual-2-27,Caucasian,XX
+dia-individual-2-28,Caucasian,XX
+dia-individual-2-29,African American,XX
+dia-individual-2-3,Caucasian,XX
+dia-individual-2-30,Caucasian,XX
+dia-individual-2-31,Caucasian,XX
+dia-individual-2-32,African American,XX
+dia-individual-2-33,African American,XX
+dia-individual-2-34,Caucasian,XY
+dia-individual-2-35,African American,XY
+dia-individual-2-36,Caucasian,XY
+dia-individual-2-37,Caucasian,XX
+dia-individual-2-38,Caucasian,XY
+dia-individual-2-39,African American,XX
+dia-individual-2-4,Caucasian,XX
+dia-individual-2-40,Caucasian,XY
+dia-individual-2-41,Caucasian,XX
+dia-individual-2-42,African American,XX
+dia-individual-2-43,Caucasian,XX
+dia-individual-2-44,African American,XX
+dia-individual-2-45,Caucasian,XX
+dia-individual-2-46,Caucasian,XX
+dia-individual-2-47,Caucasian,XX
+dia-individual-2-48,African American,XX
+dia-individual-2-49,Caucasian,XX
+dia-individual-2-5,African American,XY
+dia-individual-2-50,African American,XX
+dia-individual-2-51,African American,XY
+dia-individual-2-52,African American,XX
+dia-individual-2-53,African American,XX
+dia-individual-2-54,African American,XY
+dia-individual-2-55,Caucasian,XX
+dia-individual-2-56,Caucasian,XX
+dia-individual-2-57,African American,XY
+dia-individual-2-58,Caucasian,XX
+dia-individual-2-59,African American,XX
+dia-individual-2-6,Caucasian,XX
+dia-individual-2-60,Caucasian,XX
+dia-individual-2-61,Caucasian,XY
+dia-individual-2-62,Caucasian,XY
+dia-individual-2-63,African American,XX
+dia-individual-2-64,Caucasian,XY
+dia-individual-2-65,Caucasian,XX
+dia-individual-2-66,African American,XX
+dia-individual-2-67,Caucasian,XX
+dia-individual-2-68,Caucasian,XY
+dia-individual-2-69,Caucasian,XX
+dia-individual-2-7,Caucasian,XY
+dia-individual-2-70,Caucasian,XX
+dia-individual-2-71,Caucasian,XX
+dia-individual-2-72,African American,XX
+dia-individual-2-73,Caucasian,XX
+dia-individual-2-74,African American,XY
+dia-individual-2-75,African American,XX
+dia-individual-2-76,Caucasian,XY
+dia-individual-2-77,African American,XY
+dia-individual-2-78,African American,XX
+dia-individual-2-79,Caucasian,XY
+dia-individual-2-8,African American,XY
+dia-individual-2-80,African American,XX
+dia-individual-2-81,African American,XX
+dia-individual-2-82,Caucasian,XX
+dia-individual-2-83,African American,XX
+dia-individual-2-84,Caucasian,XX
+dia-individual-2-85,African American,XX
+dia-individual-2-86,Caucasian,XY
+dia-individual-2-87,Caucasian,XX
+dia-individual-2-88,African American,XX
+dia-individual-2-89,African American,XX
+dia-individual-2-9,African American,XX
+dia-individual-2-90,Caucasian,XY
+dia-individual-2-91,African American,XY
+dia-individual-2-92,African American,XY
+dia-individual-2-93,African American,XX
+dia-individual-2-94,African American,XX
+dia-individual-2-95,African American,XX
+dia-individual-2-96,Caucasian,XX
+dia-individual-2-97,Caucasian,XX
+dia-individual-2-98,Caucasian,XX
+dia-individual-2-99,Caucasian,XX
+nodia-individual-1-1,African American,XX
+nodia-individual-1-10,African American,XX
+nodia-individual-1-11,African American,XY
+nodia-individual-1-12,Caucasian,XX
+nodia-individual-1-13,Caucasian,XY
+nodia-individual-1-14,African American,XY
+nodia-individual-1-15,African American,XY
+nodia-individual-1-16,Caucasian,XX
+nodia-individual-1-17,African American,XY
+nodia-individual-1-18,African American,XY
+nodia-individual-1-19,Caucasian,XY
+nodia-individual-1-2,Caucasian,XX
+nodia-individual-1-20,Caucasian,XX
+nodia-individual-1-21,African American,XX
+nodia-individual-1-22,Caucasian,XX
+nodia-individual-1-23,Caucasian,XX
+nodia-individual-1-24,African American,XX
+nodia-individual-1-25,African American,XY
+nodia-individual-1-26,Caucasian,XX
+nodia-individual-1-27,African American,XX
+nodia-individual-1-28,African American,XX
+nodia-individual-1-29,African American,XY
+nodia-individual-1-3,Caucasian,XY
+nodia-individual-1-30,African American,XX
+nodia-individual-1-31,Caucasian,XX
+nodia-individual-1-32,African American,XY
+nodia-individual-1-33,African American,XX
+nodia-individual-1-34,Caucasian,XX
+nodia-individual-1-35,African American,XY
+nodia-individual-1-36,Caucasian,XY
+nodia-individual-1-37,Caucasian,XX
+nodia-individual-1-38,African American,XY
+nodia-individual-1-39,African American,XX
+nodia-individual-1-4,African American,XY
+nodia-individual-1-40,African American,XX
+nodia-individual-1-41,Caucasian,XX
+nodia-individual-1-42,African American,XX
+nodia-individual-1-43,African American,XY
+nodia-individual-1-44,Caucasian,XY
+nodia-individual-1-45,African American,XX
+nodia-individual-1-46,African American,XY
+nodia-individual-1-47,African American,XX
+nodia-individual-1-48,African American,XY
+nodia-individual-1-49,African American,XX
+nodia-individual-1-5,Caucasian,XY
+nodia-individual-1-50,African American,XY
+nodia-individual-1-51,African American,XX
+nodia-individual-1-52,Caucasian,XX
+nodia-individual-1-53,African American,XX
+nodia-individual-1-54,African American,XX
+nodia-individual-1-55,African American,XX
+nodia-individual-1-56,African American,XY
+nodia-individual-1-57,Caucasian,XX
+nodia-individual-1-58,African American,XY
+nodia-individual-1-59,Caucasian,XY
+nodia-individual-1-6,African American,XY
+nodia-individual-1-60,Caucasian,XX
+nodia-individual-1-61,Caucasian,XY
+nodia-individual-1-62,Caucasian,XX
+nodia-individual-1-63,Caucasian,XX
+nodia-individual-1-64,Caucasian,XY
+nodia-individual-1-65,African American,XY
+nodia-individual-1-66,African American,XX
+nodia-individual-1-67,African American,XY
+nodia-individual-1-68,African American,XX
+nodia-individual-1-69,African American,XY
+nodia-individual-1-7,African American,XX
+nodia-individual-1-70,African American,XX
+nodia-individual-1-71,African American,XX
+nodia-individual-1-72,Caucasian,XX
+nodia-individual-1-73,Caucasian,XX
+nodia-individual-1-74,African American,XX
+nodia-individual-1-75,African American,XX
+nodia-individual-1-76,Caucasian,XX
+nodia-individual-1-77,African American,XX
+nodia-individual-1-78,Caucasian,XX
+nodia-individual-1-79,Caucasian,XY
+nodia-individual-1-8,Caucasian,XX
+nodia-individual-1-80,African American,XX
+nodia-individual-1-9,Caucasian,XX
+nodia-individual-2-1,African American,XY
+nodia-individual-2-10,African American,XX
+nodia-individual-2-100,Caucasian,XY
+nodia-individual-2-101,Caucasian,XY
+nodia-individual-2-102,Caucasian,XX
+nodia-individual-2-103,African American,XX
+nodia-individual-2-104,African American,XX
+nodia-individual-2-105,African American,XY
+nodia-individual-2-106,Caucasian,XX
+nodia-individual-2-107,Caucasian,XY
+nodia-individual-2-108,Caucasian,XY
+nodia-individual-2-109,African American,XX
+nodia-individual-2-11,African American,XY
+nodia-individual-2-110,Caucasian,XX
+nodia-individual-2-111,Caucasian,XX
+nodia-individual-2-112,African American,XX
+nodia-individual-2-113,Caucasian,XX
+nodia-individual-2-114,African American,XX
+nodia-individual-2-115,African American,XX
+nodia-individual-2-116,African American,XX
+nodia-individual-2-117,African American,XX
+nodia-individual-2-118,African American,XX
+nodia-individual-2-119,African American,XY
+nodia-individual-2-12,African American,XX
+nodia-individual-2-120,African American,XY
+nodia-individual-2-121,Caucasian,XX
+nodia-individual-2-122,Caucasian,XY
+nodia-individual-2-123,African American,XX
+nodia-individual-2-124,African American,XY
+nodia-individual-2-125,African American,XY
+nodia-individual-2-126,Caucasian,XX
+nodia-individual-2-127,African American,XX
+nodia-individual-2-128,African American,XX
+nodia-individual-2-129,Caucasian,XX
+nodia-individual-2-13,African American,XY
+nodia-individual-2-130,African American,XX
+nodia-individual-2-131,African American,XX
+nodia-individual-2-132,Caucasian,XX
+nodia-individual-2-133,African American,XX
+nodia-individual-2-134,African American,XY
+nodia-individual-2-135,African American,XX
+nodia-individual-2-136,Caucasian,XY
+nodia-individual-2-137,Caucasian,XX
+nodia-individual-2-138,African American,XY
+nodia-individual-2-139,African American,XX
+nodia-individual-2-14,African American,XX
+nodia-individual-2-140,African American,XY
+nodia-individual-2-141,Caucasian,XX
+nodia-individual-2-142,African American,XX
+nodia-individual-2-143,African American,XY
+nodia-individual-2-144,African American,XY
+nodia-individual-2-145,Caucasian,XX
+nodia-individual-2-146,African American,XY
+nodia-individual-2-147,African American,XX
+nodia-individual-2-148,African American,XX
+nodia-individual-2-149,Caucasian,XX
+nodia-individual-2-15,African American,XY
+nodia-individual-2-150,African American,XX
+nodia-individual-2-151,African American,XX
+nodia-individual-2-152,Caucasian,XX
+nodia-individual-2-153,African American,XY
+nodia-individual-2-154,African American,XX
+nodia-individual-2-155,Caucasian,XX
+nodia-individual-2-156,African American,XX
+nodia-individual-2-157,Caucasian,XX
+nodia-individual-2-158,Caucasian,XX
+nodia-individual-2-159,African American,XX
+nodia-individual-2-16,African American,XX
+nodia-individual-2-160,African American,XX
+nodia-individual-2-161,Caucasian,XY
+nodia-individual-2-162,Caucasian,XY
+nodia-individual-2-163,African American,XX
+nodia-individual-2-164,African American,XX
+nodia-individual-2-165,African American,XX
+nodia-individual-2-166,Caucasian,XX
+nodia-individual-2-167,African American,XX
+nodia-individual-2-168,Caucasian,XX
+nodia-individual-2-169,African American,XY
+nodia-individual-2-17,Caucasian,XX
+nodia-individual-2-170,African American,XX
+nodia-individual-2-171,African American,XY
+nodia-individual-2-172,African American,XY
+nodia-individual-2-173,African American,XX
+nodia-individual-2-174,Caucasian,XY
+nodia-individual-2-175,Caucasian,XX
+nodia-individual-2-176,African American,XX
+nodia-individual-2-177,African American,XX
+nodia-individual-2-178,Caucasian,XX
+nodia-individual-2-179,African American,XX
+nodia-individual-2-18,African American,XX
+nodia-individual-2-180,African American,XX
+nodia-individual-2-181,Caucasian,XX
+nodia-individual-2-182,Caucasian,XX
+nodia-individual-2-183,African American,XX
+nodia-individual-2-184,Caucasian,XX
+nodia-individual-2-185,Caucasian,XX
+nodia-individual-2-186,Caucasian,XY
+nodia-individual-2-187,African American,XX
+nodia-individual-2-188,Caucasian,XX
+nodia-individual-2-189,African American,XY
+nodia-individual-2-19,African American,XX
+nodia-individual-2-190,African American,XX
+nodia-individual-2-191,Caucasian,XX
+nodia-individual-2-192,Caucasian,XX
+nodia-individual-2-193,African American,XX
+nodia-individual-2-194,African American,XX
+nodia-individual-2-195,African American,XX
+nodia-individual-2-196,Caucasian,XY
+nodia-individual-2-197,African American,XY
+nodia-individual-2-198,Caucasian,XY
+nodia-individual-2-199,Caucasian,XY
+nodia-individual-2-2,African American,XX
+nodia-individual-2-20,African American,XX
+nodia-individual-2-200,African American,XX
+nodia-individual-2-201,African American,XX
+nodia-individual-2-202,African American,XX
+nodia-individual-2-203,African American,XY
+nodia-individual-2-204,Caucasian,XX
+nodia-individual-2-205,Caucasian,XY
+nodia-individual-2-206,African American,XY
+nodia-individual-2-207,Caucasian,XY
+nodia-individual-2-208,African American,XY
+nodia-individual-2-209,African American,XY
+nodia-individual-2-21,African American,XY
+nodia-individual-2-210,Caucasian,XY
+nodia-individual-2-211,Caucasian,XY
+nodia-individual-2-212,Caucasian,XX
+nodia-individual-2-213,African American,XX
+nodia-individual-2-214,African American,XY
+nodia-individual-2-215,Caucasian,XX
+nodia-individual-2-216,African American,XX
+nodia-individual-2-217,Caucasian,XY
+nodia-individual-2-218,Caucasian,XY
+nodia-individual-2-219,African American,XX
+nodia-individual-2-22,Caucasian,XX
+nodia-individual-2-220,African American,XX
+nodia-individual-2-23,African American,XY
+nodia-individual-2-24,Caucasian,XY
+nodia-individual-2-25,Caucasian,XX
+nodia-individual-2-26,Caucasian,XY
+nodia-individual-2-27,Caucasian,XX
+nodia-individual-2-28,Caucasian,XX
+nodia-individual-2-29,Caucasian,XY
+nodia-individual-2-3,Caucasian,XY
+nodia-individual-2-30,African American,XY
+nodia-individual-2-31,African American,XX
+nodia-individual-2-32,African American,XY
+nodia-individual-2-33,African American,XX
+nodia-individual-2-34,African American,XY
+nodia-individual-2-35,African American,XX
+nodia-individual-2-36,African American,XX
+nodia-individual-2-37,Caucasian,XX
+nodia-individual-2-38,Caucasian,XX
+nodia-individual-2-39,African American,XX
+nodia-individual-2-4,African American,XX
+nodia-individual-2-40,African American,XX
+nodia-individual-2-41,Caucasian,XX
+nodia-individual-2-42,African American,XX
+nodia-individual-2-43,Caucasian,XX
+nodia-individual-2-44,Caucasian,XY
+nodia-individual-2-45,African American,XX
+nodia-individual-2-46,African American,XX
+nodia-individual-2-47,Caucasian,XX
+nodia-individual-2-48,Caucasian,XX
+nodia-individual-2-49,Caucasian,XX
+nodia-individual-2-5,African American,XX
+nodia-individual-2-50,African American,XX
+nodia-individual-2-51,African American,XX
+nodia-individual-2-52,African American,XX
+nodia-individual-2-53,Caucasian,XX
+nodia-individual-2-54,African American,XY
+nodia-individual-2-55,Caucasian,XX
+nodia-individual-2-56,African American,XX
+nodia-individual-2-57,Caucasian,XY
+nodia-individual-2-58,African American,XY
+nodia-individual-2-59,Caucasian,XY
+nodia-individual-2-6,Caucasian,XX
+nodia-individual-2-60,African American,XX
+nodia-individual-2-61,Caucasian,XX
+nodia-individual-2-62,African American,XX
+nodia-individual-2-63,Caucasian,XX
+nodia-individual-2-64,Caucasian,XY
+nodia-individual-2-65,Caucasian,XY
+nodia-individual-2-66,Caucasian,XX
+nodia-individual-2-67,Caucasian,XY
+nodia-individual-2-68,Caucasian,XY
+nodia-individual-2-69,Caucasian,XX
+nodia-individual-2-7,African American,XX
+nodia-individual-2-70,African American,XX
+nodia-individual-2-71,African American,XX
+nodia-individual-2-72,African American,XY
+nodia-individual-2-73,Caucasian,XY
+nodia-individual-2-74,African American,XY
+nodia-individual-2-75,Caucasian,XX
+nodia-individual-2-76,Caucasian,XX
+nodia-individual-2-77,Caucasian,XX
+nodia-individual-2-78,African American,XY
+nodia-individual-2-79,African American,XX
+nodia-individual-2-8,African American,XY
+nodia-individual-2-80,Caucasian,XX
+nodia-individual-2-81,Caucasian,XX
+nodia-individual-2-82,African American,XX
+nodia-individual-2-83,Caucasian,XX
+nodia-individual-2-84,Caucasian,XY
+nodia-individual-2-85,African American,XX
+nodia-individual-2-86,African American,XX
+nodia-individual-2-87,African American,XX
+nodia-individual-2-88,African American,XX
+nodia-individual-2-89,Caucasian,XX
+nodia-individual-2-9,Caucasian,XY
+nodia-individual-2-90,African American,XY
+nodia-individual-2-91,African American,XY
+nodia-individual-2-92,Caucasian,XX
+nodia-individual-2-93,Caucasian,XX
+nodia-individual-2-94,Caucasian,XX
+nodia-individual-2-95,African American,XX
+nodia-individual-2-96,African American,XY
+nodia-individual-2-97,African American,XX
+nodia-individual-2-98,African American,XY
+nodia-individual-2-99,Caucasian,XX
+norm-individual-1,Caucasian,XX
+norm-individual-10,African American,XX
+norm-individual-11,African American,XX
+norm-individual-12,Caucasian,XY
+norm-individual-13,Caucasian,XY
+norm-individual-14,African American,XX
+norm-individual-15,Caucasian,XY
+norm-individual-16,Caucasian,XX
+norm-individual-17,Caucasian,XY
+norm-individual-18,Caucasian,XY
+norm-individual-19,African American,XX
+norm-individual-2,African American,XY
+norm-individual-20,Caucasian,XY
+norm-individual-21,African American,XY
+norm-individual-22,African American,XX
+norm-individual-23,Caucasian,XY
+norm-individual-24,African American,XX
+norm-individual-25,African American,XX
+norm-individual-26,African American,XY
+norm-individual-27,Caucasian,XX
+norm-individual-28,Caucasian,XY
+norm-individual-29,African American,XY
+norm-individual-3,Caucasian,XX
+norm-individual-30,African American,XY
+norm-individual-31,African American,XY
+norm-individual-32,Caucasian,XY
+norm-individual-33,African American,XX
+norm-individual-34,African American,XY
+norm-individual-35,African American,XX
+norm-individual-36,Caucasian,XX
+norm-individual-37,Caucasian,XX
+norm-individual-38,African American,XY
+norm-individual-39,African American,XX
+norm-individual-4,Caucasian,XX
+norm-individual-40,African American,XY
+norm-individual-41,Caucasian,XX
+norm-individual-42,African American,XX
+norm-individual-43,African American,XY
+norm-individual-44,African American,XX
+norm-individual-45,Caucasian,XY
+norm-individual-46,African American,XX
+norm-individual-47,Caucasian,XX
+norm-individual-48,African American,XY
+norm-individual-49,Caucasian,XY
+norm-individual-5,Caucasian,XY
+norm-individual-50,Caucasian,XX
+norm-individual-51,Caucasian,XX
+norm-individual-52,African American,XX
+norm-individual-53,Caucasian,XX
+norm-individual-54,African American,XY
+norm-individual-55,African American,XX
+norm-individual-56,Caucasian,XX
+norm-individual-57,Caucasian,XY
+norm-individual-58,Caucasian,XY
+norm-individual-59,Caucasian,XX
+norm-individual-6,Caucasian,XX
+norm-individual-60,Caucasian,XX
+norm-individual-61,Caucasian,XX
+norm-individual-62,Caucasian,XX
+norm-individual-63,Caucasian,XX
+norm-individual-64,African American,XX
+norm-individual-65,African American,XX
+norm-individual-66,African American,XX
+norm-individual-67,Caucasian,XY
+norm-individual-68,African American,XX
+norm-individual-69,African American,XY
+norm-individual-7,Caucasian,XY
+norm-individual-70,African American,XX
+norm-individual-71,African American,XY
+norm-individual-72,African American,XX
+norm-individual-73,Caucasian,XX
+norm-individual-74,Caucasian,XX
+norm-individual-75,African American,XY
+norm-individual-76,Caucasian,XX
+norm-individual-77,Caucasian,XX
+norm-individual-78,African American,XX
+norm-individual-79,African American,XX
+norm-individual-8,Caucasian,XX
+norm-individual-80,Caucasian,XX
+norm-individual-9,African American,XX
+rf-individual-1,African American,XX
+rf-individual-10,African American,XY
+rf-individual-11,African American,XX
+rf-individual-12,Caucasian,XX
+rf-individual-13,African American,XX
+rf-individual-14,Caucasian,XX
+rf-individual-15,Caucasian,XX
+rf-individual-16,Caucasian,XY
+rf-individual-17,African American,XX
+rf-individual-18,Caucasian,XX
+rf-individual-19,Caucasian,XX
+rf-individual-2,Caucasian,XY
+rf-individual-20,Caucasian,XY
+rf-individual-21,African American,XX
+rf-individual-22,African American,XX
+rf-individual-23,African American,XY
+rf-individual-24,Caucasian,XY
+rf-individual-25,Caucasian,XX
+rf-individual-26,African American,XX
+rf-individual-27,Caucasian,XY
+rf-individual-28,African American,XX
+rf-individual-29,Caucasian,XX
+rf-individual-3,African American,XX
+rf-individual-30,Caucasian,XX
+rf-individual-31,Caucasian,XY
+rf-individual-32,African American,XY
+rf-individual-33,African American,XX
+rf-individual-34,Caucasian,XX
+rf-individual-35,African American,XX
+rf-individual-36,Caucasian,XX
+rf-individual-37,African American,XX
+rf-individual-38,Caucasian,XX
+rf-individual-39,Caucasian,XX
+rf-individual-4,Caucasian,XY
+rf-individual-40,Caucasian,XY
+rf-individual-5,Caucasian,XX
+rf-individual-6,African American,XX
+rf-individual-7,African American,XX
+rf-individual-8,African American,XX
+rf-individual-9,Caucasian,XY

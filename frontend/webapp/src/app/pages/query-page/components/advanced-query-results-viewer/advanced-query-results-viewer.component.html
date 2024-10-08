@@ -1,0 +1,80 @@
+<mat-card>
+  <div style="margin: 10px">
+    <h3>Advanced statistics</h3>
+    <h6>
+      Note: you can select ontology terms from query and results to visualise
+      the correlation frequencies. For example, if you queried for "diabetes
+      patients who are of karyotypic sex male", you can use this feature to get
+      frequencies of patients "who also" had coronary heart diseases,
+      cholesterole, etc.
+    </h6>
+    <h6>Click on bars of the plot to investigate further.</h6>
+    <h5 class="cursor-pointer" (click)="openTermPicker()">
+      Show/hide filters in the response
+    </h5>
+    <form action="" [formGroup]="$any(filtersForm)">
+      <div>
+        <h3>Add filters</h3>
+        @for (filter of filtersForm.controls; track filter; let fi = $index) {
+          <app-filter-editor
+            [formGroupName]="fi"
+            (removeFilterClicked)="removeFilter(fi)"
+            (searchFiltersClicked)="searchFilters($any(filter), fi)"
+          />
+        }
+        <br />
+        <div class="flex space-x-[10px]">
+          <button
+            type="button"
+            (click)="reset()"
+            mat-raised-button
+            color="primary"
+            class="w-[110px]"
+          >
+            Reset
+          </button>
+          <button
+            type="button"
+            (click)="addFilter()"
+            mat-raised-button
+            color="primary"
+            class="w-[110px]"
+          >
+            Add Filter
+          </button>
+          <button
+            type="button"
+            (click)="run()"
+            [disabled]="filtersForm.invalid"
+            mat-raised-button
+            color="primary"
+            class="w-[110px]"
+          >
+            Execute
+          </button>
+        </div>
+      </div>
+    </form>
+    @if (loading) {
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+        "
+      >
+        <h3 style="display: flex; flex-grow: 1">Loading</h3>
+        <mat-progress-bar
+          style="display: flex; flex-grow: 2"
+          mode="determinate"
+          [value]="(100 * completed) / terms.length"
+        ></mat-progress-bar>
+      </div>
+    } @else if (!loading && counts.length > 0) {
+      <div style="margin: auto; overflow: auto">
+        <app-term-freq-plot [counts]="counts" />
+      </div>
+    }
+  </div>
+</mat-card>

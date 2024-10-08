@@ -1,0 +1,217 @@
+<mat-card>
+  <mat-tab-group>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>Tabular View</h2>
+      </ng-template>
+      <mat-card-content>
+        <h2>Resources</h2>
+        <mat-card>
+          <div style="overflow-x: auto; max-height: 300px">
+            <table mat-table [dataSource]="dataSourceResources">
+              @for (column of displayedColumnsResources; track $index) {
+                <ng-container [matColumnDef]="column">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ _.startCase(column) }}
+                  </th>
+                  <td mat-cell *matCellDef="let element">
+                    <pre>{{ element[column] }}</pre>
+                  </td>
+                </ng-container>
+              }
+              <tr
+                mat-header-row
+                *matHeaderRowDef="displayedColumnsResources"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: displayedColumnsResources"
+              ></tr>
+            </table>
+          </div>
+          <mat-paginator
+            #paginatorResources
+            [pageSizeOptions]="[5, 10]"
+            showFirstLastButtons
+          >
+          </mat-paginator>
+        </mat-card>
+        <br />
+        <h2>Filters</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-1 md:gap-4">
+          <mat-form-field>
+            <mat-label>Filter</mat-label>
+            <input
+              matInput
+              (keyup)="applyFilter($event)"
+              placeholder="Disease or Code"
+              #input
+            />
+          </mat-form-field>
+        </div>
+        <mat-card>
+          <div class="overflow-x-auto" style="height: 500px">
+            <table mat-table [dataSource]="dataSourceFilters">
+              @for (column of displayedColumnsFilters; track $index) {
+                <ng-container [matColumnDef]="column">
+                  <th mat-header-cell *matHeaderCellDef>
+                    {{ _.startCase(column) }}
+                  </th>
+                  <td mat-cell *matCellDef="let element">
+                    @if ($index === 0) {
+                      <button
+                        mat-button
+                        cdkCopyToClipboard="{{ element[column] }}"
+                        matTooltip="Click to copy"
+                      >
+                        <pre>{{ element[column] }}</pre>
+                        <mat-icon iconPositionEnd>content_copy</mat-icon>
+                      </button>
+                    } @else {
+                      <pre>{{ element[column] }}</pre>
+                    }
+                  </td>
+                </ng-container>
+              }
+              <tr
+                mat-header-row
+                *matHeaderRowDef="displayedColumnsFilters"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: displayedColumnsFilters"
+              ></tr>
+            </table>
+          </div>
+          <mat-paginator
+            #paginatorFilters
+            [pageSizeOptions]="[10, 50]"
+            showFirstLastButtons
+          >
+          </mat-paginator>
+        </mat-card>
+      </mat-card-content>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>JSON Data</h2>
+      </ng-template>
+      <mat-card-content style="margin-bottom: 10px">
+        <mat-accordion>
+          <mat-expansion-panel
+            [expanded]="queryJSONOpen"
+            (opened)="queryJSONOpen = true"
+            (closed)="queryJSONOpen = false"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Click to {{ queryJSONOpen ? "hide" : "view" }} query
+              </mat-panel-title>
+              <mat-panel-description>
+                This contains query and the endpoint used
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div>
+              <h3>Endpoint</h3>
+              <pre>GET {{ endpoint }}</pre>
+              <h3>Query submitted</h3>
+              <ngx-json-viewer
+                [expanded]="false"
+                [json]="query"
+              ></ngx-json-viewer>
+            </div>
+          </mat-expansion-panel>
+          <mat-expansion-panel
+            [expanded]="metaJSONOpen"
+            (opened)="metaJSONOpen = true"
+            (closed)="metaJSONOpen = false"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Click to {{ metaJSONOpen ? "hide" : "view" }} metadata
+              </mat-panel-title>
+              <mat-panel-description>
+                This contains metadata and response summary from the Beacon API
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div>
+              <h3>Response metadata</h3>
+              <ngx-json-viewer
+                [expanded]="false"
+                [json]="results.meta"
+              ></ngx-json-viewer>
+            </div>
+          </mat-expansion-panel>
+          @if (results.response) {
+            <mat-expansion-panel
+              [expanded]="responseJSONOpen"
+              (opened)="responseJSONOpen = true"
+              (closed)="responseJSONOpen = false"
+            >
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Click to {{ responseJSONOpen ? "hide" : "view" }} returned
+                  entries
+                </mat-panel-title>
+                <mat-panel-description>
+                  This contains the results response of the beacon
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <div>
+                <h3>Response data</h3>
+                <ngx-json-viewer
+                  [expanded]="false"
+                  [json]="results.response"
+                ></ngx-json-viewer>
+              </div>
+            </mat-expansion-panel>
+          }
+          <mat-expansion-panel
+            [expanded]="fullJSONOpen"
+            (opened)="fullJSONOpen = true"
+            (closed)="fullJSONOpen = false"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Click to {{ fullJSONOpen ? "hide" : "view" }} complete response
+              </mat-panel-title>
+              <mat-panel-description>
+                This contains entire response of the beacon
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div>
+              <h3>Response</h3>
+              <ngx-json-viewer
+                [expanded]="false"
+                [json]="results"
+              ></ngx-json-viewer>
+            </div>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-card-content>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>Download</h2>
+      </ng-template>
+      <mat-card-content>
+        <button
+          (click)="download(query)"
+          mat-raised-button
+          color="primary"
+          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+        >
+          Query
+        </button>
+        <button
+          (click)="download(results)"
+          mat-raised-button
+          color="primary"
+          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+        >
+          Result
+        </button>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>

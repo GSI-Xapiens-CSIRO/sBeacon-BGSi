@@ -1,0 +1,48 @@
+<div class="relative min-w-[300px] md:min-w-[500px] max-w-[800px]">
+  <h1 mat-dialog-title>Update {{ data.name }}</h1>
+
+  <app-component-spinner [loading]="loading"></app-component-spinner>
+  <div mat-dialog-content>
+    <section class="flex flex-col" [formGroup]="form">
+      <mat-checkbox formControlName="admin" color="primary" value="admin"
+        >Admin access</mat-checkbox
+      >
+      <mat-checkbox formControlName="record" color="primary" value="record"
+        >Record access</mat-checkbox
+      >
+      <mat-checkbox formControlName="count" color="primary" value="count"
+        >Count access</mat-checkbox
+      >
+      <mat-checkbox formControlName="boolean" color="primary" value="boolean"
+        >Boolean access</mat-checkbox
+      >
+    </section>
+    <br />
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="delete()"
+      class="mb-[10px] w-[110px]"
+    >
+      Delete
+    </button>
+    <div class="flex space-x-[10px]">
+      <button
+        class="w-[110px]"
+        mat-raised-button
+        color="primary"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        class="w-[110px]"
+        mat-raised-button
+        color="primary"
+        (click)="done()"
+      >
+        Update
+      </button>
+    </div>
+  </div>
+</div>

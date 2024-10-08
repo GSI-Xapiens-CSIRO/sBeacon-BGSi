@@ -1,0 +1,83 @@
+<mat-card>
+  <mat-tab-group dynamicHeight>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>Summary</h2>
+      </ng-template>
+      <mat-card-content>
+        <mat-card style="display: flex; flex-direction: row; flex-wrap: wrap">
+          <div style="margin: 10px">
+            <h3>
+              Results exist: {{ results.responseSummary.exists ? "✅" : "❎" }}
+            </h3>
+            <h3>
+              Total count:
+              {{ _.get(results, "responseSummary.numTotalResults", "N/A") }}
+            </h3>
+          </div>
+        </mat-card>
+        <br />
+        @if (exists && granularity === "record" && !_.isEmpty(words)) {
+          <app-visual-query-results-viewer
+            [words]="words"
+            [results]="results"
+            [scope]="scope"
+          />
+          <br />
+          <app-advanced-query-results-viewer
+            [endpoint]="endpoint"
+            [query]="query"
+            [words]="words"
+            [scope]="scope"
+            [results]="results"
+          />
+        }
+      </mat-card-content>
+    </mat-tab>
+    @if (exists && granularity === "record") {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <h2>Tabular View</h2>
+        </ng-template>
+        <mat-card-content>
+          <app-tabular-query-results-viewer [results]="results" />
+        </mat-card-content>
+      </mat-tab>
+    }
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>JSON Data</h2>
+      </ng-template>
+      <mat-card-content style="margin-bottom: 10px">
+        <app-text-query-results-viewer
+          [endpoint]="endpoint"
+          [query]="query"
+          [results]="results"
+        />
+      </mat-card-content>
+    </mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <h2>Download</h2>
+      </ng-template>
+      <mat-card-content>
+        <button
+          (click)="download(query)"
+          mat-raised-button
+          color="primary"
+          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+        >
+          Query
+        </button>
+        <button
+          (click)="download(results)"
+          mat-raised-button
+          color="primary"
+          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+        >
+          Result
+        </button>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>

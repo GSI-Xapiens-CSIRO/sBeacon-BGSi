@@ -17,7 +17,7 @@ resource "aws_cloudfront_distribution" "bui-s3-distribution" {
     origin_id                = "bui-s3-origin-id-${terraform.workspace}"
   }
 
-  comment = "Distribution for BeaconUI ${terraform.workspace}"
+  comment             = "Distribution for BeaconUI ${terraform.workspace}"
   enabled             = true
   is_ipv6_enabled     = true
   http_version        = "http2and3"

@@ -1,8 +1,8 @@
 # bucket definition
 resource "aws_s3_bucket" "bui-hosted-bucket" {
   bucket_prefix = "bui-bucket-${terraform.workspace}-"
-
-  tags = var.common-tags
+  force_destroy = true
+  tags          = var.common-tags
 }
 
 # allow cloudfront to access s3

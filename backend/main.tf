@@ -116,8 +116,8 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
-      DYNAMO_DATASETS_TABLE           = aws_dynamodb_table.datasets.name
-      INDEXER_LAMBDA                  = module.lambda-indexer.lambda_function_name
+      DYNAMO_DATASETS_TABLE = aws_dynamodb_table.datasets.name
+      INDEXER_LAMBDA        = module.lambda-indexer.lambda_function_name
     },
     local.sbeacon_variables,
     local.athena_variables,

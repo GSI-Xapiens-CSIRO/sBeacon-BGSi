@@ -2,7 +2,7 @@
 # API Gateway
 #
 resource "aws_api_gateway_rest_api" "BeaconApi" {
-  name        = "BeaconApi"
+  name        = "sbeacon-backend-api"
   description = "API That implements the Beacon specification"
 }
 

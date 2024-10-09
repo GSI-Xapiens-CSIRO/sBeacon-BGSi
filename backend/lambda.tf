@@ -2,7 +2,7 @@
 # splitQuery Lambda Function
 #
 resource "aws_lambda_permission" "SNSsplitQuery" {
-  statement_id  = "AllowSNSsplitQueryInvoke"
+  statement_id  = "SBeaconBackendAllowSNSsplitQueryInvoke"
   action        = "lambda:InvokeFunction"
   function_name = module.lambda-splitQuery.lambda_function_arn
   principal     = "sns.amazonaws.com"
@@ -14,7 +14,7 @@ resource "aws_lambda_permission" "SNSsplitQuery" {
 # performQuery Lambda Function
 #
 resource "aws_lambda_permission" "SNSperformQuery" {
-  statement_id  = "AllowSNSperformQueryInvoke"
+  statement_id  = "SBeaconBackendAllowSNSperformQueryInvoke"
   action        = "lambda:InvokeFunction"
   function_name = module.lambda-performQuery.lambda_function_arn
   principal     = "sns.amazonaws.com"
@@ -25,7 +25,7 @@ resource "aws_lambda_permission" "SNSperformQuery" {
 # indexer Lambda Function
 #
 resource "aws_lambda_permission" "SNSindexer" {
-  statement_id  = "AllowSNSindexerInvoke"
+  statement_id  = "SBeaconBackendAllowSNSindexerInvoke"
   action        = "lambda:InvokeFunction"
   function_name = module.lambda-indexer.lambda_function_arn
   principal     = "sns.amazonaws.com"

@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" "datasets" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  name         = "Datasets"
+  name         = "sbeacon-Datasets"
   tags         = var.common-tags
 
   attribute {
@@ -29,7 +29,7 @@ resource "aws_dynamodb_table" "datasets" {
 
 resource "aws_dynamodb_table" "ontologies" {
   billing_mode = "PAY_PER_REQUEST"
-  name         = "Ontologies"
+  name         = "sbeacon-Ontologies"
   hash_key     = "id"
   tags         = var.common-tags
 
@@ -41,7 +41,7 @@ resource "aws_dynamodb_table" "ontologies" {
 
 resource "aws_dynamodb_table" "descendant_terms" {
   billing_mode = "PAY_PER_REQUEST"
-  name         = "Descendants"
+  name         = "sbeacon-Descendants"
   hash_key     = "term"
   tags         = var.common-tags
 
@@ -53,7 +53,7 @@ resource "aws_dynamodb_table" "descendant_terms" {
 
 resource "aws_dynamodb_table" "anscestor_terms" {
   billing_mode = "PAY_PER_REQUEST"
-  name         = "Anscestors"
+  name         = "sbeacon-Anscestors"
   hash_key     = "term"
   tags         = var.common-tags
 
@@ -66,7 +66,7 @@ resource "aws_dynamodb_table" "anscestor_terms" {
 resource "aws_dynamodb_table" "vcf_summaries" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "vcfLocation"
-  name         = "VcfSummaries"
+  name         = "sbeacon-VcfSummaries"
   tags         = var.common-tags
 
   attribute {
@@ -79,7 +79,7 @@ resource "aws_dynamodb_table" "variant_duplicates" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "contig"
   range_key    = "datasetKey"
-  name         = "VariantDuplicates"
+  name         = "sbeacon-VariantDuplicates"
   tags         = var.common-tags
 
   attribute {
@@ -100,7 +100,7 @@ resource "aws_dynamodb_table" "variant_duplicates" {
 resource "aws_dynamodb_table" "variant_queries" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
-  name         = "VariantQueries"
+  name         = "sbeacon-VariantQueries"
   tags         = var.common-tags
 
   attribute {
@@ -122,7 +122,7 @@ resource "aws_dynamodb_table" "variant_query_responses" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
   range_key    = "responseNumber"
-  name         = "VariantQueryResponses"
+  name         = "sbeacon-VariantQueryResponses"
   tags         = var.common-tags
 
   attribute {

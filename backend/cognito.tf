@@ -83,22 +83,10 @@ data "aws_iam_policy_document" "admin-group-assume-role-policy" {
       values   = ["authenticated"]
     }
   }
-  statement {
-    effect = "Deny"
-
-    principals {
-      type = "AWS"
-      identifiers = [
-        "arn:aws:sts::${data.aws_caller_identity.this.account_id}:assumed-role/admin/admin"
-      ]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
 }
 
 resource "aws_iam_role" "admin-group-role" {
-  name               = "admin-group-role"
+  name               = "sbeacon-admin-group-role"
   assume_role_policy = data.aws_iam_policy_document.admin-group-assume-role-policy.json
 }
 
@@ -114,7 +102,7 @@ data "aws_iam_policy_document" "admin-group-role-policy" {
 }
 
 resource "aws_iam_policy" "admin-group-role-policy" {
-  name        = "admin-group-role-policy"
+  name        = "sbeacon-admin-group-role-policy"
   description = "admin group permissions"
   policy      = data.aws_iam_policy_document.admin-group-role-policy.json
 
@@ -219,7 +207,7 @@ resource "aws_cognito_user_in_group" "guest-boolean-access" {
 # authorizers
 # 
 resource "aws_api_gateway_authorizer" "BeaconUserPool-authorizer" {
-  name          = "UserPoolAuthorizer-sbeacon"
+  name          = "sbeacon-userpool-authorizer"
   type          = "COGNITO_USER_POOLS"
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   provider_arns = [aws_cognito_user_pool.BeaconUserPool.arn]

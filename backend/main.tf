@@ -96,7 +96,7 @@ locals {
 module "lambda-submitDataset" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "submitDataset"
+  function_name       = "sbeacon-backend-submitDataset"
   description         = "Creates or updates a dataset and triggers summariseVcf."
   handler             = "lambda_function.lambda_handler"
   runtime             = "python3.12"
@@ -137,7 +137,7 @@ module "lambda-submitDataset" {
 module "lambda-getInfo" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "getInfo"
+  function_name      = "sbeacon-backend-getInfo"
   description        = "Returns basic information about the beacon and the datasets."
   handler            = "lambda_function.lambda_handler"
   runtime            = "python3.12"
@@ -166,7 +166,7 @@ module "lambda-getInfo" {
 module "lambda-getConfiguration" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "getConfiguration"
+  function_name      = "sbeacon-backend-getConfiguration"
   description        = "Get the beacon configuration."
   runtime            = "python3.12"
   handler            = "lambda_function.lambda_handler"
@@ -196,7 +196,7 @@ module "lambda-getConfiguration" {
 module "lambda-getMap" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "getMap"
+  function_name      = "sbeacon-backend-getMap"
   description        = "Get the beacon map."
   runtime            = "python3.12"
   handler            = "lambda_function.lambda_handler"
@@ -226,7 +226,7 @@ module "lambda-getMap" {
 module "lambda-getEntryTypes" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "getEntryTypes"
+  function_name      = "sbeacon-backend-getEntryTypes"
   description        = "Get the beacon map."
   runtime            = "python3.12"
   handler            = "lambda_function.lambda_handler"
@@ -256,7 +256,7 @@ module "lambda-getEntryTypes" {
 module "lambda-getFilteringTerms" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getFilteringTerms"
+  function_name       = "sbeacon-backend-getFilteringTerms"
   description         = "Get the beacon map."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -290,7 +290,7 @@ module "lambda-getFilteringTerms" {
 module "lambda-getAnalyses" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getAnalyses"
+  function_name       = "sbeacon-backend-getAnalyses"
   description         = "Get the beacon map."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -329,7 +329,7 @@ module "lambda-getAnalyses" {
 module "lambda-getGenomicVariants" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getGenomicVariants"
+  function_name       = "sbeacon-backend-getGenomicVariants"
   description         = "Get the variants."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -368,7 +368,7 @@ module "lambda-getGenomicVariants" {
 module "lambda-getIndividuals" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getIndividuals"
+  function_name       = "sbeacon-backend-getIndividuals"
   description         = "Get the individuals."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -407,7 +407,7 @@ module "lambda-getIndividuals" {
 module "lambda-getBiosamples" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getBiosamples"
+  function_name       = "sbeacon-backend-getBiosamples"
   description         = "Get the biosamples."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -446,7 +446,7 @@ module "lambda-getBiosamples" {
 module "lambda-getDatasets" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getDatasets"
+  function_name       = "sbeacon-backend-getDatasets"
   description         = "Get the datasets."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -485,7 +485,7 @@ module "lambda-getDatasets" {
 module "lambda-getCohorts" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getCohorts"
+  function_name       = "sbeacon-backend-getCohorts"
   description         = "Get the cohorts."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -523,7 +523,7 @@ module "lambda-getCohorts" {
 module "lambda-getRuns" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "getRuns"
+  function_name       = "sbeacon-backend-getRuns"
   description         = "Get the runs."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -562,7 +562,7 @@ module "lambda-getRuns" {
 module "lambda-splitQuery" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "splitQuery"
+  function_name      = "sbeacon-backend-splitQuery"
   description        = "Splits a dataset into smaller slices of VCFs and invokes performQuery on each."
   handler            = "lambda_function.lambda_handler"
   runtime            = "python3.12"
@@ -590,7 +590,7 @@ module "lambda-splitQuery" {
 module "lambda-performQuery" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name          = "performQuery"
+  function_name          = "sbeacon-backend-performQuery"
   description            = "Queries a slice of a vcf for a specified variant."
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
@@ -621,7 +621,7 @@ module "lambda-performQuery" {
 module "lambda-indexer" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "indexer"
+  function_name       = "sbeacon-backend-indexer"
   description         = "Run the indexing tasks."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
@@ -658,7 +658,7 @@ module "lambda-indexer" {
 module "lambda-admin" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name       = "admin"
+  function_name       = "sbeacon-backend-admin"
   description         = "Run the admin tasks."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"

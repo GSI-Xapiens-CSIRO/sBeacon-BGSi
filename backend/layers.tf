@@ -9,7 +9,7 @@ data "archive_file" "binaries_layer" {
 # binaries layer definition
 resource "aws_lambda_layer_version" "binaries_layer" {
   filename         = data.archive_file.binaries_layer.output_path
-  layer_name       = "binaries_layer"
+  layer_name       = "sbeacon_backend_binaries_layer"
   source_code_hash = filebase64sha256("${data.archive_file.binaries_layer.output_path}")
 
   compatible_runtimes = ["python3.12"]
@@ -22,7 +22,7 @@ module "python_libraries_layer" {
 
   create_layer = true
 
-  layer_name          = "python_libraries_layer"
+  layer_name          = "sbeacon_backend_python_libraries_layer"
   description         = "python libraries"
   compatible_runtimes = ["python3.12"]
 
@@ -38,7 +38,7 @@ module "python_modules_layer" {
 
   create_layer = true
 
-  layer_name          = "python_modules_layer"
+  layer_name          = "sbeacon_backend_python_modules_layer"
   description         = "python libraries"
   compatible_runtimes = ["python3.12"]
 

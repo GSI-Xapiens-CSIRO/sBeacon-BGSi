@@ -1,6 +1,6 @@
 # bucket definition
 resource "aws_s3_bucket" "bui-hosted-bucket" {
-  bucket_prefix = "bui-bucket-${terraform.workspace}-"
+  bucket_prefix = "sbeacon-frontend-bucket-"
   force_destroy = true
   tags          = var.common-tags
 }

@@ -9,8 +9,8 @@
 
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
-- [Serverless Beacon](#serverless-beacon)
 - [Why serverless?](#why-serverless)
+- [Serverless Architecture](#serverless-architecture)
 - [Introduction to sBeacon](#introduction-to-sbeacon)
 - [Installation](#installation)
    * [Option 1: Setting up the development environment on Amazon Linux](#option-1-setting-up-the-development-environment-on-amazon-linux)
@@ -38,6 +38,41 @@
 Serverless means the service does not require any servers to be provisioned. The
 idea is to minimise running costs, as well as support arbitrary scalablility. It
 also means setup is very fast.
+
+<!-- TOC --><a name="serverless-architecture"></a>
+## Serverless Architecture
+
+To more about how sBeacon is built and architected please head to [./docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md). If you wish to read more about the implementation and performance please find our publication at [10.1038/s41587-023-01972-9](https://doi.org/10.1038/s41587-023-01972-9). Following is the citation bib.
+
+```bibtex
+@Article{Wickramarachchi2023,
+   author={Wickramarachchi, Anuradha
+   and Hosking, Brendan
+   and Jain, Yatish
+   and Grimes, John
+   and O'Brien, Mitchell J.
+   and Wright, Tracey
+   and Burgess, Mark A.
+   and Lin, Victor San Kho
+   and Reisinger, Florian
+   and Hofmann, Oliver
+   and Lawley, Michael
+   and Wilson, Laurence O. W.
+   and Twine, Natalie A.
+   and Bauer, Denis C.},
+   title={Scalable genomic data exchange and analytics with sBeacon},
+   journal={Nature Biotechnology},
+   year={2023},
+   month={Nov},
+   day={01},
+   volume={41},
+   number={11},
+   pages={1510-1512},
+   issn={1546-1696},
+   doi={10.1038/s41587-023-01972-9},
+   url={https://doi.org/10.1038/s41587-023-01972-9}
+}
+```
 
 <!-- TOC --><a name="introduction-to-sbeacon"></a>
 ## Introduction to sBeacon

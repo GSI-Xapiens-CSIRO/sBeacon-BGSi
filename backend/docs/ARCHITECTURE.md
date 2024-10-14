@@ -11,7 +11,7 @@ This documentation specifically outlines the complexities associated with the im
 Entities are related in the following form.
 
 <div align="center">
-<img src="./images/erd.png" alt="Entity Relationships" width="800" style="background-color: white;">
+<img src="./images/erd.webp" alt="Entity Relationships" width="800" style="background-color: white;">
 </div>
 
 ## Querying Module
@@ -19,7 +19,7 @@ Entities are related in the following form.
 Querying takes place using the following architecture. Note that DynamoDB is used as a simple yet efficient lookup table to expand ontology codes to retrieve descendent terms as needed for querying.
 
 <div align="center">
-<img src="./images/micro-services.png" alt="Micro services" width="800" style="background-color: white;">
+<img src="./images/micro-services.webp" alt="Micro services" width="800" style="background-color: white;">
 </div>
 
 ## Variant Querying Module
@@ -27,7 +27,7 @@ Querying takes place using the following architecture. Note that DynamoDB is use
 Variant querying module is used by other querying modules to enable variant perusal as needed to satisfy the user query.
 
 <div align="center">
-<img src="./images/variant-querying.png" alt="Variang querying services" width="800" style="background-color: white;">
+<img src="./images/variant-querying.webp" alt="Variang querying services" width="800" style="background-color: white;">
 </div>
 
 ## Ingestion and Indexing
@@ -35,7 +35,7 @@ Variant querying module is used by other querying modules to enable variant peru
 Ingestion and indexing of data in the sBeacon takes place as below.
 
 <div align="center">
-<img src="./images/ingestion.png" alt="Variang querying services" width="800" style="background-color: white;">
+<img src="./images/ingestion.webp" alt="Variang querying services" width="800" style="background-color: white;">
 </div>
 
 Note that, the `ACK` refers to the acknowledgement as indexing can take place asynchronously, or after few ingestion rounds for maximum efficiency.

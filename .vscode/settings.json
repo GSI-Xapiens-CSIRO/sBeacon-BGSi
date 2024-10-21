@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./backend/shared_resources/python-modules/python"
+    ]
+}

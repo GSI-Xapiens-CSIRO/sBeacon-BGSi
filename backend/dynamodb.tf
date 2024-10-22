@@ -147,3 +147,39 @@ resource "aws_dynamodb_table" "variant_query_responses" {
     enabled        = true
   }
 }
+
+# 
+# Data Portal Tables
+# 
+
+# User Projects
+resource "aws_dynamodb_table" "projects" {
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+  name         = "sbeacon-dataportal-projects"
+  tags         = var.common-tags
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+}
+
+# User Projects Table
+resource "aws_dynamodb_table" "user_projects" {
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+  range_key    = "uid"
+  name         = "sbeacon-dataportal-user-projects"
+  tags         = var.common-tags
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+}

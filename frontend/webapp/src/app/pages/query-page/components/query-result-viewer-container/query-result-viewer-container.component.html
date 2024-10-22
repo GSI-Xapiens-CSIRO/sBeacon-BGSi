@@ -60,12 +60,12 @@
       <ng-template mat-tab-label>
         <h2>Download</h2>
       </ng-template>
-      <mat-card-content>
+      <mat-card-content class="flex flex-row space-x-[10px] mb-[10px]">
         <button
           (click)="download(query)"
           mat-raised-button
           color="primary"
-          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+          class="w-[110px]"
         >
           Query
         </button>
@@ -73,9 +73,17 @@
           (click)="download(results)"
           mat-raised-button
           color="primary"
-          style="margin-bottom: 10px; margin-right: 10px; width: 110px"
+          class="w-[110px]"
         >
           Result
+        </button>
+        <button
+          (click)="save({ endpoint, query, results })"
+          mat-raised-button
+          color="primary"
+          class="w-[110px]"
+        >
+          Save
         </button>
       </mat-card-content>
     </mat-tab>

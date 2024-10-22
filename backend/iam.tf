@@ -706,3 +706,23 @@ data "aws_iam_policy_document" "athena-readonly-access" {
     ]
   }
 }
+
+
+# DataPortal Lambda Access
+data "aws_iam_policy_document" "data-portal-lambda-access" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+    ]
+    resources = [
+      aws_dynamodb_table.user_projects.arn,
+      aws_dynamodb_table.user_projects.arn,
+    ]
+  }
+}

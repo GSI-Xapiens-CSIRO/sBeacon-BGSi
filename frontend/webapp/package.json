@@ -22,7 +22,7 @@
     "@angular/platform-browser-dynamic": "^17.3.11",
     "@angular/router": "^17.3.11",
     "angular-plotly.js": "^5.2.2",
-    "aws-amplify": "^5.3.19",
+    "aws-amplify": "^5.3.25",
     "csv-parse": "^5.5.6",
     "echarts": "^5.5.1",
     "lodash": "^4.17.21",

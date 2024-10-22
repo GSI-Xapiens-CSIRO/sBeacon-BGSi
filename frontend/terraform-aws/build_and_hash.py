@@ -12,6 +12,7 @@ ENVIRONMENT = """export const environment = {{
     region: '{region}',
     userPoolId: '{user_pool_id}',
     userPoolWebClientId: '{user_pool_web_client_id}',
+    identityPoolId: '{identity_pool_id}',
     authenticationFlowType: 'USER_PASSWORD_AUTH',
   }},
   api_endpoint_sbeacon: {{
@@ -70,6 +71,7 @@ def setup_env(
     base_range: str,
     region: str,
     user_pool_id: str,
+    identity_pool_id: str,
     user_pool_web_client_id: str,
     api_endpoint_sbeacon: str,
     dir: str,
@@ -83,6 +85,7 @@ def setup_env(
                 base_range=base_range,
                 region=region,
                 user_pool_id=user_pool_id,
+                identity_pool_id=identity_pool_id,
                 user_pool_web_client_id=user_pool_web_client_id,
                 api_endpoint_sbeacon=api_endpoint_sbeacon,
             )
@@ -94,6 +97,7 @@ def setup_env(
                 base_range=base_range,
                 region=region,
                 user_pool_id=user_pool_id,
+                identity_pool_id=identity_pool_id,
                 user_pool_web_client_id=user_pool_web_client_id,
                 api_endpoint_sbeacon=api_endpoint_sbeacon,
             )
@@ -109,6 +113,7 @@ if __name__ == "__main__":
     base_range = args["base_range"]
     region = args["region"]
     user_pool_id = args["user_pool_id"]
+    identity_pool_id = args["identity_pool_id"]
     user_pool_web_client_id = args["user_pool_web_client_id"]
     api_endpoint_sbeacon = args["api_endpoint_sbeacon"]
 
@@ -116,6 +121,7 @@ if __name__ == "__main__":
         base_range,
         region,
         user_pool_id,
+        identity_pool_id,
         user_pool_web_client_id,
         api_endpoint_sbeacon,
         webapp_dir,

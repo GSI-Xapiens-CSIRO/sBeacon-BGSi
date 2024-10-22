@@ -49,7 +49,7 @@ import {
   twoRangesValidator,
 } from 'src/app/utils/validators';
 import { customQueries } from './custom-queries';
-// import { result, query } from './test_responses/individuals';
+// import { result, query, endpoint } from './test_responses/individuals';
 // import { result, query } from './test_responses/biosamples';
 
 const allowedReturns = {
@@ -123,6 +123,9 @@ export class QueryTabComponent implements OnInit, AfterViewInit, OnDestroy {
   protected results: any = null;
   protected endpoint: any = null;
   protected query: any = null;
+  // protected results: any = result;
+  // protected endpoint: any = endpoint;
+  // protected query: any = query;
   protected scope: any = ScopeTypes.INDIVIDUALS;
   // expansion panels
   protected openPanels: boolean[] = [false, false, false];

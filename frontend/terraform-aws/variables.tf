@@ -45,6 +45,11 @@ variable "user_pool_id" {
   description = "User pool ID for authentication."
 }
 
+variable "identity_pool_id" {
+  type        = string
+  description = "Identity pool ID for authentication."
+}
+
 variable "user_pool_web_client_id" {
   type        = string
   description = "User pool web client ID for authentication."

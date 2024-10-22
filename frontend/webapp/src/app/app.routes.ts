@@ -17,6 +17,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'dportal',
+    loadComponent: () =>
+      import('./pages/dportal-page/dportal-page.component').then(
+        (c) => c.DportalPageComponent,
+      ),
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./pages/login-page/login-page.component').then(

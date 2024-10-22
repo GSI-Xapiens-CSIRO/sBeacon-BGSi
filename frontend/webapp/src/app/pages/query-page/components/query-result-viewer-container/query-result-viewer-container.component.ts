@@ -8,6 +8,12 @@ import { AdvancedQueryResultsViewerComponent } from '../advanced-query-results-v
 import { VisualQueryResultsViewerComponent } from '../visual-query-results-viewer/visual-query-results-viewer.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
+import { DportalService } from 'src/app/services/dportal.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { SpinnerService } from 'src/app/services/spinner.service';
+import { catchError, from, of } from 'rxjs';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Storage } from 'aws-amplify';
 
 @Component({
   selector: 'app-query-result-viewer-container',
@@ -17,11 +23,13 @@ import { MatCardModule } from '@angular/material/card';
   imports: [
     MatCardModule,
     MatTabsModule,
+    MatDialogModule,
     VisualQueryResultsViewerComponent,
     AdvancedQueryResultsViewerComponent,
     TabularQueryResultsViewerComponent,
     TextQueryResultsViewerComponent,
     MatButtonModule,
+    MatSnackBarModule,
   ],
 })
 export class QueryResultViewerContainerComponent implements OnChanges {
@@ -38,6 +46,12 @@ export class QueryResultViewerContainerComponent implements OnChanges {
   protected granularity = '';
   protected exists = false;
   protected words: any[] = [];
+
+  constructor(
+    private dg: MatDialog,
+    private ss: SpinnerService,
+    private sb: MatSnackBar,
+  ) {}
 
   ngOnChanges(): void {
     this.granularity = this.results.meta.returnedGranularity;
@@ -61,5 +75,39 @@ export class QueryResultViewerContainerComponent implements OnChanges {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  }
+
+  async save(content: any) {
+    const { TextInputDialogComponent } = await import(
+      '../../../../components/text-input-dialog/text-input-dialog.component'
+    );
+
+    const dialog = this.dg.open(TextInputDialogComponent, {
+      data: {
+        title: 'Save Query Results',
+        message:
+          'Please enter a name for the file. Dupliactions will be overwritten.',
+        label: 'Name your data',
+        placeholder: 'My query results',
+      },
+    });
+    dialog.afterClosed().subscribe((name) => {
+      if (name) {
+        this.ss.start();
+        from(
+          Storage.put(`saved-queries/${name}.json`, content, {
+            level: 'private',
+            contentType: 'application/json',
+          }),
+        )
+          .pipe(catchError(() => of(null)))
+          .subscribe((res) => {
+            if (!res) {
+              this.sb.open('Saving failed', 'Okay', { duration: 60000 });
+            }
+            this.ss.end();
+          });
+      }
+    });
   }
 }

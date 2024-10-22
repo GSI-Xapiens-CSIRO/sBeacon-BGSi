@@ -25,6 +25,7 @@ module "seabcon-frontend" {
   region                  = local.region
   base_range              = 5000
   user_pool_id            = module.sbeacon-backend.cognito_user_pool_id
+  identity_pool_id        = module.sbeacon-backend.cognito_identity_pool_id
   user_pool_web_client_id = module.sbeacon-backend.cognito_client_id
   api_endpoint_sbeacon    = "${module.sbeacon-backend.api_url}${module.sbeacon-backend.api_stage}/"
   common-tags             = merge(var.common-tags, {

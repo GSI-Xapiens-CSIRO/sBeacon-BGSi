@@ -68,8 +68,8 @@ locals {
     ATHENA_RUNS_CACHE_TABLE        = aws_glue_catalog_table.sbeacon-runs-cache.name
     ATHENA_ANALYSES_TABLE          = aws_glue_catalog_table.sbeacon-analyses.name
     ATHENA_ANALYSES_CACHE_TABLE    = aws_glue_catalog_table.sbeacon-analyses-cache.name
-    ATHENA_TERMS_TABLE             = aws_glue_catalog_table.sbeacon-terms.name
-    ATHENA_TERMS_INDEX_TABLE       = aws_glue_catalog_table.sbeacon-terms-index.name
+    ATHENA_TERMS_TABLE             = aws_cloudformation_stack.sbeacon_terms_stack.parameters.TableName
+    ATHENA_TERMS_INDEX_TABLE       = aws_cloudformation_stack.sbeacon_terms_index_stack.parameters.TableName
     ATHENA_TERMS_CACHE_TABLE       = aws_glue_catalog_table.sbeacon-terms-cache.name
     ATHENA_RELATIONS_TABLE         = aws_glue_catalog_table.sbeacon-relations.name
   }
@@ -681,5 +681,36 @@ module "lambda-admin" {
   layers = [
     local.python_libraries_layer,
     local.python_modules_layer
+  ]
+}
+
+#
+# dataPortal Function
+#
+module "lambda-data-portal" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-dataPortal"
+  description         = "Data portal endpoints."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 512
+  timeout             = 60
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.data-portal-lambda-access.json
+  ]
+  number_of_policy_jsons = 1
+  source_path            = "${path.module}/lambda/dataPortal"
+
+  tags = var.common-tags
+
+  environment_variables = {
+    DYNAMO_PROJECTS_TABLE      = aws_dynamodb_table.projects.name
+    DYNAMO_USER_PROJECTS_TABLE = aws_dynamodb_table.user_projects.name
+  }
+
+  layers = [
+    local.python_modules_layer,
   ]
 }

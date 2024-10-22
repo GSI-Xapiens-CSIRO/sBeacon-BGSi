@@ -128,3 +128,58 @@ resource "aws_s3_bucket_acl" "lambda-layers" {
   bucket = aws_s3_bucket.lambda-layers-bucket.id
   acl    = "private"
 }
+
+#
+# S3 bucket for data portal content
+#
+resource "aws_s3_bucket" "dataportal-bucket" {
+  bucket_prefix = "sbeacon-backend-dataportal-"
+  force_destroy = true
+  tags          = var.common-tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "dataportal_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.dataportal-bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "dataportal_bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.dataportal_bucket_ownership_controls]
+
+  bucket = aws_s3_bucket.dataportal-bucket.id
+  acl    = "private"
+}
+
+# 
+# enable cors for dataportal bucket
+# 
+resource "aws_s3_bucket_cors_configuration" "dataportal-bucket" {
+  bucket = aws_s3_bucket.dataportal-bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    allowed_origins = ["*"]
+    expose_headers  = []
+    max_age_seconds = 3000
+  }
+}
+
+# resource "aws_s3_bucket_lifecycle_configuration" "dataportal_bucket_lifecycle" {
+#   bucket = aws_s3_bucket.dataportal-bucket.id
+
+#   rule {
+#     id     = "clean-old-queries"
+#     status = "Enabled"
+
+#     filter {
+#       prefix = "variant-queries/"
+#     }
+
+#     expiration {
+#       days = 1
+#     }
+#   }
+# }

@@ -22,6 +22,7 @@ export const routes: Routes = [
       import('./pages/dportal-page/dportal-page.component').then(
         (c) => c.DportalPageComponent,
       ),
+    canActivate: [authGuard],
   },
   {
     path: 'login',

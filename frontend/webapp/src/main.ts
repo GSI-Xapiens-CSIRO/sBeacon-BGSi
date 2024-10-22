@@ -17,7 +17,7 @@ Amplify.configure({
   Auth: environment.auth,
   Storage: {
     AWSS3: {
-      bucket: 'sbeacon-backend-dataportal-20241021050809293500000001',
+      bucket: environment.storage.dataPortalBucket,
       region: environment.auth.region,
     },
   },

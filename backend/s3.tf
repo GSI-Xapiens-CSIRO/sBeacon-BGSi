@@ -166,20 +166,3 @@ resource "aws_s3_bucket_cors_configuration" "dataportal-bucket" {
     max_age_seconds = 3000
   }
 }
-
-# resource "aws_s3_bucket_lifecycle_configuration" "dataportal_bucket_lifecycle" {
-#   bucket = aws_s3_bucket.dataportal-bucket.id
-
-#   rule {
-#     id     = "clean-old-queries"
-#     status = "Enabled"
-
-#     filter {
-#       prefix = "variant-queries/"
-#     }
-
-#     expiration {
-#       days = 1
-#     }
-#   }
-# }

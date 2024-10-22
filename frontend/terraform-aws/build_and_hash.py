@@ -15,6 +15,9 @@ ENVIRONMENT = """export const environment = {{
     identityPoolId: '{identity_pool_id}',
     authenticationFlowType: 'USER_PASSWORD_AUTH',
   }},
+  storage: {{
+    dataPortalBucket: '{data_portal_bucket}',
+  }},
   api_endpoint_sbeacon: {{
     name: 'sbeacon',
     endpoint: '{api_endpoint_sbeacon}',
@@ -73,6 +76,7 @@ def setup_env(
     user_pool_id: str,
     identity_pool_id: str,
     user_pool_web_client_id: str,
+    data_portal_bucket: str,
     api_endpoint_sbeacon: str,
     dir: str,
 ):
@@ -86,6 +90,7 @@ def setup_env(
                 region=region,
                 user_pool_id=user_pool_id,
                 identity_pool_id=identity_pool_id,
+                data_portal_bucket=data_portal_bucket,
                 user_pool_web_client_id=user_pool_web_client_id,
                 api_endpoint_sbeacon=api_endpoint_sbeacon,
             )
@@ -98,6 +103,7 @@ def setup_env(
                 region=region,
                 user_pool_id=user_pool_id,
                 identity_pool_id=identity_pool_id,
+                data_portal_bucket=data_portal_bucket,
                 user_pool_web_client_id=user_pool_web_client_id,
                 api_endpoint_sbeacon=api_endpoint_sbeacon,
             )
@@ -116,6 +122,7 @@ if __name__ == "__main__":
     identity_pool_id = args["identity_pool_id"]
     user_pool_web_client_id = args["user_pool_web_client_id"]
     api_endpoint_sbeacon = args["api_endpoint_sbeacon"]
+    data_portal_bucket = args["data_portal_bucket"]
 
     setup_env(
         base_range,
@@ -123,6 +130,7 @@ if __name__ == "__main__":
         user_pool_id,
         identity_pool_id,
         user_pool_web_client_id,
+        data_portal_bucket,
         api_endpoint_sbeacon,
         webapp_dir,
     )

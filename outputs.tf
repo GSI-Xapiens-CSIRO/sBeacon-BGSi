@@ -24,10 +24,10 @@ output "beacon_ui_url" {
 }
 
 output "admin_login_command" {
-  value = module.sbeacon-backend.admin_login_command
+  value       = module.sbeacon-backend.admin_login_command
   description = "Admin Login Command"
 }
 output "guest_login_command" {
-  value = module.sbeacon-backend.guest_login_command
+  value       = module.sbeacon-backend.guest_login_command
   description = "Guest Login Command"
 }

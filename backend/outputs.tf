@@ -32,3 +32,8 @@ output "guest_login_command" {
   value       = var.beacon-enable-auth ? "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-guest-username},PASSWORD=${var.beacon-guest-password} --output json --query AuthenticationResult.IdToken" : "N/A"
   description = "Command to sign in a guest"
 }
+
+output "data-portal-bucket" {
+  value       = aws_s3_bucket.dataportal-bucket.bucket
+  description = "S3 bucket for the data portal."
+}

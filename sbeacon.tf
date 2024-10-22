@@ -15,7 +15,7 @@ module "sbeacon-backend" {
   beacon-guest-password = "guest1234pw"
   beacon-admin-username = "admin@gmail.com"
   beacon-admin-password = "admin1234pw"
-  common-tags           = merge(var.common-tags, {
+  common-tags = merge(var.common-tags, {
     "NAME" = "sbeacon-backend"
   })
 }
@@ -27,8 +27,9 @@ module "seabcon-frontend" {
   user_pool_id            = module.sbeacon-backend.cognito_user_pool_id
   identity_pool_id        = module.sbeacon-backend.cognito_identity_pool_id
   user_pool_web_client_id = module.sbeacon-backend.cognito_client_id
+  data_portal_bucket      = module.sbeacon-backend.data-portal-bucket
   api_endpoint_sbeacon    = "${module.sbeacon-backend.api_url}${module.sbeacon-backend.api_stage}/"
-  common-tags             = merge(var.common-tags, {
+  common-tags = merge(var.common-tags, {
     "NAME" = "sbeacon-fronted"
   })
 }

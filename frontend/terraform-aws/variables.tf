@@ -50,6 +50,11 @@ variable "identity_pool_id" {
   description = "Identity pool ID for authentication."
 }
 
+variable "data_portal_bucket" {
+  type        = string
+  description = "Bucket name of the data portal."
+}
+
 variable "user_pool_web_client_id" {
   type        = string
   description = "User pool web client ID for authentication."

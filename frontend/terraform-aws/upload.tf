@@ -8,7 +8,9 @@ data "external" "build" {
     base_range              = var.base_range
     region                  = var.region
     user_pool_id            = var.user_pool_id
+    identity_pool_id        = var.identity_pool_id
     user_pool_web_client_id = var.user_pool_web_client_id
+    data_portal_bucket      = var.data_portal_bucket
     api_endpoint_sbeacon    = var.api_endpoint_sbeacon
   }
   working_dir = path.module

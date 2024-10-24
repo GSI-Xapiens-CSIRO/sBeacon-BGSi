@@ -1,4 +1,4 @@
-<form [formGroup]="dataSubmissionForm" (ngSubmit)="onSubmit()">
+<form [formGroup]="dataSubmissionForm">
   <p>
     Please use the below field to place your S3 URI to submit data to the
     sBeacon.
@@ -29,8 +29,9 @@
       class="w-[100px]"
       mat-raised-button
       color="primary"
-      type="submit"
+      type="button"
       [disabled]="dataSubmissionForm.invalid"
+      (click)="onSubmit(dataSubmissionForm.value)"
     >
       Submit
     </button>

@@ -28,4 +28,91 @@ export class DportalService {
   }
 
   // data portal user actions
+  createNotebookInstance(
+    instanceName: string,
+    instanceType: string,
+    volumeSize: number,
+  ) {
+    console.log('create my notebook');
+    return from(
+      API.post(environment.api_endpoint_sbeacon.name, 'dportal/notebooks', {
+        body: { instanceName, instanceType, volumeSize },
+      }),
+    );
+  }
+
+  getMyNotebooks() {
+    console.log('get my notebooks');
+    return from(
+      API.get(environment.api_endpoint_sbeacon.name, 'dportal/notebooks', {}),
+    );
+  }
+
+  getNotebookStatus(name: string) {
+    console.log('get my notebook status');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}`,
+        {},
+      ),
+    );
+  }
+
+  stopNotebook(name: string) {
+    console.log('stop my notebook');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}/stop`,
+        {},
+      ),
+    );
+  }
+
+  startNotebook(name: string) {
+    console.log('start my notebook');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}/start`,
+        {},
+      ),
+    );
+  }
+
+  deleteNotebook(name: string) {
+    console.log('delete my notebook');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}/delete`,
+        {},
+      ),
+    );
+  }
+
+  updateNotebook(name: string, instanceType: string, volumeSize: number) {
+    console.log('update my notebook');
+    return from(
+      API.put(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}`,
+        {
+          body: { instanceType, volumeSize },
+        },
+      ),
+    );
+  }
+
+  getNotebookUrl(name: string) {
+    console.log('get my notebook url');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/notebooks/${name}/url`,
+        {},
+      ),
+    );
+  }
 }

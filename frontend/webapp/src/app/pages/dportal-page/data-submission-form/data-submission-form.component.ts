@@ -44,10 +44,10 @@ export class DataSubmissionFormComponent {
     });
   }
 
-  onSubmit() {
+  onSubmit(entry: any) {
     this.ss.start();
     this.dps
-      .submitData(this.dataSubmissionForm.value.s3path)
+      .submitData(entry.s3path)
       .pipe(
         tap((res) => console.log(res)),
         catchError(() => of(null)),

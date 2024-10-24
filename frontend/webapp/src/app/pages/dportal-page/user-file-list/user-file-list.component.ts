@@ -5,17 +5,20 @@ import { catchError, of } from 'rxjs';
 import { DportalService } from 'src/app/services/dportal.service';
 import { Storage } from 'aws-amplify';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-user-file-list',
   standalone: true,
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, MatDialogModule],
   templateUrl: './user-file-list.component.html',
   styleUrl: './user-file-list.component.scss',
 })
 export class UserFileListComponent implements OnInit {
   myFiles: any[] = [];
-  constructor(private dps: DportalService) {}
+
+  constructor(private dg: MatDialog) {}
 
   ngOnInit(): void {
     this.list();
@@ -45,7 +48,21 @@ export class UserFileListComponent implements OnInit {
   }
 
   async delete(file: any) {
-    await Storage.remove(file.key, { level: 'private' });
-    this.myFiles = this.myFiles.filter((f) => f.key !== file.key);
+    const { ActionConfirmationDialogComponent } = await import(
+      '../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
+    );
+
+    const dialog = this.dg.open(ActionConfirmationDialogComponent, {
+      data: {
+        title: 'Delete File',
+        message: 'Are you sure you want to delete this file?',
+      },
+    });
+    dialog.afterClosed().subscribe(async (result) => {
+      if (result) {
+        await Storage.remove(file.key, { level: 'private' });
+        this.myFiles = this.myFiles.filter((f) => f.key !== file.key);
+      }
+    });
   }
 }

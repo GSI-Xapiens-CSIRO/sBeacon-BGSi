@@ -721,8 +721,35 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       "dynamodb:DeleteItem",
     ]
     resources = [
+      aws_dynamodb_table.projects.arn,
       aws_dynamodb_table.user_projects.arn,
-      aws_dynamodb_table.user_projects.arn,
+      aws_dynamodb_table.juptyer_notebooks.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "sagemaker:CreateNotebookInstance",
+      "sagemaker:DescribeNotebookInstance",
+      "sagemaker:StartNotebookInstance",
+      "sagemaker:StopNotebookInstance",
+      "sagemaker:DeleteNotebookInstance",
+      "sagemaker:ListNotebookInstances",
+      "sagemaker:UpdateNotebookInstance",
+      "sagemaker:CreatePresignedNotebookInstanceUrl",
+    ]
+    resources = [
+      "arn:aws:sagemaker:${var.region}:${data.aws_caller_identity.this.account_id}:notebook-instance/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:PassRole"
+    ]
+
+    resources = [
+      aws_iam_role.sagemaker_jupyter_instance_role.arn
     ]
   }
 }

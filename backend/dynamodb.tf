@@ -183,3 +183,22 @@ resource "aws_dynamodb_table" "user_projects" {
     type = "S"
   }
 }
+
+# Jupyter Notebooks Table
+resource "aws_dynamodb_table" "juptyer_notebooks" {
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "uid"
+  range_key    = "instanceName"
+  name         = "sbeacon-dataportal-juptyer-notebooks"
+  tags         = var.common-tags
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  attribute {
+    name = "instanceName"
+    type = "S"
+  }
+}

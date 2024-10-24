@@ -706,11 +706,9 @@ module "lambda-data-portal" {
   tags = var.common-tags
 
   environment_variables = {
-    DYNAMO_PROJECTS_TABLE      = aws_dynamodb_table.projects.name
-    DYNAMO_USER_PROJECTS_TABLE = aws_dynamodb_table.user_projects.name
+    DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name
+    DYNAMO_USER_PROJECTS_TABLE     = aws_dynamodb_table.user_projects.name
+    DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
+    JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn
   }
-
-  layers = [
-    local.python_modules_layer,
-  ]
 }

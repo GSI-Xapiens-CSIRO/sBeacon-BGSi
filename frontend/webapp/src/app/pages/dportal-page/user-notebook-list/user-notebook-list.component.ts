@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChildren } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -51,6 +51,7 @@ export interface InstanceStartInfo {
   styleUrl: './user-notebook-list.component.scss',
 })
 export class UserNotebookListComponent implements OnInit {
+  @ViewChildren('notebook') notebookItems?: NotebookItemComponent[];
   notebooks: InstanceName[] = [];
   instanceTypes = instanceTypes;
   volumeSizes = volumeSizes;
@@ -79,6 +80,7 @@ export class UserNotebookListComponent implements OnInit {
   }
 
   list() {
+    this.notebookItems?.map((n) => n.getStatus());
     this.loading = true;
     this.dps
       .getMyNotebooks()

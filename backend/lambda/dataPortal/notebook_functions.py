@@ -18,6 +18,8 @@ def create_notebook(event, context):
     notebook_name = body_dict.get("instanceName")
     volume_size = body_dict.get("volumeSize")
     instance_type = body_dict.get("instanceType")
+    # TODO check if this can be done better
+    identity_id = body_dict.get("identityId")
 
     if JupyterInstances.count(sub, JupyterInstances.instanceName == notebook_name) > 0:
         raise PortalError(
@@ -32,6 +34,7 @@ def create_notebook(event, context):
         RoleArn=os.getenv("JUPYTER_INSTACE_ROLE_ARN"),
         DirectInternetAccess="Enabled",
         RootAccess="Disabled",
+        Tags=[{"Key": "IdentityId", "Value": identity_id}],
     )
     entry = JupyterInstances(sub, notebook_name)
     entry.save()

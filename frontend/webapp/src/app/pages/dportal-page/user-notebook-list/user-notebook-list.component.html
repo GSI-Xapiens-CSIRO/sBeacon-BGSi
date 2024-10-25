@@ -11,7 +11,11 @@
 </div>
 <div class="flex flex-col space-y-1 relative">
   @for (notebook of notebooks; track notebook) {
-    <app-notebook-item [notebook]="notebook" (deleted)="remove(notebook)" />
+    <app-notebook-item
+      #notebook
+      [notebook]="notebook"
+      (deleted)="remove(notebook)"
+    />
   } @empty {
     <div>No notebooks yet! Please start a notebook to continue.</div>
   }

@@ -737,6 +737,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       "sagemaker:ListNotebookInstances",
       "sagemaker:UpdateNotebookInstance",
       "sagemaker:CreatePresignedNotebookInstanceUrl",
+      "sagemaker:AddTags",
     ]
     resources = [
       "arn:aws:sagemaker:${var.region}:${data.aws_caller_identity.this.account_id}:notebook-instance/*"

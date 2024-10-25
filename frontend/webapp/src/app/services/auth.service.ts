@@ -4,7 +4,6 @@ import { CognitoUser } from 'amazon-cognito-identity-js';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 import _ from 'lodash';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -50,9 +49,6 @@ export class AuthService {
   async refresh() {
     try {
       const user = await Auth.currentAuthenticatedUser();
-      if (!environment.production) {
-        console.log('Logged in as ', user);
-      }
       this.userGroups.next(
         new Set(user.signInUserSession.idToken.payload['cognito:groups']),
       );

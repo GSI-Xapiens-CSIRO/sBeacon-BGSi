@@ -48,7 +48,7 @@ export class NotebookItemComponent implements OnInit {
     this.getStatus();
   }
 
-  getStatus() {
+  public getStatus() {
     this.dps.getNotebookStatus(this.notebook).subscribe((res) => {
       this.status = res;
     });

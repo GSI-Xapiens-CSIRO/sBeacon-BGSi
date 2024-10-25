@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { API } from 'aws-amplify';
+import { API, Auth } from 'aws-amplify';
 import { from } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -34,9 +34,17 @@ export class DportalService {
     volumeSize: number,
   ) {
     console.log('create my notebook');
+
     return from(
-      API.post(environment.api_endpoint_sbeacon.name, 'dportal/notebooks', {
-        body: { instanceName, instanceType, volumeSize },
+      Auth.currentCredentials().then((credentials) => {
+        const identityId = credentials.identityId;
+        return API.post(
+          environment.api_endpoint_sbeacon.name,
+          'dportal/notebooks',
+          {
+            body: { instanceName, instanceType, volumeSize, identityId },
+          },
+        );
       }),
     );
   }

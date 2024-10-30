@@ -1,0 +1,42 @@
+<div class="flex flex-row">
+  <button
+    mat-mini-fab
+    type="button"
+    color="primary"
+    class="w-[110px]"
+    (click)="closed.emit()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<br />
+<form>
+  <mat-form-field class="w-full">
+    <mat-label>Email</mat-label>
+    <input matInput [formControl]="email" type="email" required />
+    <mat-error> A valid email is required </mat-error>
+  </mat-form-field>
+  <div class="flex flex-row space-x-1">
+    <button
+      mat-raised-button
+      type="button"
+      (click)="email.reset()"
+      color="primary"
+      class="w-[110px]"
+    >
+      Reset
+    </button>
+    <button
+      mat-raised-button
+      type="button"
+      [disabled]="email.invalid"
+      autocomplete="off"
+      color="primary"
+      class="w-[110px]"
+      (click)="submit(email.value!)"
+    >
+      Submit
+    </button>
+  </div>
+</form>
+<br />

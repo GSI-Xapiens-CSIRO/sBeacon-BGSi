@@ -1,0 +1,57 @@
+<form [formGroup]="dataSubmissionForm">
+  <br />
+  <div class="flex flex-col space-y-2 w-full">
+    <mat-form-field class="w-full">
+      <mat-label>Project name</mat-label>
+      <input matInput formControlName="projectName" placeholder="Project 1" />
+      <mat-error>
+        A unique name is required. White spaces not allowed at start or end of
+        this name.</mat-error
+      >
+    </mat-form-field>
+    <mat-form-field class="w-full">
+      <mat-label>Project description</mat-label>
+      <textarea
+        matInput
+        formControlName="projectDescription"
+        placeholder="Enter project description"
+      ></textarea>
+      <mat-error> A description is required. </mat-error>
+    </mat-form-field>
+    <app-file-dropper
+      (dropped)="patchFiles($event)"
+      [disabled]="dataSubmissionForm.disabled"
+      #fileDropper
+    />
+  </div>
+  <br />
+  <div class="flex flex-row space-x-[10px]">
+    <button
+      class="w-[100px]"
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="reset()"
+      [disabled]="dataSubmissionForm.disabled"
+    >
+      Reset
+    </button>
+    <button
+      class="w-[100px]"
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="onSubmit(dataSubmissionForm.value)"
+      [disabled]="dataSubmissionForm.invalid || dataSubmissionForm.disabled"
+    >
+      Submit
+    </button>
+    <mat-spinner
+      class="w-[100px]"
+      diameter="36"
+      mode="determinate"
+      [value]="(progress / totalSize) * 100"
+    ></mat-spinner>
+  </div>
+</form>
+<br />

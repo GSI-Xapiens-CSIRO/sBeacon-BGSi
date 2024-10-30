@@ -1,0 +1,103 @@
+@if (loading) {
+  <app-component-spinner [loading]="true" class="min-h-[400px] block" />
+} @else {
+  <br />
+  <table mat-table [dataSource]="dataSource">
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
+
+    <!-- Description Column -->
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Description</th>
+      <td mat-cell *matCellDef="let element">{{ element.description }}</td>
+    </ng-container>
+
+    <!-- Files Column -->
+    <ng-container matColumnDef="files">
+      <th mat-header-cell *matHeaderCellDef>Files</th>
+      <td mat-cell *matCellDef="let element">
+        @for (file of element.files; track $index) {
+          <a class="block">{{ file }}</a>
+        }
+      </td>
+    </ng-container>
+
+    <!-- Indexed to Beacon Column -->
+    <ng-container matColumnDef="indexed">
+      <th mat-header-cell *matHeaderCellDef>Added to sBeacon</th>
+      <td mat-cell *matCellDef="let element">
+        @if (element.indexed) {
+          <span class="text-green-500 font-bold">Yes</span>
+        } @else {
+          <span class="text-red-500 font-bold">No</span>
+        }
+      </td>
+    </ng-container>
+
+    <!-- Assignments Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Assignments</th>
+      <td mat-cell *matCellDef="let element">
+        <div class="flex flex-col space-y-1 py-1">
+          <button
+            mat-raised-button
+            (click)="assignTo = element.name"
+            color="primary"
+          >
+            Assign Users
+          </button>
+          <button
+            mat-raised-button
+            (click)="viewUsers = element.name"
+            color="primary"
+          >
+            Assigned Users
+          </button>
+          <button
+            mat-raised-button
+            (click)="ingest(element.name)"
+            color="primary"
+          >
+            Ingest to sBeacon
+          </button>
+          <button mat-raised-button (click)="delete(element.name)" color="warn">
+            Delete
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+}
+<br />
+<div class="flex flex-row space-x-[10px]">
+  <button
+    mat-raised-button
+    color="primary"
+    class="w-[110px]"
+    (click)="index()"
+    type="button"
+  >
+    Index
+  </button>
+  <button mat-mini-fab color="primary" (click)="list()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+<br />
+@if (assignTo) {
+  <hr />
+  <h3>Add new users to project: {{ assignTo }}</h3>
+  <app-project-assignments (closed)="assignTo = null" [project]="assignTo" />
+}
+
+@if (viewUsers) {
+  <hr />
+  <h3>Users of project: {{ viewUsers }}</h3>
+  <app-projects-users (closed)="viewUsers = null" [project]="viewUsers" />
+}

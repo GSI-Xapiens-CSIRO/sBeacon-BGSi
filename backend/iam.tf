@@ -631,8 +631,8 @@ data "aws_iam_policy_document" "athena-full-access" {
       "s3:*",
     ]
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.metadata-bucket.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.metadata-bucket.bucket}/*"
+      "${aws_s3_bucket.metadata-bucket.arn}",
+      "${aws_s3_bucket.metadata-bucket.arn}/*"
     ]
   }
 }
@@ -719,11 +719,22 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:BatchGetItem",
     ]
     resources = [
       aws_dynamodb_table.projects.arn,
-      aws_dynamodb_table.user_projects.arn,
+      aws_dynamodb_table.project_users.arn,
       aws_dynamodb_table.juptyer_notebooks.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "cognito-idp:ListUsers",
+    ]
+    resources = [
+      aws_cognito_user_pool.BeaconUserPool.arn
     ]
   }
 
@@ -751,6 +762,35 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
     resources = [
       aws_iam_role.sagemaker_jupyter_instance_role.arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      aws_s3_bucket.dataportal-bucket.arn
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "projects/*",
+      ]
+    }
+  }
+
+  statement {
+    actions = [
+      "s3:DeleteObject",
+      "s3:GetObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*"
     ]
   }
 }

@@ -6,25 +6,7 @@
 </mat-card>
 <br />
 @if ((auth.userGroups | async)!.has("admin-group")) {
-  <mat-card>
-    <mat-card-content>
-      <h2>Administration</h2>
-      <app-data-submission-form />
-    </mat-card-content>
-  </mat-card>
+  <app-admin-section />
   <br />
 }
-<mat-card>
-  <mat-card-content class="min-h-[400px]">
-    <div class="grid grid-cols-3 gap-4 min-h-[400px]">
-      <!-- TODO add vertical lines -->
-      <app-user-projects-list
-        class="border-0 border-r border-solid border-cyan-900 pr-4"
-      />
-      <app-user-notebook-list
-        class="border-0 border-r border-solid border-cyan-900 pr-4"
-      />
-      <app-user-file-list />
-    </div>
-  </mat-card-content>
-</mat-card>
+<app-user-section />

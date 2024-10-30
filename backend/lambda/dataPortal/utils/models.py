@@ -15,15 +15,19 @@ class Projects(Model):
         table_name = os.environ.get("DYNAMO_PROJECTS_TABLE")
         region = REGION
 
-    id = UnicodeAttribute(hash_key=True)
+    name = UnicodeAttribute(hash_key=True)
+    description = UnicodeAttribute()
+    vcf = UnicodeAttribute()
+    tbi = UnicodeAttribute()
+    json = UnicodeAttribute()
 
 
-class UserProjects(Model):
+class ProjectUsers(Model):
     class Meta:
-        table_name = os.environ.get("DYNAMO_USER_PROJECTS_TABLE")
+        table_name = os.environ.get("DYNAMO_PROJECT_USERS_TABLE")
         region = REGION
 
-    id = UnicodeAttribute(hash_key=True)
+    name = UnicodeAttribute(hash_key=True)
     uid = UnicodeAttribute(range_key=True)
 
 

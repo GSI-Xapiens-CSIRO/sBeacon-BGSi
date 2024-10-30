@@ -155,26 +155,26 @@ resource "aws_dynamodb_table" "variant_query_responses" {
 # User Projects
 resource "aws_dynamodb_table" "projects" {
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
+  hash_key     = "name"
   name         = "sbeacon-dataportal-projects"
   tags         = var.common-tags
 
   attribute {
-    name = "id"
+    name = "name"
     type = "S"
   }
 }
 
 # User Projects Table
-resource "aws_dynamodb_table" "user_projects" {
+resource "aws_dynamodb_table" "project_users" {
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
+  hash_key     = "name"
   range_key    = "uid"
-  name         = "sbeacon-dataportal-user-projects"
+  name         = "sbeacon-dataportal-project-users"
   tags         = var.common-tags
 
   attribute {
-    name = "id"
+    name = "name"
     type = "S"
   }
 

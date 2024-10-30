@@ -1,6 +1,7 @@
 import json
 import traceback
 import datetime
+from urllib.parse import unquote
 
 from botocore.exceptions import ClientError
 
@@ -175,7 +176,7 @@ class LambdaRouter:
         for route_part, path_part in zip(route_parts, path_parts):
             if route_part.startswith("{") and route_part.endswith("}"):
                 param_name = route_part.strip("{}")
-                params[param_name] = path_part
+                params[param_name] = unquote(path_part)
 
         return params
 

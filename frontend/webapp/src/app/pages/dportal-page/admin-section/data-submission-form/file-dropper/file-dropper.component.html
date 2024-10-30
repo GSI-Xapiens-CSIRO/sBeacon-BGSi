@@ -1,0 +1,35 @@
+<div
+  class="border-dashed border-[1px] p-10 rounded-md bg-cyan-300 font-light max-w-[100%] mx-auto text-center cursor-pointer"
+  #dropzone
+  (dragenter)="highlight($event)"
+  (dragover)="highlight($event)"
+  (dragleave)="unhighlight($event)"
+  (drop)="handleDrop($event)"
+  (click)="!disabled && input.click()"
+  [class]="disabled ? 'bg-gray-500' : ''"
+>
+  <h4 class="my-0">{{ message }}</h4>
+  <br />
+  Click to open a file picker
+  <br />
+  @if (vcf) {
+    <br />
+    {{ vcf.name }} ({{ vcf.size / 1024 / 1024 | number: ".0-3" }} MB)
+  }
+  @if (tbi) {
+    <br />
+    {{ tbi.name }} ({{ tbi.size / 1024 / 1024 | number: ".0-3" }} MB)
+  }
+  @if (json) {
+    <br />
+    {{ json.name }} ({{ json.size / 1024 / 1024 | number: ".0-3" }} MB)
+  }
+  <input
+    type="file"
+    [accept]="htmlTypes.join(',')"
+    (change)="handlePick($event)"
+    multiple
+    hidden
+    #input
+  />
+</div>

@@ -56,7 +56,7 @@ export class NotebookItemComponent implements OnInit {
 
   async stop() {
     const { ActionConfirmationDialogComponent } = await import(
-      '../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
+      '../../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
     );
 
     const dialog = this.dg.open(ActionConfirmationDialogComponent, {
@@ -76,7 +76,7 @@ export class NotebookItemComponent implements OnInit {
 
   async start() {
     const { ActionConfirmationDialogComponent } = await import(
-      '../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
+      '../../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
     );
 
     const dialog = this.dg.open(ActionConfirmationDialogComponent, {
@@ -96,7 +96,7 @@ export class NotebookItemComponent implements OnInit {
 
   async delete() {
     const { ActionConfirmationDialogComponent } = await import(
-      '../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
+      '../../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
     );
 
     const dialog = this.dg.open(ActionConfirmationDialogComponent, {

@@ -62,8 +62,6 @@ resource "aws_cognito_user_group" "admin-group" {
 
 data "aws_iam_policy_document" "admin-group-assume-role-policy" {
   statement {
-    effect = "Deny"
-
     principals {
       type        = "Federated"
       identifiers = ["cognito-identity.amazonaws.com"]
@@ -74,7 +72,7 @@ data "aws_iam_policy_document" "admin-group-assume-role-policy" {
     condition {
       test     = "StringEquals"
       variable = "cognito-identity.amazonaws.com:aud"
-      values   = ["us-east-1:12345678-dead-beef-cafe-123456790ab"]
+      values   = [aws_cognito_identity_pool.BeaconIdentityPool.id]
     }
 
     condition {
@@ -91,12 +89,50 @@ resource "aws_iam_role" "admin-group-role" {
 }
 
 data "aws_iam_policy_document" "admin-group-role-policy" {
+  # project access
   statement {
     actions = [
-      "cognito-idp:*"
+      "s3:*"
     ]
     resources = [
-      aws_cognito_user_pool.BeaconUserPool.arn
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+    ]
+  }
+
+  # private access
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      aws_s3_bucket.dataportal-bucket.arn,
+    ]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "private/$${cognito-identity.amazonaws.com:sub}/",
+        "private/$${cognito-identity.amazonaws.com:sub}/*",
+      ]
+    }
+  }
+
+  # private access
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/private/$${cognito-identity.amazonaws.com:sub}/*",
     ]
   }
 }

@@ -8,16 +8,49 @@ import { environment } from 'src/environments/environment';
 })
 export class DportalService {
   constructor() {}
-
-  submitData(s3path: string) {
-    console.log('submit dataset', s3path);
+  // data portal admin project actions
+  createProject(
+    name: string,
+    description: string,
+    vcf: string,
+    tbi: string,
+    json: string,
+  ) {
+    console.log('create project');
     return from(
-      API.post(environment.api_endpoint_sbeacon.name, 'submit_dataset', {
-        body: { s3Payload: s3path },
-      }),
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        'dportal/admin/projects',
+        {
+          body: { name, description, vcf, tbi, json },
+        },
+      ),
     );
   }
 
+  getProjects() {
+    console.log('get projects');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        'dportal/admin/projects',
+        {},
+      ),
+    );
+  }
+
+  deleteProject(project: string) {
+    console.log('delete project');
+    return from(
+      API.del(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/projects/${project}`,
+        {},
+      ),
+    );
+  }
+
+  // project admin users actions
   indexData() {
     console.log('index datasets');
     return from(
@@ -27,7 +60,62 @@ export class DportalService {
     );
   }
 
+  getProjectUsers(project: string) {
+    console.log('get project users');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/projects/${project}/users`,
+        {},
+      ),
+    );
+  }
+
+  addUserToProject(project: string, email: string) {
+    console.log('add user to project');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/projects/${project}/users`,
+        {
+          body: { emails: [email] },
+        },
+      ),
+    );
+  }
+
+  removeUserFromProject(project: string, email: string) {
+    console.log('remove user from project');
+    return from(
+      API.del(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/projects/${project}/users/${email}`,
+        {},
+      ),
+    );
+  }
+
   // data portal user actions
+  getMyProjects() {
+    console.log('get my projects');
+    return from(
+      API.get(environment.api_endpoint_sbeacon.name, 'dportal/projects', {}),
+    );
+  }
+
+  getMyProjectFile(project: string, file: string) {
+    console.log('get my project file');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/projects/${project}/file`,
+        {
+          queryStringParameters: { file },
+        },
+      ),
+    );
+  }
+
   createNotebookInstance(
     instanceName: string,
     instanceType: string,

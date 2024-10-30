@@ -39,6 +39,7 @@ resource "aws_iam_role" "beacon_authenticated" {
   assume_role_policy = data.aws_iam_policy_document.beacon_authenticated.json
 }
 
+# this is the defauly policy for the authenticated role
 data "aws_iam_policy_document" "beacon_authenticated_role_policy" {
   statement {
     effect = "Allow"
@@ -55,8 +56,8 @@ data "aws_iam_policy_document" "beacon_authenticated_role_policy" {
       test     = "StringLike"
       variable = "s3:prefix"
       values = [
-        "private/$${cognito-identity.amazonaws.com:sub}/saved-queries/",
-        "private/$${cognito-identity.amazonaws.com:sub}/saved-queries/*",
+        "private/$${cognito-identity.amazonaws.com:sub}/",
+        "private/$${cognito-identity.amazonaws.com:sub}/*",
       ]
     }
   }
@@ -71,7 +72,7 @@ data "aws_iam_policy_document" "beacon_authenticated_role_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/private/$${cognito-identity.amazonaws.com:sub}/saved-queries/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/private/$${cognito-identity.amazonaws.com:sub}/*",
     ]
   }
 }
@@ -134,6 +135,12 @@ resource "aws_iam_role_policy" "beacon_unauthenticated" {
 
 resource "aws_cognito_identity_pool_roles_attachment" "beacon_cognito_roles" {
   identity_pool_id = aws_cognito_identity_pool.BeaconIdentityPool.id
+
+  role_mapping {
+    identity_provider         = "${aws_cognito_user_pool.BeaconUserPool.endpoint}:${aws_cognito_user_pool_client.BeaconUserPool-client.id}"
+    type                      = "Token"
+    ambiguous_role_resolution = "AuthenticatedRole"
+  }
 
   roles = {
     "authenticated"   = aws_iam_role.beacon_authenticated.arn

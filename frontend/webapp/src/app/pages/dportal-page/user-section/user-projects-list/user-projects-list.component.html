@@ -1,0 +1,49 @@
+<div class="flex flex-row justify-between w-full items-center">
+  <h2 class="flex">My Projects</h2>
+  <button
+    mat-mini-fab
+    color="primary"
+    class="flex items-center"
+    (click)="list()"
+  >
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+<div class="flex flex-col space-y-1">
+  @for (project of myProjects; track project) {
+    <div class="flex flex-row justify-between w-full items-center">
+      <div class="flex">{{ project }}</div>
+      <div class="flex space-x-1">
+        <button
+          mat-mini-fab
+          color="primary"
+          class="flex items-center"
+          matTooltip="Copy VCF URL"
+          (click)="copy(project, 'vcf')"
+        >
+          <mat-icon>file_copy</mat-icon>
+        </button>
+        <button
+          mat-mini-fab
+          color="primary"
+          class="flex items-center"
+          matTooltip="Copy VCF index URL"
+          (click)="copy(project, 'tbi')"
+        >
+          <mat-icon>file_copy</mat-icon>
+        </button>
+        <button
+          mat-mini-fab
+          color="primary"
+          class="flex items-center"
+          matTooltip="Copy metadata URL"
+          (click)="copy(project, 'json')"
+        >
+          <mat-icon>file_copy</mat-icon>
+        </button>
+      </div>
+    </div>
+  } @empty {
+    No projects yet! Wait until you are assigned to a project.
+  }
+</div>

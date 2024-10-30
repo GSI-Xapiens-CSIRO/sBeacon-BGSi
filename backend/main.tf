@@ -707,8 +707,10 @@ module "lambda-data-portal" {
 
   environment_variables = {
     DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name
-    DYNAMO_USER_PROJECTS_TABLE     = aws_dynamodb_table.user_projects.name
+    DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
     JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn
+    USER_POOL_ID                   = aws_cognito_user_pool.BeaconUserPool.id
+    DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket
   }
 }

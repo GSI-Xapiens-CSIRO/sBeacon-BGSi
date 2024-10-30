@@ -84,7 +84,7 @@ def stop_my_notebook(event, context):
     if InstanceStatus(status) != InstanceStatus.IN_SERVICE:
         raise PortalError(
             error_code=409,
-            error_message=f"Notebook must be in service before deleting.",
+            error_message=f"Notebook must be in service before stopping.",
         )
 
     response = sagemaker_client.stop_notebook_instance(
@@ -134,8 +134,7 @@ def delete_my_notebook(event, context):
     response = sagemaker_client.delete_notebook_instance(
         NotebookInstanceName=notebook_name
     )
-    entry = JupyterInstances.get(sub, name)
-    entry.delete()
+    JupyterInstances(sub, name).delete()
 
     return response
 

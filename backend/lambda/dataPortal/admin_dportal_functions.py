@@ -4,35 +4,11 @@ import os
 from utils.router import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
 from utils.s3_util import list_s3_prefix, delete_s3_objects
-import boto3
+from utils.cognito import get_user_from_attribute, get_user_attribute
 from pynamodb.exceptions import DoesNotExist
 
 router = LambdaRouter()
-cognito_client = boto3.client("cognito-idp")
-USER_POOL_ID = os.environ.get("USER_POOL_ID")
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
-
-
-def get_user_from_attribute(attribute, value):
-    try:
-        response = cognito_client.list_users(
-            UserPoolId=USER_POOL_ID, Filter=f'{attribute} = "{value}"'
-        )
-        users = response.get("Users", [])
-        if not users:
-            raise PortalError(404, "User not found")
-        return users[0]
-    except cognito_client.exceptions.UserNotFoundException:
-        raise PortalError(404, "User not found")
-    except Exception as e:
-        raise PortalError(500, str(e))
-
-
-def get_user_attribute(user, attribute_name):
-    for attribute in user["Attributes"]:
-        if attribute["Name"] == attribute_name:
-            return attribute["Value"]
-    raise PortalError(404, f"{attribute_name} attribute not found")
 
 
 #

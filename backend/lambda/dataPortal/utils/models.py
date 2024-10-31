@@ -48,3 +48,12 @@ class JupyterInstances(Model):
 
     uid = UnicodeAttribute(hash_key=True)
     instanceName = UnicodeAttribute(range_key=True)
+
+class NextflowInstances(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_NEXTFLOW_INSTANCES_TABLE")
+        region = REGION
+
+    uid = UnicodeAttribute(hash_key=True)
+    instanceName = UnicodeAttribute(range_key=True)
+    instanceId = UnicodeAttribute()

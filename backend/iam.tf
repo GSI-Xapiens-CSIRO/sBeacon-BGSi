@@ -755,6 +755,70 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
   }
 
+  
+  statement {
+    actions = [
+      "ec2:RunInstances",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:instance/*",
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:network-interface/*",
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:security-group/*",
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:subnet/*",
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:volume/*",
+      "arn:aws:ec2:${var.region}::image/ami-0f71013b2c8bd2c29",
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:CreateTags",
+      "ec2:DescribeImages",
+      "ec2-instance-connect:SendSSHPublicKey",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:instance/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeImages",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:image/ami-0f71013b2c8bd2c29",
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeKeyPairs",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:key-pair/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:DescribeVolumes",
+      "ec2:CreateVolume",
+      "ec2:AttachVolume",
+    ]
+    resources = [
+      "arn:aws:ec2:${var.region}:${data.aws_caller_identity.this.account_id}:volume/*"
+    ]
+  }
+
+
   statement {
     actions = [
       "iam:PassRole"

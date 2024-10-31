@@ -1,6 +1,7 @@
 boto3
 jsons==1.6.3
 jsonschema==4.18.0
+paramiko==3.5.0
 pydantic==2.9.2
 pyhumps==3.8.0
 pynamodb==5.5.0

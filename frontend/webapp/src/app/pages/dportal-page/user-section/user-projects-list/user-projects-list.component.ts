@@ -35,7 +35,7 @@ export class UserProjectsListComponent implements OnInit {
 
   list() {
     this.dps
-      .getProjects()
+      .getMyProjects()
       .pipe(catchError(() => of(null)))
       .subscribe((projects: any) => {
         if (!projects) {

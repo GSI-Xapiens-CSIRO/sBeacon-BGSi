@@ -8,8 +8,9 @@ import { environment } from 'src/environments/environment';
 })
 export class DportalService {
   constructor() {}
+
   // data portal admin project actions
-  createProject(
+  adminCreateProject(
     name: string,
     description: string,
     vcf: string,
@@ -28,7 +29,7 @@ export class DportalService {
     );
   }
 
-  getProjects() {
+  getAdminProjects() {
     console.log('get projects');
     return from(
       API.get(
@@ -39,7 +40,7 @@ export class DportalService {
     );
   }
 
-  deleteProject(project: string) {
+  deleteAdminProject(project: string) {
     console.log('delete project');
     return from(
       API.del(
@@ -50,8 +51,53 @@ export class DportalService {
     );
   }
 
+  // data portal admin notebook actions
+  getAdminNotebooks() {
+    console.log('get my notebooks');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        'dportal/admin/notebooks',
+        {},
+      ),
+    );
+  }
+
+  stopAdminNotebook(name: string) {
+    console.log('stop admin notebook');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/notebooks/${name}/stop`,
+        {},
+      ),
+    );
+  }
+
+  deleteAdminNotebook(name: string) {
+    console.log('stop admin notebook');
+    return from(
+      API.post(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/notebooks/${name}/delete`,
+        {},
+      ),
+    );
+  }
+
+  getAdminNotebookStatus(name: string) {
+    console.log('get admin notebook status');
+    return from(
+      API.get(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/notebooks/${name}`,
+        {},
+      ),
+    );
+  }
+
   // project admin users actions
-  indexData() {
+  indexAdminData() {
     console.log('index datasets');
     return from(
       API.post(environment.api_endpoint_sbeacon.name, 'index', {
@@ -60,7 +106,7 @@ export class DportalService {
     );
   }
 
-  getProjectUsers(project: string) {
+  adminGetProjectUsers(project: string) {
     console.log('get project users');
     return from(
       API.get(
@@ -71,7 +117,7 @@ export class DportalService {
     );
   }
 
-  addUserToProject(project: string, email: string) {
+  adminAddUserToProject(project: string, email: string) {
     console.log('add user to project');
     return from(
       API.post(
@@ -84,7 +130,7 @@ export class DportalService {
     );
   }
 
-  removeUserFromProject(project: string, email: string) {
+  adminRemoveUserFromProject(project: string, email: string) {
     console.log('remove user from project');
     return from(
       API.del(
@@ -116,7 +162,7 @@ export class DportalService {
     );
   }
 
-  createNotebookInstance(
+  createMyNotebookInstance(
     instanceName: string,
     instanceType: string,
     volumeSize: number,
@@ -144,7 +190,7 @@ export class DportalService {
     );
   }
 
-  getNotebookStatus(name: string) {
+  getMyNotebookStatus(name: string) {
     console.log('get my notebook status');
     return from(
       API.get(
@@ -155,7 +201,7 @@ export class DportalService {
     );
   }
 
-  stopNotebook(name: string) {
+  stopMyNotebook(name: string) {
     console.log('stop my notebook');
     return from(
       API.post(
@@ -166,7 +212,7 @@ export class DportalService {
     );
   }
 
-  startNotebook(name: string) {
+  startMyNotebook(name: string) {
     console.log('start my notebook');
     return from(
       API.post(
@@ -177,7 +223,7 @@ export class DportalService {
     );
   }
 
-  deleteNotebook(name: string) {
+  deleteMyNotebook(name: string) {
     console.log('delete my notebook');
     return from(
       API.post(
@@ -188,7 +234,7 @@ export class DportalService {
     );
   }
 
-  updateNotebook(name: string, instanceType: string, volumeSize: number) {
+  updateMyNotebook(name: string, instanceType: string, volumeSize: number) {
     console.log('update my notebook');
     return from(
       API.put(
@@ -201,7 +247,7 @@ export class DportalService {
     );
   }
 
-  getNotebookUrl(name: string) {
+  getMyNotebookUrl(name: string) {
     console.log('get my notebook url');
     return from(
       API.get(

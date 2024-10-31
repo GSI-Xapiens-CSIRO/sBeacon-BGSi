@@ -45,7 +45,7 @@ export class ProjectsUsersComponent implements OnInit {
 
   list() {
     this.dps
-      .getProjectUsers(this.project!)
+      .adminGetProjectUsers(this.project!)
       .pipe(catchError(() => of(null)))
       .subscribe((users: User[] | null) => {
         if (!users) {
@@ -72,7 +72,7 @@ export class ProjectsUsersComponent implements OnInit {
     dialog.afterClosed().subscribe((result) => {
       if (result) {
         this.dps
-          .removeUserFromProject(this.project, email)
+          .adminRemoveUserFromProject(this.project, email)
           .pipe(catchError(() => of(null)))
           .subscribe((res: any) => {
             if (!res) {

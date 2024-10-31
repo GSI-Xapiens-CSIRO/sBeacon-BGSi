@@ -3,6 +3,7 @@ import { DataSubmissionFormComponent } from './data-submission-form/data-submiss
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ProjectsListComponent } from './projects-list/projects-list.component';
+import { NotebooksComponent } from './admin-notebooks-list/admin-notebooks-list.component';
 
 @Component({
   selector: 'app-admin-section',
@@ -12,6 +13,7 @@ import { ProjectsListComponent } from './projects-list/projects-list.component';
     MatCardModule,
     MatTabsModule,
     ProjectsListComponent,
+    NotebooksComponent,
   ],
   templateUrl: './admin-section.component.html',
   styleUrl: './admin-section.component.scss',

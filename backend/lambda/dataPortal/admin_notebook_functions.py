@@ -30,7 +30,7 @@ def list_notebooks(event, context):
 
     return [
         {
-            "name": f"{instance.instanceName}-{instance.uid}",
+            "instanceName": f"{instance.instanceName}-{instance.uid}",
             "userFirstName": get_user_attribute(
                 get_user_from_attribute("sub", instance.uid), "given_name"
             ),
@@ -46,6 +46,25 @@ def list_notebooks(event, context):
         }
         for instance, status in zip(instances, statuses)
     ]
+
+
+@router.attach("/dportal/admin/notebooks/{name}", "get")
+def get_notebook_status(event, context):
+    notebook_name = event["pathParameters"]["name"]
+
+    response = sagemaker_client.describe_notebook_instance(
+        NotebookInstanceName=notebook_name
+    )
+
+    notebook_status = response["NotebookInstanceStatus"]
+    volme_size = response["VolumeSizeInGB"]
+    instance_type = response["InstanceType"]
+
+    return {
+        "status": notebook_status,
+        "volumeSize": volme_size,
+        "instanceType": instance_type,
+    }
 
 
 @router.attach("/dportal/admin/notebooks/{name}/stop", "post")

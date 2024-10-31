@@ -1,0 +1,34 @@
+<div class="flex flex-row justify-between border border-solid rounded-md p-2">
+  <div class="flex flex-col">
+    <span><strong>Notebook Name:</strong> {{ notebook.instanceName }}</span>
+    <span><strong>Owner First Name:</strong> {{ notebook.userFirstName }}</span>
+    <span><strong>Owner Last Name:</strong> {{ notebook.userLastName }}</span>
+    <span><strong>Owner Email:</strong> {{ notebook.userEmail }}</span>
+    @if (cachedStatus) {
+      <span> <strong>Status:</strong> {{ cachedStatus.status }} </span>
+      <span> <strong>Volume (GB):</strong> {{ cachedStatus.volumeSize }} </span>
+      <span> <strong>Type (GB):</strong> {{ cachedStatus.instanceType }} </span>
+      <span class="text-sm text-gray-500 italic"
+        >Instance must be stopped before deleting or changing. Changes in
+        notebook instances can take few minutes to come in to effect.</span
+      >
+    }
+  </div>
+  @if (cachedStatus) {
+    <div class="flex flex-col space-y-1">
+      @if (cachedStatus.status == Status.IN_SERVICE) {
+        <button mat-mini-fab color="primary" (click)="stop()">
+          <mat-icon>stop_circle</mat-icon>
+        </button>
+      }
+      @if (cachedStatus.status == Status.STOPPED) {
+        <button mat-mini-fab color="primary" (click)="delete()">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      }
+      <button mat-mini-fab color="primary" (click)="getStatus()">
+        <mat-icon>change_circle</mat-icon>
+      </button>
+    </div>
+  }
+</div>

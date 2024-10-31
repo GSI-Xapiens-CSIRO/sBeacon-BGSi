@@ -95,7 +95,7 @@ export class UserNotebookListComponent implements OnInit {
 
   create(info: InstanceStartInfo, panel: MatExpansionPanel) {
     this.dps
-      .createNotebookInstance(
+      .createMyNotebookInstance(
         info.instanceName,
         info.instanceType,
         info.volumeSize,
@@ -111,10 +111,6 @@ export class UserNotebookListComponent implements OnInit {
         this.instanceForm.reset();
         panel.close();
       });
-  }
-
-  reset() {
-    console.log(this.instanceForm);
   }
 
   remove(notebook: InstanceName) {

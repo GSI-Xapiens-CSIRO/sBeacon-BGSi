@@ -105,7 +105,13 @@ export class DataSubmissionFormComponent {
             const [vcf, tbi, json] = res;
 
             return this.dps
-              .createProject(projectName, projectDescription, vcf, tbi, json)
+              .adminCreateProject(
+                projectName,
+                projectDescription,
+                vcf,
+                tbi,
+                json,
+              )
               .pipe(catchError(() => of(null)));
           }
           return of(null);

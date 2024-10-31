@@ -42,7 +42,7 @@ export class ProjectAssignmentsComponent {
   submit(email: string) {
     console.log(this.project, email);
     this.dps
-      .addUserToProject(this.project, email)
+      .adminAddUserToProject(this.project, email)
       .pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
         if (!res) {

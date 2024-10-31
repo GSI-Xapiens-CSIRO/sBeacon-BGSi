@@ -57,7 +57,7 @@ export class ProjectsListComponent {
 
   list() {
     this.dps
-      .getProjects()
+      .getAdminProjects()
       .pipe(catchError(() => of(null)))
       .subscribe((data: any[]) => {
         if (!data) {
@@ -78,7 +78,7 @@ export class ProjectsListComponent {
   index() {
     this.ss.start();
     this.dps
-      .indexData()
+      .indexAdminData()
       .pipe(catchError(() => of(null)))
       .subscribe((res: any) => {
         if (!res) {
@@ -102,7 +102,7 @@ export class ProjectsListComponent {
     dialog.afterClosed().subscribe((result) => {
       if (result) {
         this.dps
-          .deleteProject(name)
+          .deleteAdminProject(name)
           .pipe(catchError(() => of(null)))
           .subscribe((res: any) => {
             if (!res) {

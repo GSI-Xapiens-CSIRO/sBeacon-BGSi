@@ -1,8 +1,15 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DportalService } from 'src/app/services/dportal.service';
-import { InstanceName } from '../user-notebook-list.component';
+import { InstanceInfo } from '../admin-notebooks-list.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { catchError, of } from 'rxjs';
 
@@ -16,42 +23,40 @@ export enum Status {
   UPDATING = 'Updating',
 }
 
-export interface InstanceDetails {
-  status: Status;
-  volumeSize: number;
-  instanceType: string;
-}
-
-export interface SignedNotebookUrl {
-  AuthorizedUrl: string;
-}
-
 @Component({
-  selector: 'app-notebook-item',
+  selector: 'app-admin-notebook-item',
   standalone: true,
   imports: [MatButtonModule, MatIconModule, MatDialogModule],
-  templateUrl: './notebook-item.component.html',
-  styleUrl: './notebook-item.component.scss',
+  templateUrl: './admin-notebook-item.component.html',
+  styleUrl: './admin-notebook-item.component.scss',
 })
-export class NotebookItemComponent implements OnInit {
-  @Input({ required: true }) notebook!: InstanceName;
+export class AdminNotebookItemComponent implements OnChanges {
+  @Input({ required: true }) notebook!: InstanceInfo;
   @Output() deleted = new EventEmitter<void>();
-  status: InstanceDetails | null = null;
   Status = Status;
+  cachedStatus: InstanceInfo | null = null;
 
   constructor(
     private dps: DportalService,
     private dg: MatDialog,
   ) {}
 
-  ngOnInit(): void {
-    this.getStatus();
+  ngOnChanges(changes: SimpleChanges): void {
+    // cache the initial status
+    if (changes['notebook'].firstChange) {
+      this.cachedStatus = changes['notebook'].currentValue;
+    }
   }
 
   public getStatus() {
-    this.dps.getMyNotebookStatus(this.notebook).subscribe((res) => {
-      this.status = res;
-    });
+    this.dps
+      .getAdminNotebookStatus(this.notebook.instanceName)
+      .subscribe((res) => {
+        // merge res to the cached status
+        if (this.cachedStatus) {
+          this.cachedStatus = { ...this.cachedStatus, ...res };
+        }
+      });
   }
 
   async stop() {
@@ -67,27 +72,7 @@ export class NotebookItemComponent implements OnInit {
     });
     dialog.afterClosed().subscribe((result) => {
       if (result) {
-        this.dps.stopMyNotebook(this.notebook).subscribe(() => {
-          this.getStatus();
-        });
-      }
-    });
-  }
-
-  async start() {
-    const { ActionConfirmationDialogComponent } = await import(
-      '../../../../../components/action-confirmation-dialog/action-confirmation-dialog.component'
-    );
-
-    const dialog = this.dg.open(ActionConfirmationDialogComponent, {
-      data: {
-        title: 'Start Notebook',
-        message: 'Are you sure you want to start this notebook?',
-      },
-    });
-    dialog.afterClosed().subscribe((result) => {
-      if (result) {
-        this.dps.startMyNotebook(this.notebook).subscribe(() => {
+        this.dps.stopAdminNotebook(this.notebook.instanceName).subscribe(() => {
           this.getStatus();
         });
       }
@@ -108,25 +93,12 @@ export class NotebookItemComponent implements OnInit {
     dialog.afterClosed().subscribe((result) => {
       if (result) {
         this.dps
-          .deleteMyNotebook(this.notebook)
+          .deleteAdminNotebook(this.notebook.instanceName)
           .pipe(catchError(() => of(null)))
           .subscribe(() => {
             this.deleted.emit();
           });
       }
     });
-  }
-
-  url() {
-    this.dps
-      .getMyNotebookUrl(this.notebook)
-      .subscribe((nbUrlObj: SignedNotebookUrl) => {
-        const url = nbUrlObj.AuthorizedUrl;
-        const anchor = document.createElement('a');
-        anchor.href = url;
-        anchor.target = '_blank';
-        anchor.rel = 'noopener noreferrer';
-        anchor.click();
-      });
   }
 }

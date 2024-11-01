@@ -9,12 +9,6 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
-export interface FileDropEvent {
-  vcf: File;
-  tbi: File;
-  json: File;
-}
-
 @Component({
   selector: 'app-file-dropper',
   standalone: true,
@@ -26,18 +20,8 @@ export class FileDropperComponent {
   @ViewChild('dropzone') dropzone!: ElementRef;
   @ViewChild('input') input!: ElementRef;
   @Input() disabled: boolean = false;
-  @Output() dropped = new EventEmitter<FileDropEvent>();
-  types: string[] = ['.vcf.gz', '.vcf.gz.tbi', '.json'];
-  // html can only handle last extension
-  htmlTypes: string[] = ['.gz', '.tbi', '.json'];
-  message: string =
-    'Add VCF (.vcf.gz), TBI (.tbi) and JSON (.json) files for submission.';
-
-  vcf: File | null = null;
-  tbi: File | null = null;
-  json: File | null = null;
-
-  constructor(private sb: MatSnackBar) {}
+  @Input() files: string[] = [];
+  @Output() dropped = new EventEmitter<FileList>();
 
   highlight(e: Event) {
     this.preventDefaults(e);
@@ -75,44 +59,12 @@ export class FileDropperComponent {
   }
 
   handleFiles(files: FileList) {
-    // validations >>
-    if (files.length == 0) {
-      return;
-    }
-    if (files.length > 3) {
-      this.sb.open('Cannot provide more than three files.', 'Okay', {
-        duration: 60000,
-      });
-      return;
-    }
-
-    for (let index = 0; index < files.length; index++) {
-      const file = files.item(index)!;
-
-      if (file.name.endsWith('.vcf.gz')) {
-        this.vcf = file;
-      } else if (file.name.endsWith('.vcf.gz.tbi')) {
-        this.tbi = file;
-      } else if (file.name.endsWith('.json')) {
-        this.json = file;
-      }
-    }
-
-    // validations <<
-    if (this.vcf && this.tbi && this.json) {
-      this.dropped.emit({ vcf: this.vcf, tbi: this.tbi, json: this.json });
-    }
+    this.dropped.emit(files);
+    this.input.nativeElement.value = '';
   }
 
   preventDefaults(e: Event) {
     e.preventDefault();
     e.stopPropagation();
-  }
-
-  reset() {
-    this.vcf = null;
-    this.tbi = null;
-    this.json = null;
-    this.input.nativeElement.value = '';
   }
 }

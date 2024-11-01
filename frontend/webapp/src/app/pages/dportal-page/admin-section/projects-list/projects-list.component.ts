@@ -67,7 +67,7 @@ export class ProjectsListComponent {
           this.dataSource.data = data.map((project) => ({
             name: project.name,
             description: project.description,
-            files: [project.vcf, project.tbi, project.json],
+            files: project.files,
             indexed: false,
           }));
         }

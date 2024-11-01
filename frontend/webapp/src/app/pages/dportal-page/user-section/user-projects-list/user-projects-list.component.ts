@@ -7,6 +7,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { catchError, of } from 'rxjs';
 import { DportalService } from 'src/app/services/dportal.service';
 
+interface Project {
+  name: string;
+  description: string;
+  files: string[];
+  expanded: boolean;
+}
+
 @Component({
   selector: 'app-user-projects-list',
   standalone: true,
@@ -21,7 +28,7 @@ import { DportalService } from 'src/app/services/dportal.service';
   styleUrl: './user-projects-list.component.scss',
 })
 export class UserProjectsListComponent implements OnInit {
-  myProjects: string[] = [];
+  myProjects: Project[] = [];
 
   constructor(
     private dps: DportalService,
@@ -43,14 +50,17 @@ export class UserProjectsListComponent implements OnInit {
             duration: 60000,
           });
         } else {
-          this.myProjects = projects.map((p: any) => p.name);
+          this.myProjects = projects.map((p: Project) => ({
+            ...p,
+            expanded: false,
+          }));
         }
       });
   }
 
-  copy(project: string, file: string) {
+  copy(project: string, prefix: string) {
     return this.dps
-      .getMyProjectFile(project, file)
+      .getMyProjectFile(project, prefix)
       .pipe(catchError(() => of(null)))
       .subscribe((url: string | null) => {
         if (!url) {

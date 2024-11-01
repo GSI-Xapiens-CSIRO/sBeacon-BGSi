@@ -10,20 +10,14 @@ export class DportalService {
   constructor() {}
 
   // data portal admin project actions
-  adminCreateProject(
-    name: string,
-    description: string,
-    vcf: string,
-    tbi: string,
-    json: string,
-  ) {
+  adminCreateProject(name: string, description: string, files: string[]) {
     console.log('create project');
     return from(
       API.post(
         environment.api_endpoint_sbeacon.name,
         'dportal/admin/projects',
         {
-          body: { name, description, vcf, tbi, json },
+          body: { name, description, files },
         },
       ),
     );
@@ -149,14 +143,14 @@ export class DportalService {
     );
   }
 
-  getMyProjectFile(project: string, file: string) {
+  getMyProjectFile(project: string, prefix: string) {
     console.log('get my project file');
     return from(
       API.get(
         environment.api_endpoint_sbeacon.name,
         `dportal/projects/${project}/file`,
         {
-          queryStringParameters: { file },
+          queryStringParameters: { prefix },
         },
       ),
     );

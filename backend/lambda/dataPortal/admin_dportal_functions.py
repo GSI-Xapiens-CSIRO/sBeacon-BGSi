@@ -64,8 +64,6 @@ def add_user_to_project(event, context):
     emails = body_dict.get("emails")
     users = [get_user_from_attribute("email", email) for email in emails]
 
-    print(users)
-    print(name)
     try:
         Projects.get(name)
     except DoesNotExist:
@@ -111,11 +109,13 @@ def update_project(event, context):
     name = event.get("path").get("name")
     body_dict = json.loads(event.get("body"))
     description = body_dict.get("description")
+    files = body_dict.get("files")
     project = Projects.get(name)
     project.description = description
+    project.files = files
     project.save()
 
-    return project.attribute_values
+    return project.to_dict()
 
 
 @router.attach("/dportal/admin/projects", "post")
@@ -123,9 +123,7 @@ def create_project(event, context):
     body_dict = json.loads(event.get("body"))
     name = body_dict.get("name")
     description = body_dict.get("description")
-    vcf_path = body_dict.get("vcf")
-    tbi_path = body_dict.get("tbi")
-    json_path = body_dict.get("json")
+    files = body_dict.get("files")
 
     if Projects.count(name):
         raise PortalError(409, "Project already exists")
@@ -137,16 +135,14 @@ def create_project(event, context):
     project = Projects(
         name,
         description=description,
-        vcf=vcf_path,
-        tbi=tbi_path,
-        json=json_path,
+        files=files,
     )
     project.save()
 
-    return project.attribute_values
+    return project.to_dict()
 
 
 @router.attach("/dportal/admin/projects", "get")
 def list_projects(event, context):
     projects = Projects.scan()
-    return [project.attribute_values for project in projects]
+    return [project.to_dict() for project in projects]

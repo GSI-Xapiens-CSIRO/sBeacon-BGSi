@@ -13,21 +13,12 @@ import { DportalService } from '../../../../services/dportal.service';
 import { SpinnerService } from 'src/app/services/spinner.service';
 import { catchError, of, switchMap, tap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import {
-  FileDropEvent,
-  FileDropperComponent,
-} from './file-dropper/file-dropper.component';
+import { FileDropperComponent } from './file-dropper/file-dropper.component';
 import { Storage } from 'aws-amplify';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin } from 'rxjs';
-
-interface DataFormType {
-  projectName: string;
-  projectDescription: string;
-  vcf: File;
-  tbi: File;
-  json: File;
-}
+import { MatIconModule } from '@angular/material/icon';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-data-submission-form',
@@ -41,6 +32,8 @@ interface DataFormType {
     MatSnackBarModule,
     FileDropperComponent,
     MatProgressSpinnerModule,
+    MatIconModule,
+    DecimalPipe,
   ],
   templateUrl: './data-submission-form.component.html',
   styleUrl: './data-submission-form.component.scss',
@@ -50,6 +43,7 @@ export class DataSubmissionFormComponent {
   dataSubmissionForm: FormGroup;
   totalSize = 0;
   progress = 0;
+  files: File[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -63,9 +57,6 @@ export class DataSubmissionFormComponent {
         Validators.pattern(/^\S.*\S$/),
       ]),
       projectDescription: fb.control('', Validators.required),
-      vcf: fb.control(null, Validators.required),
-      tbi: fb.control(null, Validators.required),
-      json: fb.control(null, Validators.required),
     });
   }
 
@@ -89,29 +80,15 @@ export class DataSubmissionFormComponent {
     const projectName = entry.projectName;
     const projectDescription = entry.projectDescription;
     this.progress = 0;
-    this.totalSize =
-      (entry.vcf as File).size +
-      (entry.tbi as File).size +
-      (entry.json as File).size;
-    forkJoin([
-      this.uploadFile(projectName, entry.vcf),
-      this.uploadFile(projectName, entry.tbi),
-      this.uploadFile(projectName, entry.json),
-    ])
+    this.totalSize = this.files.reduce((acc, file) => acc + file.size, 0);
+
+    forkJoin(this.files.map((file) => this.uploadFile(projectName, file)))
       .pipe(
         catchError(() => of(null)),
-        switchMap((res) => {
-          if (res) {
-            const [vcf, tbi, json] = res;
-
+        switchMap((files: string[] | null) => {
+          if (files) {
             return this.dps
-              .adminCreateProject(
-                projectName,
-                projectDescription,
-                vcf,
-                tbi,
-                json,
-              )
+              .adminCreateProject(projectName, projectDescription, files)
               .pipe(catchError(() => of(null)));
           }
           return of(null);
@@ -127,15 +104,25 @@ export class DataSubmissionFormComponent {
       });
   }
 
-  patchFiles(event: FileDropEvent) {
-    this.dataSubmissionForm.patchValue(event);
+  patchFiles(files: FileList) {
+    if (files.length + this.files.length > 20) {
+      this.sb.open('No more than 20 files per project is allowed!', 'Okay', {
+        duration: 60000,
+      });
+      return;
+    }
+    this.files = [...this.files, ...Array.from(files)];
   }
 
   reset() {
     this.dataSubmissionForm.reset();
     this.dataSubmissionForm.enable();
-    this.fileDroppper.reset();
     this.progress = 0;
     this.totalSize = 0;
+    this.files = [];
+  }
+
+  removeFile(index: number) {
+    this.files.splice(index, 1);
   }
 }

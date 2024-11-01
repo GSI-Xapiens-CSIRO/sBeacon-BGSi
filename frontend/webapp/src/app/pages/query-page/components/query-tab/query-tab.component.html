@@ -241,27 +241,9 @@
           <mat-form-field>
             <mat-label>Granularity</mat-label>
             <mat-select formControlName="granularity" required>
-              <mat-option
-                [disabled]="
-                  !(auth.userGroups | async)!.has('record-access-user-group')
-                "
-                value="record"
-                >Record</mat-option
-              >
-              <mat-option
-                [disabled]="
-                  !(auth.userGroups | async)!.has('boolean-access-user-group')
-                "
-                value="boolean"
-                >Boolean</mat-option
-              >
-              <mat-option
-                [disabled]="
-                  !(auth.userGroups | async)!.has('count-access-user-group')
-                "
-                value="count"
-                >Count</mat-option
-              >
+              <mat-option value="record">Record</mat-option>
+              <mat-option value="boolean">Boolean</mat-option>
+              <mat-option value="count">Count</mat-option>
             </mat-select>
             <mat-hint>Format of returned result</mat-hint>
           </mat-form-field>

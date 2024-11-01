@@ -23,7 +23,6 @@ import {
 } from 'src/app/utils/parsers';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterTypes, ScopeTypes } from 'src/app/utils/interfaces';
-import { AuthService } from 'src/app/services/auth.service';
 import { catchError, of, Subscription } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import _ from 'lodash';
@@ -156,7 +155,6 @@ export class QueryTabComponent implements OnInit, AfterViewInit, OnDestroy {
     private fb: FormBuilder,
     private qs: QueryService,
     public dg: MatDialog,
-    protected auth: AuthService,
     private sb: MatSnackBar,
     private ss: SpinnerService,
   ) {

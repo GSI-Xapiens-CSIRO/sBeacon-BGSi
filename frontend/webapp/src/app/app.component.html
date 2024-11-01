@@ -32,27 +32,6 @@
     <li class="bui-menu-item" [routerLinkActive]="'active'">
       <a [routerLink]="['filters']" accesskey="3" title="">Filters</a>
     </li>
-    <!-- <li class="bui-menu-item" [routerLinkActive]="'active'">
-      <a [routerLink]="['analytics']" accesskey="4" title="">Analytics</a>
-    </li> -->
-    <li class="bui-menu-item" [routerLinkActive]="'active'">
-      <a
-        href="https://bioinformatics.csiro.au/serverless-beacon/"
-        target="_blank"
-        accesskey="5"
-        title=""
-        >Methods</a
-      >
-    </li>
-    <li class="bui-menu-item" [routerLinkActive]="'active'">
-      <a
-        href="https://bioinformatics.csiro.au/get-in-touch/"
-        target="_blank"
-        accesskey="7"
-        title=""
-        >Contact</a
-      >
-    </li>
     @if ((auth.userGroups | async)!.has("admin-group")) {
       <li class="bui-menu-item" [routerLinkActive]="'active'">
         <a [routerLink]="['admin']" title="">Admin</a>

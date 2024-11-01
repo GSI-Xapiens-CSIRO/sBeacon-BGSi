@@ -260,27 +260,4 @@ def parse_request(event) -> Tuple[RequestParams, str]:
 
         return request_params, dict({k: list(v) for k, v in errors.items()}), 400
 
-    if BEACON_ENABLE_AUTH:
-        # either use belongs to a group or they are unauthorized
-        groups = (
-            event.get("requestContext", dict())
-            .get("authorizer", dict())
-            .get("claims", dict())
-            .get("cognito:groups", "unauthorized")
-        )
-        groups = groups.split(",")
-        authorized = (
-            f"{request_params.query.requested_granularity}-access-user-group" in groups
-        )
-
-        # return unauthorized status
-        if not authorized:
-            return (
-                None,
-                {
-                    "anauthorized_access": f"User does not belong to {request_params.query.requested_granularity}-access-user-group"
-                },
-                400,
-            )
-
     return request_params, errors, status

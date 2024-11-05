@@ -19,7 +19,7 @@ output "cognito_user_pool_id" {
 }
 
 output "beacon_ui_url" {
-  value       = module.seabcon-frontend.cloudfront-url
+  value       = module.sbeacon-frontend.cloudfront-url
   description = "URL of the webapp."
 }
 

@@ -20,7 +20,7 @@ module "sbeacon-backend" {
   })
 }
 
-module "seabcon-frontend" {
+module "sbeacon-frontend" {
   source                  = "./frontend/terraform-aws"
   region                  = local.region
   base_range              = 5000
@@ -30,6 +30,6 @@ module "seabcon-frontend" {
   data_portal_bucket      = module.sbeacon-backend.data-portal-bucket
   api_endpoint_sbeacon    = "${module.sbeacon-backend.api_url}${module.sbeacon-backend.api_stage}/"
   common-tags = merge(var.common-tags, {
-    "NAME" = "sbeacon-fronted"
+    "NAME" = "sbeacon-frontend"
   })
 }

@@ -50,6 +50,10 @@ locals {
     BEACON_ENABLE_AUTH = var.beacon-enable-auth
     # configurations
     CONFIG_MAX_VARIANT_SEARCH_BASE_RANGE = var.config-max-variant-search-base-range
+    # sbeacon cloudfront url
+    BEACON_UI_URL = var.beacon-ui-url
+    # ses variables
+    SES_SOURCE_EMAIL = var.ses-source-email
   }
   # athena related variables
   athena_variables = {

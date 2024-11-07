@@ -155,6 +155,14 @@ class BeaconEnvironment:
     @property
     def BEACON_ENABLE_AUTH(self):
         return os.environ["BEACON_ENABLE_AUTH"].strip().lower() in ("true", "1")
+    
+    @property
+    def BEACON_UI_URL(self):
+        return os.environ["BEACON_UI_URL"]
+
+    @property
+    def SES_SOURCE_EMAIL(self):
+        return os.environ["SES_SOURCE_EMAIL"]
 
 
 class AthenaEnvironment:

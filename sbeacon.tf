@@ -15,6 +15,7 @@ module "sbeacon-backend" {
   beacon-guest-password = "guest1234pw"
   beacon-admin-username = "admin@gmail.com"
   beacon-admin-password = "admin1234pw"
+  beacon-ui-url         = module.sbeacon-frontend.cloudfront-url
   common-tags = merge(var.common-tags, {
     "NAME" = "sbeacon-backend"
   })

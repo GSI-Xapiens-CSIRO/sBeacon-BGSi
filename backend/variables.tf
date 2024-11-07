@@ -195,3 +195,14 @@ variable "config-max-variant-search-base-range" {
   description = "Max allowed range for variant searching"
   default     = 5000
 }
+
+variable "beacon-ui-url" {
+  type        = string
+  description = "CloudFront URL for the sBeacon frontend"
+}
+
+variable "ses-source-email" {
+  type = string
+  description = "Address from which to send SES emails"
+  default = "no.reply.gaspi.notifications@gmail.com"
+}

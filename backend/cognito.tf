@@ -6,11 +6,6 @@ resource "aws_cognito_user_pool" "BeaconUserPool" {
 
   admin_create_user_config {
     allow_admin_create_user_only = true
-    invite_message_template {
-      email_subject = "sBeacon registration"
-      email_message = "Welcome to sBeacon, please use username: {username} and password: {####} to log in."
-      sms_message   = "Welcome to sBeacon, please use username: {username} and password: {####} to log in."
-    }
   }
 
   account_recovery_setting {

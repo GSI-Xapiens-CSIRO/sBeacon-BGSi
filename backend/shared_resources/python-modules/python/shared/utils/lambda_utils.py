@@ -160,10 +160,6 @@ class BeaconEnvironment:
     def BEACON_UI_URL(self):
         return os.environ["BEACON_UI_URL"]
 
-    @property
-    def SES_SOURCE_EMAIL(self):
-        return os.environ["SES_SOURCE_EMAIL"]
-
 
 class AthenaEnvironment:
     @property
@@ -292,6 +288,15 @@ class CognitoEnvironment:
     def COGNITO_USER_POOL_ID(self):
         return os.environ["COGNITO_USER_POOL_ID"]
 
+class SesEnvironment:
+    @property
+    def SES_SOURCE_EMAIL(self):
+        return os.environ["SES_SOURCE_EMAIL"]
+
+    @property
+    def SES_CONFIG_SET_NAME(self):
+        return os.environ["SES_CONFIG_SET_NAME"]
+
 
 class ConfigEnvironment:
     @property
@@ -329,3 +334,4 @@ ENV_DYNAMO = DynamoDBEnvironment()
 ENV_SNS = SnsEnvironment()
 ENV_CONFIG = ConfigEnvironment()
 ENV_COGNITO = CognitoEnvironment()
+ENV_SES = SesEnvironment()

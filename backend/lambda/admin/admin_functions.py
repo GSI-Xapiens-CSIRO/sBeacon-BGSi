@@ -7,11 +7,12 @@ from markupsafe import escape
 
 from admin_utils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
-from shared.utils.lambda_utils import ENV_COGNITO, ENV_BEACON
+from shared.utils.lambda_utils import ENV_COGNITO, ENV_BEACON, ENV_SES
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
 BEACON_UI_URL = ENV_BEACON.BEACON_UI_URL
-SES_SOURCE_EMAIL = ENV_BEACON.SES_SOURCE_EMAIL
+SES_SOURCE_EMAIL = ENV_SES.SES_SOURCE_EMAIL
+SES_CONFIG_SET_NAME = ENV_SES.SES_CONFIG_SET_NAME
 cognito_client = boto3.client("cognito-idp")
 ses_client = boto3.client("ses")
 router = LambdaRouter()
@@ -99,7 +100,7 @@ def add_user(event, context):
     </html>
     """
 
-    ses_client.send_email(
+    response = ses_client.send_email(
         Destination={
             'ToAddresses': [email],
         },
@@ -121,9 +122,12 @@ def add_user(event, context):
             },
         },
         Source=SES_SOURCE_EMAIL,
+        ReturnPath=SES_SOURCE_EMAIL,
+        ConfigurationSetName=SES_CONFIG_SET_NAME
     )
 
     print(f"User {email} created successfully!")
+    print(f"Email sent with message ID: {response["MessageId"]}")
     return {"success": True}
 
 
@@ -214,3 +218,26 @@ def update_user_groups(event, context):
         f"User with email {email} added to {len(chosen_groups)} and removed from {len(removed_groups)} groups"
     )
     return {"success": True}
+
+
+def log_email_notification(event, context):
+    for record in event["Records"]:
+        sns_message = json.loads(record["Sns"]["Message"])
+
+        print(f"Received email delivery notification: {json.dumps(sns_message)}")
+
+        event_type = sns_message.get('eventType')
+
+        if event_type == 'Delivery':
+            print(f"Email successfully delivered to: {sns_message['mail']['destination']}")
+        elif event_type == 'Bounce':
+            bounce_type = sns_message['bounce']['bounceType']
+            bounce_sub_type = sns_message['bounce']['bounceSubType']
+            print(f"Email bounced. Bounce Type: {bounce_type}, SubType: {bounce_sub_type}")
+        elif event_type == 'Complaint':
+            complaint_sub_type = sns_message['complaint']['complaintSubType']
+            print(f"Complaint received for email: {sns_message['complaint']['complainedRecipients']}, Complaint Type: {complaint_sub_type}")
+        else:
+            print(f"Unknown event type: {event_type}")
+
+        return {'statusCode': 200, 'body': json.dumps('SNS notification processed successfully')}

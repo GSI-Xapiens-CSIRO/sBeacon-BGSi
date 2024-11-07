@@ -679,7 +679,9 @@ module "lambda-admin" {
 
   environment_variables = merge(
     local.sbeacon_variables,
-    { COGNITO_USER_POOL_ID = aws_cognito_user_pool.BeaconUserPool.id }
+    { COGNITO_USER_POOL_ID = aws_cognito_user_pool.BeaconUserPool.id },
+    { SES_SOURCE_EMAIL = var.ses-source-email },
+    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name }
   )
 
   layers = [

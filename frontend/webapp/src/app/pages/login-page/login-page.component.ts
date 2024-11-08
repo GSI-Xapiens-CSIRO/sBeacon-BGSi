@@ -64,6 +64,7 @@ enum StateTypes {
 export class LoginPageComponent {
   protected state = StateTypes.ORDINARY_LOGIN;
   protected StateTypes = StateTypes;
+  protected loading = false;
 
   protected loginForm = new FormGroup(
     {
@@ -137,17 +138,13 @@ export class LoginPageComponent {
       this.state = StateTypes.PASSWORD_RESET;
       this.loginForm.controls.resetCode.enable();
       this.loginForm.controls.newPassword.enable();
+
+      this.loading = true;
+      const success = await this.auth.forgotPassword(this.loginForm.value.email!);
+      this.loading = false;
     } else {
       this.loginForm.controls.email.markAsTouched();
     }
-    // this.loading = true;
     console.log(this.loginForm.controls.email.valid);
-    // const success = await this.auth.forgotPassword(this.loginForm.value.email!);
-    // if (success) {
-    //   alert('Password reset email sent!');
-    // } else {
-    //   alert('Something went wrong, please contact admin!')
-    // }
-    // this.loading = false;
   }
 }

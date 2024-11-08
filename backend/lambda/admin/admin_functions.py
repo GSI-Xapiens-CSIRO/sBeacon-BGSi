@@ -159,7 +159,15 @@ def get_users(event, context):
 @router.attach("/admin/users/{email}", "delete", authenticate_admin)
 def delete_user(event, context):
     email = event["pathParameters"]["email"]
+    authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
+
     username = get_username_by_email(email)
+    authorizer = get_username_by_email(authorizer_email)
+
+    if username == authorizer:
+        print(f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves.")
+        return {"success": False}
+
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 
     print(f"User with email {email} removed successfully!")
@@ -169,19 +177,22 @@ def delete_user(event, context):
 @router.attach("/admin/users/{email}/groups", "get", authenticate_admin)
 def user_groups(event, context):
     email = event["pathParameters"]["email"]
+    authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
     username = get_username_by_email(email)
+    authorizer = get_username_by_email(authorizer_email)
     response = cognito_client.admin_list_groups_for_user(
         Username=username, UserPoolId=USER_POOL_ID
     )
 
     groups = response.get("Groups", [])
     print(f"User with email {email} has {len(groups)} groups")
-    return {"groups": groups}
+    return {"groups": groups, "user": username, "authorizer": authorizer}
 
 
 @router.attach("/admin/users/{email}/groups", "post", authenticate_admin)
 def update_user_groups(event, context):
     email = event["pathParameters"]["email"]
+    authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
     body_dict = json.loads(event.get("body"))
     chosen_groups = []
     removed_groups = []
@@ -204,6 +215,12 @@ def update_user_groups(event, context):
         removed_groups.append("boolean-access-user-group")
 
     username = get_username_by_email(email)
+    authorizer = get_username_by_email(authorizer_email)
+    
+    if username == authorizer and "admin-group" in removed_groups:
+        print(f"Unsuccessful. Administrators are unable to decrease their own permissions.")
+        return {"success": False}
+
     for group_name in chosen_groups:
         cognito_client.admin_add_user_to_group(
             UserPoolId=USER_POOL_ID, Username=username, GroupName=group_name

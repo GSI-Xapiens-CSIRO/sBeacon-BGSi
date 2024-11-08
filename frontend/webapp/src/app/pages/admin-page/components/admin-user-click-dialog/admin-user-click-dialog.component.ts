@@ -45,6 +45,7 @@ export class AdminUserClickDialogComponent implements OnInit {
   };
   protected form: FormGroup;
   protected loading = false;
+  protected disableDelete = false;
 
   constructor(
     public dialogRef: MatDialogRef<AdminUserClickDialogComponent>,
@@ -66,17 +67,21 @@ export class AdminUserClickDialogComponent implements OnInit {
     this.as
       .listUsersGroups(this.data.email)
       .pipe(catchError(() => of(null)))
-      .subscribe((groups: any) => {
-        const groupNames = _.map(
-          _.get(groups, 'groups', []),
-          (group) => _.split(group.GroupName, '-')[0],
-        );
+      .subscribe((response: any) => {
+        const groups = _.get(response, 'groups', []);
+        const user = _.get(response, 'user', null);
+        const authorizer = _.get(response, 'authorizer', null);
+        const groupNames = _.map(groups, (group) => _.split(group.GroupName, '-')[0]);
         const userGroups: { [key: string]: boolean } = {};
         _.each(groupNames, (gn: string) => {
           userGroups[gn] = true;
         });
         _.merge(this.initialGroups, userGroups);
         this.form.patchValue(userGroups);
+        if (user === authorizer) {
+          this.form.get('admin')?.disable();
+          this.disableDelete = true;
+        }
         this.loading = false;
       });
   }

@@ -720,3 +720,21 @@ module "lambda-data-portal" {
     DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket
   }
 }
+
+#
+# email notification Lambda function
+#
+module "lambda-logEmailDelivery" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-logEmailDelivery"
+  description         = "Logging of user invite email delivery status."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 512
+  timeout             = 60
+  attach_policy_jsons = true
+  source_path = "${path.module}/lambda/logEmailDelivery"
+
+  tags = var.common-tags
+}

@@ -804,6 +804,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
   }
 }
 
+
 # SES Email Notification Logging
 data "aws_iam_policy_document" "ses-sns-access" {
   statement {
@@ -816,7 +817,7 @@ data "aws_iam_policy_document" "ses-sns-access" {
     }
 
     actions   = ["sns:Publish"]
-    resources = [aws_sns_topic.emailNotificationLogger.arn]
+    resources = [aws_sns_topic.sesDeliveryLogger.arn]
 
     # Removing specific conditions to see if that fixes the permission issue
     condition {

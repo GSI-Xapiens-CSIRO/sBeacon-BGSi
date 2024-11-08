@@ -38,7 +38,7 @@ resource "aws_lambda_permission" "SNSindexer" {
 resource "aws_lambda_permission" "SNSemailNotification" {
   statement_id  = "SBeaconBackendAllowSNSemailNotificationInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = module.lambda-admin.lambda_function_arn
+  function_name = module.lambda-logEmailDelivery.lambda_function_arn
   principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.emailNotificationLogger.arn
+  source_arn    = aws_sns_topic.sesDeliveryLogger.arn
 }

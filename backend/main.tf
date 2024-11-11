@@ -120,6 +120,7 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
+      HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
       DYNAMO_DATASETS_TABLE = aws_dynamodb_table.datasets.name
       INDEXER_LAMBDA        = module.lambda-indexer.lambda_function_name
     },
@@ -613,7 +614,8 @@ module "lambda-performQuery" {
   ]
 
   environment_variables = merge({
-    VARIANTS_BUCKET = aws_s3_bucket.variants-bucket.bucket
+      HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
+      VARIANTS_BUCKET = aws_s3_bucket.variants-bucket.bucket
     },
     local.sbeacon_variables,
   local.dynamodb_variables)

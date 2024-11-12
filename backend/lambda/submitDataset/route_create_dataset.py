@@ -128,6 +128,8 @@ def create_dataset(attributes, vcf_chromosome_maps):
             Payload=jsons.dumps(dict()),
         )
         pending.append("Running indexer")
+    else:
+        completed.append("Indexing skipped")
 
 
 def submit_dataset(body_dict):

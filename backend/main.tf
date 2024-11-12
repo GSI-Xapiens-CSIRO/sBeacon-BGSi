@@ -80,8 +80,6 @@ locals {
   # dynamodb variables
   dynamodb_variables = {
     DYNAMO_DATASETS_TABLE                = aws_dynamodb_table.datasets.name
-    DYNAMO_VCF_SUMMARIES_TABLE           = aws_dynamodb_table.vcf_summaries.name
-    DYNAMO_VARIANT_DUPLICATES_TABLE      = aws_dynamodb_table.variant_duplicates.name
     DYNAMO_VARIANT_QUERIES_TABLE         = aws_dynamodb_table.variant_queries.name
     DYNAMO_VARIANT_QUERY_RESPONSES_TABLE = aws_dynamodb_table.variant_query_responses.name
     DYNAMO_ONTOLOGIES_TABLE              = aws_dynamodb_table.ontologies.name

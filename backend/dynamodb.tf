@@ -63,36 +63,6 @@ resource "aws_dynamodb_table" "anscestor_terms" {
   }
 }
 
-resource "aws_dynamodb_table" "vcf_summaries" {
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "vcfLocation"
-  name         = "sbeacon-VcfSummaries"
-  tags         = var.common-tags
-
-  attribute {
-    name = "vcfLocation"
-    type = "S"
-  }
-}
-
-resource "aws_dynamodb_table" "variant_duplicates" {
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "contig"
-  range_key    = "datasetKey"
-  name         = "sbeacon-VariantDuplicates"
-  tags         = var.common-tags
-
-  attribute {
-    name = "contig"
-    type = "S"
-  }
-
-  attribute {
-    name = "datasetKey"
-    type = "S"
-  }
-}
-
 # this table holds the query made by user
 # this is used to control the lambdas that
 # execute a given query

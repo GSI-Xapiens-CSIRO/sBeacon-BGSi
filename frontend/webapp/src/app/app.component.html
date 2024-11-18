@@ -1,10 +1,18 @@
 <!-- Toolbar -->
 <div class="bui-header-wrapper">
-  <div class="bui-header">
-    <div class="bui-logo">
-      <h1><a href="#">Beacon UI</a></h1>
+  @if (auth.user | async) {
+    <div class="bui-header">
+      <div class="bui-welcome-wrapper">
+        <h1><a href="#">WELCOME TO DATA PORTAL</a></h1>
+      </div>
     </div>
-  </div>
+  } @else {
+    <div class="bui-header">
+      <div class="bui-logo">
+        <h1><a href="/login">DATA PORTAL</a></h1>
+      </div>
+    </div>
+  }
 </div>
 <div class="bui-menu-expander">
   <button type="button" mat-button (click)="isCollapsed = !isCollapsed">
@@ -20,18 +28,24 @@
 </div>
 <div [@collapse]="isCollapsed ? 'closed' : 'open'" class="bui-menu">
   <ul class="bui-menu-items">
-    <li class="bui-menu-item" [routerLinkActive]="'active'">
-      <a [routerLink]="['home']" accesskey="1" title="">Home</a>
-    </li>
-    <li class="bui-menu-item" [routerLinkActive]="'active'">
-      <a [routerLink]="['dportal']" accesskey="1" title="">Data Portal</a>
-    </li>
-    <li class="bui-menu-item" [routerLinkActive]="'active'">
+    @if (auth.user | async) {
+      <li class="bui-menu-item" [routerLinkActive]="'active'">
+        <a [routerLink]="['home']" accesskey="1" title="">About</a>
+      </li>
+      <li class="bui-menu-item" [routerLinkActive]="'active'">
+        <a [routerLink]="['dportal']" accesskey="1" title="">Data Portal</a>
+      </li>
+      <!-- hide for now (deleted soon after code complete) -->
+      <!-- <li class="bui-menu-item" [routerLinkActive]="'active'">
       <a [routerLink]="['query']" accesskey="2" title="">Query</a>
     </li>
     <li class="bui-menu-item" [routerLinkActive]="'active'">
       <a [routerLink]="['filters']" accesskey="3" title="">Filters</a>
-    </li>
+    </li> -->
+      <li class="bui-menu-item" [routerLinkActive]="'active'">
+        <a [routerLink]="['clinic']" accesskey="3" title="">Clinic</a>
+      </li>
+    }
     @if ((auth.userGroups | async)!.has("admin-group")) {
       <li class="bui-menu-item" [routerLinkActive]="'active'">
         <a [routerLink]="['admin']" title="">Admin</a>
@@ -44,11 +58,12 @@
       <li class="bui-menu-item">
         <a [routerLink]="[]" (click)="auth.signOut()">Logout</a>
       </li>
-    } @else {
-      <li class="bui-menu-item" [routerLinkActive]="'active'">
-        <a routerLink="/login">Login</a>
-      </li>
     }
+    <!-- @else {
+    <li class="bui-menu-item" [routerLinkActive]="'active'">
+      <a routerLink="/login">Login</a>
+    </li>
+    } -->
   </ul>
 </div>
 <div class="bui-card-background">

@@ -8,10 +8,9 @@ describe('AdminNotebookItemComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminNotebookItemComponent]
-    })
-    .compileComponents();
-    
+      imports: [AdminNotebookItemComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(AdminNotebookItemComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

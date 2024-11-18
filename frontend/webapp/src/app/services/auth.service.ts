@@ -43,7 +43,7 @@ export class AuthService {
   async signOut() {
     await Auth.signOut();
     this.refresh();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
 
   async refresh() {

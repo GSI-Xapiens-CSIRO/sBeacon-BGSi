@@ -89,6 +89,10 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.isCollapsed = this.el.nativeElement.offsetWidth < 1200;
+    if (!this.auth.user.value) {
+      console.log('keinin');
+      this.router.navigate(['/login']);
+    }
   }
 
   @HostListener('window:resize', ['event'])

@@ -140,7 +140,9 @@ export class LoginPageComponent {
       this.loginForm.controls.newPassword.enable();
 
       this.loading = true;
-      const success = await this.auth.forgotPassword(this.loginForm.value.email!);
+      const success = await this.auth.forgotPassword(
+        this.loginForm.value.email!,
+      );
       this.loading = false;
     } else {
       this.loginForm.controls.email.markAsTouched();

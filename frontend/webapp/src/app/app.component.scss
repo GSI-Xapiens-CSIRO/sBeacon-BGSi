@@ -13,8 +13,11 @@
 }
 
 .bui-header {
-  position: relative;
   height: 13em;
+  display: flex;
+  position: relative;
+  align-items: flex-end;
+  justify-content: center;
 
   @media (max-width: 800px) {
     height: 7em;
@@ -27,14 +30,11 @@
 
 .bui-logo {
   position: absolute;
-  left: 0;
-  width: 100%;
-  margin-top: -0.5em;
 }
 
 .bui-logo h1 {
   display: inline-block;
-  padding: 0.8em 1.3em 0.6em 1.5em;
+  // padding: 0.8em 1.3em 0.6em 1.5em;
   font-size: 2.5em;
   text-transform: uppercase;
   font-weight: 900;
@@ -45,6 +45,36 @@
 }
 
 .bui-logo a {
+  text-decoration: none;
+  color: #fff;
+}
+
+/*********************************************************************************/
+/* Welcome Text                                                                  */
+/*********************************************************************************/
+
+.bui-welcome-wrapper {
+  position: absolute;
+  left: 3em;
+  top: 30%;
+  width: 100%;
+  margin-top: -0.5em;
+  @media (max-width: 800px) {
+    left: 1em;
+    top: 50%;
+  }
+}
+
+.bui-welcome-wrapper h1 {
+  font-size: 2.5em;
+  text-transform: uppercase;
+  font-weight: 900;
+  @media (max-width: 800px) {
+    font-size: 1.3em;
+  }
+}
+
+.bui-welcome-wrapper a {
   text-decoration: none;
   color: #fff;
 }

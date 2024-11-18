@@ -8,10 +8,9 @@ describe('TextInputDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TextInputDialogComponent]
-    })
-    .compileComponents();
-    
+      imports: [TextInputDialogComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(TextInputDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

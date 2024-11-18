@@ -1,14 +1,16 @@
 <mat-card>
   <mat-card-content>
-    <h2 style="text-align: center">Login</h2>
-    <div style="width: 100%; align-items: center; display: flex">
+    <h2 style="text-align: center; color: #006064; text-transform: uppercase">
+      Login
+    </h2>
+    <!-- <div style="width: 100%; align-items: center; display: flex">
       <img
         src="/assets/images/sbeacon-tile.png"
         alt=""
         height="150px"
         style="margin: 0 auto"
       />
-    </div>
+    </div> -->
     <form [formGroup]="loginForm" (ngSubmit)="login()" class="bui-login-form">
       <mat-form-field class="bui-login-input-field">
         <mat-label>Email</mat-label>

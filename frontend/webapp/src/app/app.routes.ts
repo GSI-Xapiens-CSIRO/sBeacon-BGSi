@@ -49,6 +49,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'clinic',
+    loadComponent: () =>
+      import('./pages/clinic-page/clinic-page.component').then(
+        (c) => c.ClinicPageComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'admin',
     loadComponent: () =>
       import('./pages/admin-page/admin-page.component').then(

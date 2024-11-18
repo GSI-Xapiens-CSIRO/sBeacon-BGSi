@@ -245,14 +245,6 @@ class DynamoDBEnvironment:
         return os.environ["DYNAMO_DATASETS_TABLE"]
 
     @property
-    def DYNAMO_VCF_SUMMARIES_TABLE(self):
-        return os.environ["DYNAMO_VCF_SUMMARIES_TABLE"]
-
-    @property
-    def DYNAMO_VARIANT_DUPLICATES_TABLE(self):
-        return os.environ["DYNAMO_VARIANT_DUPLICATES_TABLE"]
-
-    @property
     def DYNAMO_VARIANT_QUERIES_TABLE(self):
         return os.environ["DYNAMO_VARIANT_QUERIES_TABLE"]
 

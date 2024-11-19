@@ -44,17 +44,10 @@
         <div class="flex flex-col space-y-1 py-1">
           <button
             mat-raised-button
-            (click)="assignTo = element.name"
+            (click)="setActive(element.name)"
             color="primary"
           >
-            Assign Users
-          </button>
-          <button
-            mat-raised-button
-            (click)="viewUsers = element.name"
-            color="primary"
-          >
-            Assigned Users
+            Add/Remove Users
           </button>
           <button
             mat-raised-button
@@ -90,14 +83,21 @@
   </button>
 </div>
 <br />
-@if (assignTo) {
+@if (active) {
+  <h3 id="addRemoveUsers">Manage users of project: {{ active }}</h3>
+  <button
+    mat-mini-fab
+    type="button"
+    color="primary"
+    class="w-[110px]"
+    (click)="active = null"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
   <hr />
-  <h3>Add new users to project: {{ assignTo }}</h3>
-  <app-project-assignments (closed)="assignTo = null" [project]="assignTo" />
-}
-
-@if (viewUsers) {
+  <h3>Add new user</h3>
+  <app-project-assignments [project]="active" />
   <hr />
-  <h3>Users of project: {{ viewUsers }}</h3>
-  <app-projects-users (closed)="viewUsers = null" [project]="viewUsers" />
+  <h3>Current users</h3>
+  <app-projects-users [project]="active" />
 }

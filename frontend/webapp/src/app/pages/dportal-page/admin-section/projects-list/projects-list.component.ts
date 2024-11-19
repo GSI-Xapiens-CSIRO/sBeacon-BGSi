@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ComponentSpinnerComponent } from 'src/app/components/component-spinner/component-spinner.component';
 import { DportalService } from 'src/app/services/dportal.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -43,16 +43,26 @@ export class ProjectsListComponent {
     'indexed',
     'actions',
   ];
-  assignTo: string | null = null;
-  viewUsers: string | null = null;
+  active: string | null = null;
 
   constructor(
     private dps: DportalService,
     private ss: SpinnerService,
     private sb: MatSnackBar,
     private dg: MatDialog,
+    private cd: ChangeDetectorRef,
   ) {
     this.list();
+  }
+
+  setActive(project: string) {
+    this.active = project;
+    this.cd.detectChanges();
+
+    const element = document.getElementById('addRemoveUsers');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   list() {

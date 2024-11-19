@@ -30,7 +30,6 @@ import { DportalService } from 'src/app/services/dportal.service';
   styleUrl: './project-assignments.component.scss',
 })
 export class ProjectAssignmentsComponent {
-  @Output() closed = new EventEmitter<void>();
   @Input({ required: true }) project!: string;
   email = new FormControl('', [Validators.required, Validators.email]);
 

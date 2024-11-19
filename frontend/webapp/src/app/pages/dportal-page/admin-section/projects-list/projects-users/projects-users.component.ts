@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,8 +34,7 @@ interface User {
   templateUrl: './projects-users.component.html',
   styleUrl: './projects-users.component.scss',
 })
-export class ProjectsUsersComponent implements OnInit {
-  @Output() closed = new EventEmitter<void>();
+export class ProjectsUsersComponent implements OnChanges {
   @Input({ required: true }) project!: string;
 
   displayedColumns: string[] = ['firstName', 'lastName', 'email', 'actions'];
@@ -39,7 +46,7 @@ export class ProjectsUsersComponent implements OnInit {
     private dg: MatDialog,
   ) {}
 
-  ngOnInit(): void {
+  ngOnChanges(_: SimpleChanges): void {
     this.list();
   }
 

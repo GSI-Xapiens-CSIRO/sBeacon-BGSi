@@ -1,19 +1,14 @@
-<div class="flex flex-row">
-  <button
-    mat-mini-fab
-    type="button"
-    color="primary"
-    class="w-[110px]"
-    (click)="closed.emit()"
-  >
-    <mat-icon>close</mat-icon>
-  </button>
-</div>
 <br />
 <form>
   <mat-form-field class="w-full">
     <mat-label>Email</mat-label>
-    <input matInput [formControl]="email" type="email" required />
+    <input
+      matInput
+      [formControl]="email"
+      type="email"
+      required
+      autocomplete="off"
+    />
     <mat-error> A valid email is required </mat-error>
   </mat-form-field>
   <div class="flex flex-row space-x-1">

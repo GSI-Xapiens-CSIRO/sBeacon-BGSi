@@ -43,12 +43,7 @@ export class UserProjectsListComponent implements OnInit {
   list() {
     this.dps
       .getMyProjects()
-      .pipe(
-        catchError((e) => {
-          console.log(e);
-          return of(null);
-        }),
-      )
+      .pipe(catchError(() => of(null)))
       .subscribe((projects: any) => {
         if (!projects) {
           this.sb.open('Unable to get projects.', 'Close', {

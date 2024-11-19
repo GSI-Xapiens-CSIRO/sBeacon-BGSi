@@ -33,14 +33,6 @@ export const routes: Routes = [
     canActivate: [unauthGuard],
   },
   {
-    path: 'login-redirect',
-    loadComponent: () =>
-      import('./pages/login-redirect-page/login-redirect-page.component').then(
-        (c) => c.LoginRedirectPageComponent,
-      ),
-    // canActivate: [unauthGuard],
-  },
-  {
     path: 'query',
     loadComponent: () =>
       import('./pages/query-page/query-page.component').then(

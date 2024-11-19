@@ -28,4 +28,4 @@ def get_user_attribute(user, attribute_name):
     for attribute in user["Attributes"]:
         if attribute["Name"] == attribute_name:
             return attribute["Value"]
-    raise PortalError(404, f"{attribute_name} attribute not found")
+    return "NULL"

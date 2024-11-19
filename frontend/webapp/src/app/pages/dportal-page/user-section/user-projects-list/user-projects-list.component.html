@@ -29,10 +29,9 @@
       </button>
     </div>
     @if (project.expanded) {
-      <div class="flex flex-col ml-2">
+      <div class="flex flex-col ml-2 space-y-1">
         @for (file of project.files; track file) {
-          <div class="flex flex-row justify-between items-center space-y-1">
-            <div>{{ file }}</div>
+          <div class="flex flex-row items-center space-x-2">
             <button
               mat-mini-fab
               color="primary"
@@ -42,6 +41,7 @@
             >
               <mat-icon>file_copy</mat-icon>
             </button>
+            <div>{{ file.split("/").pop() }}</div>
           </div>
         }
       </div>

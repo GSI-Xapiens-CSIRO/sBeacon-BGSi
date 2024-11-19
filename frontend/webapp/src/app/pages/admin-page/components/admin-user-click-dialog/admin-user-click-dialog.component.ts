@@ -71,7 +71,10 @@ export class AdminUserClickDialogComponent implements OnInit {
         const groups = _.get(response, 'groups', []);
         const user = _.get(response, 'user', null);
         const authorizer = _.get(response, 'authorizer', null);
-        const groupNames = _.map(groups, (group) => _.split(group.GroupName, '-')[0]);
+        const groupNames = _.map(
+          groups,
+          (group) => _.split(group.GroupName, '-')[0],
+        );
         const userGroups: { [key: string]: boolean } = {};
         _.each(groupNames, (gn: string) => {
           userGroups[gn] = true;

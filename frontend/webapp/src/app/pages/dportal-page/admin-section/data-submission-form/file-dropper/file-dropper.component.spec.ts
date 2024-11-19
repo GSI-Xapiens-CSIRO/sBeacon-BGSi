@@ -8,10 +8,9 @@ describe('FileDropperComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FileDropperComponent]
-    })
-    .compileComponents();
-    
+      imports: [FileDropperComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(FileDropperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

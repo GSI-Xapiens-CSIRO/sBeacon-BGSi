@@ -8,10 +8,9 @@ describe('DataSubmissionFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DataSubmissionFormComponent]
-    })
-    .compileComponents();
-    
+      imports: [DataSubmissionFormComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(DataSubmissionFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

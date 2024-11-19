@@ -8,10 +8,9 @@ describe('DportalPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DportalPageComponent]
-    })
-    .compileComponents();
-    
+      imports: [DportalPageComponent],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(DportalPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

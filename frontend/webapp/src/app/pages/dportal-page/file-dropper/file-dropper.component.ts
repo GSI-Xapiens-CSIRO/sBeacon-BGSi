@@ -7,12 +7,11 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-file-dropper',
   standalone: true,
-  imports: [MatSnackBarModule, DecimalPipe],
+  imports: [],
   templateUrl: './file-dropper.component.html',
   styleUrl: './file-dropper.component.scss',
 })
@@ -53,7 +52,6 @@ export class FileDropperComponent {
   }
 
   handlePick(e: Event) {
-    console.log(e);
     const files = (e.target as HTMLInputElement).files ?? new FileList();
     this.handleFiles(files);
   }

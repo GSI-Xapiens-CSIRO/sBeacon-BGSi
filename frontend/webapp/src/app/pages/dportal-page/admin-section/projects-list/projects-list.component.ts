@@ -9,9 +9,10 @@ import { catchError, of, tap } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ProjectAssignmentsComponent } from './project-assignments/project-assignments.component';
-import { ProjectsUsersComponent } from './projects-users/projects-users.component';
+import { ProjectsUsersComponent } from './project-users/project-users.component';
+import { ProjectUpdatesComponent } from './project-updates/project-updates.component';
 
-interface Project {
+export interface Project {
   name: string;
   description: string;
   files: string[];
@@ -29,6 +30,7 @@ interface Project {
     MatDialogModule,
     ProjectAssignmentsComponent,
     ProjectsUsersComponent,
+    ProjectUpdatesComponent,
   ],
   templateUrl: './projects-list.component.html',
   styleUrl: './projects-list.component.scss',
@@ -43,7 +45,7 @@ export class ProjectsListComponent {
     'indexed',
     'actions',
   ];
-  active: string | null = null;
+  active: Project | null = null;
 
   constructor(
     private dps: DportalService,
@@ -55,7 +57,7 @@ export class ProjectsListComponent {
     this.list();
   }
 
-  setActive(project: string) {
+  setActive(project: Project) {
     this.active = project;
     this.cd.detectChanges();
 
@@ -80,6 +82,12 @@ export class ProjectsListComponent {
             files: project.files,
             indexed: false,
           }));
+          if (this.active) {
+            this.active =
+              this.dataSource.data.find(
+                (project) => project.name === this.active?.name,
+              ) || null;
+          }
         }
         this.loading = false;
       });

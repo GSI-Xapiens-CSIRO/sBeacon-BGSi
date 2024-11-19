@@ -19,9 +19,7 @@
     <ng-container matColumnDef="files">
       <th mat-header-cell *matHeaderCellDef>Files</th>
       <td mat-cell *matCellDef="let element">
-        @for (file of element.files; track $index) {
-          <a class="block">{{ file }}</a>
-        }
+        {{ element.files.length }} file(s)
       </td>
     </ng-container>
 
@@ -44,10 +42,10 @@
         <div class="flex flex-col space-y-1 py-1">
           <button
             mat-raised-button
-            (click)="setActive(element.name)"
+            (click)="setActive(element)"
             color="primary"
           >
-            Add/Remove Users
+            Add/Remove Users or Files
           </button>
           <button
             mat-raised-button
@@ -84,7 +82,7 @@
 </div>
 <br />
 @if (active) {
-  <h3 id="addRemoveUsers">Manage users of project: {{ active }}</h3>
+  <h3 id="addRemoveUsers">Manage users of project: {{ active.name }}</h3>
   <button
     mat-mini-fab
     type="button"
@@ -96,8 +94,11 @@
   </button>
   <hr />
   <h3>Add new user</h3>
-  <app-project-assignments [project]="active" />
+  <app-project-assignments [project]="active.name" />
   <hr />
   <h3>Current users</h3>
-  <app-projects-users [project]="active" />
+  <app-projects-users [project]="active.name" />
+  <hr />
+  <h3>Project files</h3>
+  <app-project-updates [project]="active" (projectUpdated)="list()" />
 }

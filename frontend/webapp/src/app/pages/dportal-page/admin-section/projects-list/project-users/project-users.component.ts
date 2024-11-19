@@ -31,8 +31,8 @@ interface User {
     MatSnackBarModule,
     MatDialogModule,
   ],
-  templateUrl: './projects-users.component.html',
-  styleUrl: './projects-users.component.scss',
+  templateUrl: './project-users.component.html',
+  styleUrl: './project-users.component.scss',
 })
 export class ProjectsUsersComponent implements OnChanges {
   @Input({ required: true }) project!: string;

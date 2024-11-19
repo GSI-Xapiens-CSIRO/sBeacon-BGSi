@@ -13,7 +13,7 @@ import { DportalService } from '../../../../services/dportal.service';
 import { SpinnerService } from 'src/app/services/spinner.service';
 import { catchError, of, switchMap, tap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { FileDropperComponent } from './file-dropper/file-dropper.component';
+import { FileDropperComponent } from '../../file-dropper/file-dropper.component';
 import { Storage } from 'aws-amplify';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { forkJoin } from 'rxjs';
@@ -48,7 +48,6 @@ export class DataSubmissionFormComponent {
   constructor(
     private fb: FormBuilder,
     private dps: DportalService,
-    private ss: SpinnerService,
     private sb: MatSnackBar,
   ) {
     this.dataSubmissionForm = this.fb.group({

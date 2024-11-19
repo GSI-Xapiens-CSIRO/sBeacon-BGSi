@@ -1,3 +1,4 @@
+<h3>View project content and update</h3>
 <div class="flex flex-col space-y-1">
   @for (file of project.files; track file) {
     <div class="flex flex-row items-center space-x-2">
@@ -10,6 +11,9 @@
     <h4>No files added to the project yet</h4>
   }
 </div>
+<br />
+<hr />
+<h3>Change project description and add extra files</h3>
 <form [formGroup]="dataSubmissionForm">
   <br />
   <div class="flex flex-col space-y-2 w-full">

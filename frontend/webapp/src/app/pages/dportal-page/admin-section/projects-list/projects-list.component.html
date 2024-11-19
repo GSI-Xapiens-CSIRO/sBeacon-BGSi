@@ -93,12 +93,11 @@
     <mat-icon>close</mat-icon>
   </button>
   <hr />
-  <h3>Add new user</h3>
+
   <app-project-assignments [project]="active.name" />
   <hr />
-  <h3>Current users</h3>
+
   <app-projects-users [project]="active.name" />
   <hr />
-  <h3>Project files</h3>
   <app-project-updates [project]="active" (projectUpdated)="list()" />
 }

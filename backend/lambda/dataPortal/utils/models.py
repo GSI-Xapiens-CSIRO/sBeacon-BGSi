@@ -23,7 +23,8 @@ class Projects(Model):
         return {
             "name": self.name,
             "description": self.description,
-            "files": list(self.files),  # Convert set to list for JSON serialization
+            # Convert set to list for JSON serialization
+            "files": list(self.files) if self.files else [],
         }
 
 

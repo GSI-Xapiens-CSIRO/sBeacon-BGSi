@@ -23,6 +23,19 @@ export class DportalService {
     );
   }
 
+  adminUpdateProject(name: string, description: string, files: string[]) {
+    console.log('update project');
+    return from(
+      API.put(
+        environment.api_endpoint_sbeacon.name,
+        `dportal/admin/projects/${name}`,
+        {
+          body: { description, files },
+        },
+      ),
+    );
+  }
+
   getAdminProjects() {
     console.log('get projects');
     return from(

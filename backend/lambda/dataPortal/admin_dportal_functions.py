@@ -106,13 +106,23 @@ def delete_project(event, context):
 
 @router.attach("/dportal/admin/projects/{name}", "put")
 def update_project(event, context):
-    name = event.get("path").get("name")
+    name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
     description = body_dict.get("description")
-    files = body_dict.get("files")
     project = Projects.get(name)
+    # file diff
+    current_files = set(body_dict.get("files"))
+    initial_files = project.files
+    deleted_files = initial_files - current_files
+    # delete file diff
+    delete_s3_objects(
+        DPORTAL_BUCKET,
+        [f"projects/{name}/{file.split('/')[-1]}" for file in deleted_files],
+    )
+
+    # update entry
     project.description = description
-    project.files = files
+    project.files = current_files
     project.save()
 
     return project.to_dict()

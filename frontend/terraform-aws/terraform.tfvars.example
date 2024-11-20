@@ -1,5 +1,0 @@
-
-region = "us-east-1"
-common-tags = {
-  Tag1 = "tag-1"
-}

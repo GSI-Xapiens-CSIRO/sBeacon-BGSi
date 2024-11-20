@@ -2,7 +2,7 @@
 # S3 bucket for persisted vcf summaries and variant queries
 #
 resource "aws_s3_bucket" "variants-bucket" {
-  bucket_prefix = "sbeacon-backend-variants-"
+  bucket_prefix = var.variants-bucket-prefix
   force_destroy = true
   tags          = var.common-tags
 }
@@ -42,7 +42,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "variants_bucket_lifecycle" {
 # S3 bucket for metadata handling
 # 
 resource "aws_s3_bucket" "metadata-bucket" {
-  bucket_prefix = "sbeacon-backend-metadata-"
+  bucket_prefix = var.metadata-bucket-prefix
   force_destroy = true
   tags          = var.common-tags
 }
@@ -110,7 +110,7 @@ resource "aws_s3_bucket_cors_configuration" "metadata-bucket" {
 # S3 bucket for lambda layers
 # 
 resource "aws_s3_bucket" "lambda-layers-bucket" {
-  bucket_prefix = "sbeacon-backend-lambda-layers-"
+  bucket_prefix = var.lambda-layers-bucket-prefix
   force_destroy = true
   tags          = var.common-tags
 }
@@ -133,7 +133,7 @@ resource "aws_s3_bucket_acl" "lambda-layers" {
 # S3 bucket for data portal content
 #
 resource "aws_s3_bucket" "dataportal-bucket" {
-  bucket_prefix = "sbeacon-backend-dataportal-"
+  bucket_prefix = var.dataportal-bucket-prefix
   force_destroy = true
   tags          = var.common-tags
 }

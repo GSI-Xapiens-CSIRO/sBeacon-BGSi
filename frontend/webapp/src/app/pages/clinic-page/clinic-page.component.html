@@ -1,9 +1,0 @@
-@for (page of pages; track page) {
-  <div
-    [hidden]="page !== active"
-    [@navigate]="page === active ? 'open' : 'closed'"
-    [class]="page === active ? 'bui-page-open' : 'bui-page-closed'"
-  >
-    Hello this is clinic
-  </div>
-}

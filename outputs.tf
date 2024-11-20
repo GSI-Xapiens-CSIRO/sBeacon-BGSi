@@ -1,33 +1,39 @@
 output "api_url" {
-  value       = module.sbeacon-backend.api_url
+  value       = aws_api_gateway_deployment.BeaconApi.invoke_url
   description = "URL used to invoke the API."
 }
 
 output "api_stage" {
-  value       = module.sbeacon-backend.api_stage
+  value       = aws_api_gateway_stage.BeaconApi.stage_name
   description = "API stage."
 }
 
 output "cognito_client_id" {
-  value       = module.sbeacon-backend.cognito_client_id
+  value       = aws_cognito_user_pool_client.BeaconUserPool-client.id
   description = "Cognito client Id for user registration and login."
 }
 
 output "cognito_user_pool_id" {
-  value       = module.sbeacon-backend.cognito_user_pool_id
+  value       = aws_cognito_user_pool.BeaconUserPool.id
   description = "Cognito user pool Id."
 }
 
-output "beacon_ui_url" {
-  value       = module.sbeacon-frontend.cloudfront-url
-  description = "URL of the webapp."
+output "cognito_identity_pool_id" {
+  value       = aws_cognito_identity_pool.BeaconIdentityPool.id
+  description = "Cognito identity pool Id."
 }
 
 output "admin_login_command" {
-  value       = module.sbeacon-backend.admin_login_command
-  description = "Admin Login Command"
+  value       = "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-admin-username},PASSWORD=${var.beacon-admin-password} --output json --query AuthenticationResult.IdToken"
+  description = "Command to sign in an admin"
 }
+
 output "guest_login_command" {
-  value       = module.sbeacon-backend.guest_login_command
-  description = "Guest Login Command"
+  value       = "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-guest-username},PASSWORD=${var.beacon-guest-password} --output json --query AuthenticationResult.IdToken"
+  description = "Command to sign in a guest"
+}
+
+output "data-portal-bucket" {
+  value       = aws_s3_bucket.dataportal-bucket.bucket
+  description = "S3 bucket for the data portal."
 }

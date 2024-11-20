@@ -1,6 +1,35 @@
-.terraform*
+.idea/
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+credentials.auto.tfvars
+remote_state.tf
+
+# Build files
+*.zip
+*.pyc
+build
+libraries
+
+# csi/tbi files from tests
+*.csi
+*.tbi
+
+# python lambda layers
+layers/python_libraries/python
+layers/binaries/bin/*
+layers/binaries/lib/*
+
+# simulation files
+vcf.txt
+tmp*
+nohup.out
+tmpterms
+
+# terraform
+*.tfvars
 backend.tf
-builds
+.terraform.lock.hcl
+
+# MAC
 .DS_Store
-.pnpm-store
-errored.tfstate

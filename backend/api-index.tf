@@ -11,8 +11,8 @@ resource "aws_api_gateway_method" "index_post" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.index.id
   http_method   = "POST"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "index_post" {

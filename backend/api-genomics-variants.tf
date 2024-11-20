@@ -11,8 +11,8 @@ resource "aws_api_gateway_method" "g_variants" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants.id
   http_method   = "GET"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "g_variants" {
@@ -34,8 +34,8 @@ resource "aws_api_gateway_method" "g_variants_post" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants.id
   http_method   = "POST"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "g_variants_post" {
@@ -66,8 +66,8 @@ resource "aws_api_gateway_method" "g_variants-id" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id.id
   http_method   = "GET"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -93,8 +93,8 @@ resource "aws_api_gateway_method" "g_variants-id_post" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id.id
   http_method   = "POST"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -129,8 +129,8 @@ resource "aws_api_gateway_method" "g_variants-id-biosamples" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id-biosamples.id
   http_method   = "GET"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -156,8 +156,8 @@ resource "aws_api_gateway_method" "g_variants-id-biosamples_post" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id-biosamples.id
   http_method   = "POST"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -192,8 +192,8 @@ resource "aws_api_gateway_method" "g_variants-id-individuals" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id-individuals.id
   http_method   = "GET"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -219,8 +219,8 @@ resource "aws_api_gateway_method" "g_variants-id-individuals_post" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   resource_id   = aws_api_gateway_resource.g_variants-id-individuals.id
   http_method   = "POST"
-  authorization = var.beacon-enable-auth ? "COGNITO_USER_POOLS" : "NONE"
-  authorizer_id = var.beacon-enable-auth ? aws_api_gateway_authorizer.BeaconUserPool-authorizer.id : null
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true

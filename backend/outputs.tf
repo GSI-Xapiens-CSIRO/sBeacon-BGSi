@@ -9,27 +9,27 @@ output "api_stage" {
 }
 
 output "cognito_client_id" {
-  value       = var.beacon-enable-auth ? aws_cognito_user_pool_client.BeaconUserPool-client.id : "N/A"
+  value       = aws_cognito_user_pool_client.BeaconUserPool-client.id
   description = "Cognito client Id for user registration and login."
 }
 
 output "cognito_user_pool_id" {
-  value       = var.beacon-enable-auth ? aws_cognito_user_pool.BeaconUserPool.id : "N/A"
+  value       = aws_cognito_user_pool.BeaconUserPool.id
   description = "Cognito user pool Id."
 }
 
 output "cognito_identity_pool_id" {
-  value       = var.beacon-enable-auth ? aws_cognito_identity_pool.BeaconIdentityPool.id : "N/A"
+  value       = aws_cognito_identity_pool.BeaconIdentityPool.id
   description = "Cognito identity pool Id."
 }
 
 output "admin_login_command" {
-  value       = var.beacon-enable-auth ? "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-admin-username},PASSWORD=${var.beacon-admin-password} --output json --query AuthenticationResult.IdToken" : "N/A"
+  value       = "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-admin-username},PASSWORD=${var.beacon-admin-password} --output json --query AuthenticationResult.IdToken"
   description = "Command to sign in an admin"
 }
 
 output "guest_login_command" {
-  value       = var.beacon-enable-auth ? "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-guest-username},PASSWORD=${var.beacon-guest-password} --output json --query AuthenticationResult.IdToken" : "N/A"
+  value       = "aws cognito-idp admin-initiate-auth --user-pool-id ${aws_cognito_user_pool.BeaconUserPool.id} --region ${var.region} --client-id ${aws_cognito_user_pool_client.BeaconUserPool-client.id} --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=${var.beacon-guest-username},PASSWORD=${var.beacon-guest-password} --output json --query AuthenticationResult.IdToken"
   description = "Command to sign in a guest"
 }
 

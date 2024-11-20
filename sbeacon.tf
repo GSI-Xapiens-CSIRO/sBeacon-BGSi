@@ -10,7 +10,6 @@ module "sbeacon-backend" {
   beacon-name           = "BGSi Serverless Beacon"
   organisation-id       = "BGSi"
   organisation-name     = "BGSi"
-  beacon-enable-auth    = true
   beacon-guest-username = "guest@gmail.com"
   beacon-guest-password = "guest1234pw"
   beacon-admin-username = "admin@gmail.com"

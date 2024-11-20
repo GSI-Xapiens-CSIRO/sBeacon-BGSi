@@ -158,12 +158,6 @@ variable "beacon-service-type-version" {
 }
 
 # auth configurations
-variable "beacon-enable-auth" {
-  type        = bool
-  description = "Flag to enable API authentication"
-  default     = false
-}
-
 variable "beacon-guest-username" {
   type        = string
   description = "Value for guest username (must be an email)"
@@ -201,7 +195,7 @@ variable "beacon-ui-url" {
 }
 
 variable "ses-source-email" {
-  type = string
+  type        = string
   description = "Address from which to send SES emails"
-  default = "no.reply.gaspi.notifications@gmail.com"
+  default     = "no.reply.gaspi.notifications@gmail.com"
 }

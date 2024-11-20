@@ -46,8 +46,6 @@ locals {
     BEACON_SERVICE_TYPE_GROUP    = var.beacon-service-type-group
     BEACON_SERVICE_TYPE_ARTIFACT = var.beacon-service-type-artifact
     BEACON_SERVICE_TYPE_VERSION  = var.beacon-service-type-version
-    # authentication variables
-    BEACON_ENABLE_AUTH = var.beacon-enable-auth
     # configurations
     CONFIG_MAX_VARIANT_SEARCH_BASE_RANGE = var.config-max-variant-search-base-range
     # sbeacon cloudfront url
@@ -118,7 +116,7 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
-      HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
+      HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
       DYNAMO_DATASETS_TABLE = aws_dynamodb_table.datasets.name
       INDEXER_LAMBDA        = module.lambda-indexer.lambda_function_name
     },
@@ -612,8 +610,8 @@ module "lambda-performQuery" {
   ]
 
   environment_variables = merge({
-      HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
-      VARIANTS_BUCKET = aws_s3_bucket.variants-bucket.bucket
+    HTS_S3_HOST     = "s3.${var.region}.amazonaws.com"
+    VARIANTS_BUCKET = aws_s3_bucket.variants-bucket.bucket
     },
     local.sbeacon_variables,
   local.dynamodb_variables)
@@ -734,7 +732,7 @@ module "lambda-logEmailDelivery" {
   memory_size         = 512
   timeout             = 60
   attach_policy_jsons = true
-  source_path = "${path.module}/lambda/logEmailDelivery"
+  source_path         = "${path.module}/lambda/logEmailDelivery"
 
   tags = var.common-tags
 }

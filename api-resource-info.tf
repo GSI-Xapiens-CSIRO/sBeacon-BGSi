@@ -12,7 +12,7 @@ resource "aws_api_gateway_method" "info" {
   resource_id   = aws_api_gateway_resource.info.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "info" {
@@ -38,7 +38,7 @@ resource "aws_api_gateway_method" "root-get" {
   resource_id   = aws_api_gateway_rest_api.BeaconApi.root_resource_id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "root-get" {

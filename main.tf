@@ -677,7 +677,7 @@ module "lambda-admin" {
 
   environment_variables = merge(
     local.sbeacon_variables,
-    { COGNITO_USER_POOL_ID = aws_cognito_user_pool.BeaconUserPool.id },
+    { COGNITO_USER_POOL_ID = var.cognito-user-pool-id },
     { SES_SOURCE_EMAIL = var.ses-source-email },
     { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name }
   )
@@ -714,7 +714,7 @@ module "lambda-data-portal" {
     DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
     JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn
-    USER_POOL_ID                   = aws_cognito_user_pool.BeaconUserPool.id
+    USER_POOL_ID                   = var.cognito-user-pool-id
     DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket
   }
 }

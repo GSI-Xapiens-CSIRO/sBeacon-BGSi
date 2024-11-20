@@ -12,7 +12,7 @@ resource "aws_api_gateway_method" "datasets" {
   resource_id   = aws_api_gateway_resource.datasets.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "datasets" {
@@ -35,7 +35,7 @@ resource "aws_api_gateway_method" "datasets_post" {
   resource_id   = aws_api_gateway_resource.datasets.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "datasets_post" {
@@ -67,7 +67,7 @@ resource "aws_api_gateway_method" "datasets-filtering_terms" {
   resource_id   = aws_api_gateway_resource.datasets-filtering_terms.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "datasets-filtering_terms" {
@@ -90,7 +90,7 @@ resource "aws_api_gateway_method" "datasets-filtering_terms_post" {
   resource_id   = aws_api_gateway_resource.datasets-filtering_terms.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "datasets-filtering_terms_post" {
@@ -122,7 +122,7 @@ resource "aws_api_gateway_method" "datasets-id" {
   resource_id   = aws_api_gateway_resource.datasets-id.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -149,7 +149,7 @@ resource "aws_api_gateway_method" "datasets-id_post" {
   resource_id   = aws_api_gateway_resource.datasets-id.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -185,7 +185,7 @@ resource "aws_api_gateway_method" "datasets-id-filtering_terms" {
   resource_id   = aws_api_gateway_resource.datasets-id-filtering_terms.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -212,7 +212,7 @@ resource "aws_api_gateway_method" "datasets-id-filtering_terms_post" {
   resource_id   = aws_api_gateway_resource.datasets-id-filtering_terms.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -248,7 +248,7 @@ resource "aws_api_gateway_method" "datasets-id-biosamples" {
   resource_id   = aws_api_gateway_resource.datasets-id-biosamples.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -275,7 +275,7 @@ resource "aws_api_gateway_method" "datasets-id-biosamples_post" {
   resource_id   = aws_api_gateway_resource.datasets-id-biosamples.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -311,7 +311,7 @@ resource "aws_api_gateway_method" "datasets-id-g_variants" {
   resource_id   = aws_api_gateway_resource.datasets-id-g_variants.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -338,7 +338,7 @@ resource "aws_api_gateway_method" "datasets-id-g_variants_post" {
   resource_id   = aws_api_gateway_resource.datasets-id-g_variants.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -374,7 +374,7 @@ resource "aws_api_gateway_method" "datasets-id-individuals" {
   resource_id   = aws_api_gateway_resource.datasets-id-individuals.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -401,7 +401,7 @@ resource "aws_api_gateway_method" "datasets-id-individuals_post" {
   resource_id   = aws_api_gateway_resource.datasets-id-individuals.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true

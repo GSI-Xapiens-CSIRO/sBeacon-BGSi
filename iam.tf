@@ -679,7 +679,7 @@ data "aws_iam_policy_document" "admin-lambda-access" {
       "cognito-idp:*"
     ]
     resources = [
-      aws_cognito_user_pool.BeaconUserPool.arn,
+      var.cognito-user-pool-arn,
     ]
   }
   statement {
@@ -743,7 +743,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       "cognito-idp:ListUsers",
     ]
     resources = [
-      aws_cognito_user_pool.BeaconUserPool.arn
+      var.cognito-user-pool-arn,
     ]
   }
 

@@ -12,7 +12,7 @@ resource "aws_api_gateway_method" "submit-dataset_post" {
   resource_id   = aws_api_gateway_resource.submit-dataset.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "submit-dataset_post" {
@@ -44,7 +44,7 @@ resource "aws_api_gateway_method" "submit-dataset-id_post" {
   resource_id   = aws_api_gateway_resource.submit-dataset-id.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true

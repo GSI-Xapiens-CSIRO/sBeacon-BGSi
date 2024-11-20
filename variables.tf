@@ -220,3 +220,14 @@ variable "dataportal-bucket-prefix" {
   type        = string
   description = "Prefix for the dataportal S3 bucket"
 }
+
+# cognito variables
+variable "cognito-user-pool-arn" {
+  type        = string
+  description = "Cognito user pool ARN"
+}
+
+variable "cognito-user-pool-id" {
+  type        = string
+  description = "Cognito user pool Id."
+}

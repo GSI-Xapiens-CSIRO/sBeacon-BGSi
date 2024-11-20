@@ -12,7 +12,7 @@ resource "aws_api_gateway_method" "filtering_terms" {
   resource_id   = aws_api_gateway_resource.filtering_terms.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "filtering_terms" {

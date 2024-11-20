@@ -12,7 +12,7 @@ resource "aws_api_gateway_method" "cohorts" {
   resource_id   = aws_api_gateway_resource.cohorts.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "cohorts" {
@@ -35,7 +35,7 @@ resource "aws_api_gateway_method" "cohorts_post" {
   resource_id   = aws_api_gateway_resource.cohorts.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 }
 
 resource "aws_api_gateway_method_response" "cohorts_post" {
@@ -67,7 +67,7 @@ resource "aws_api_gateway_method" "cohorts-id" {
   resource_id   = aws_api_gateway_resource.cohorts-id.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -94,7 +94,7 @@ resource "aws_api_gateway_method" "cohorts-id_post" {
   resource_id   = aws_api_gateway_resource.cohorts-id.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -130,7 +130,7 @@ resource "aws_api_gateway_method" "cohorts-id-filtering_terms" {
   resource_id   = aws_api_gateway_resource.cohorts-id-filtering_terms.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -157,7 +157,7 @@ resource "aws_api_gateway_method" "cohorts-id-filtering_terms_post" {
   resource_id   = aws_api_gateway_resource.cohorts-id-filtering_terms.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -193,7 +193,7 @@ resource "aws_api_gateway_method" "cohorts-id-individuals" {
   resource_id   = aws_api_gateway_resource.cohorts-id-individuals.id
   http_method   = "GET"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true
@@ -220,7 +220,7 @@ resource "aws_api_gateway_method" "cohorts-id-individuals_post" {
   resource_id   = aws_api_gateway_resource.cohorts-id-individuals.id
   http_method   = "POST"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.id" = true

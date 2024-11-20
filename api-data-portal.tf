@@ -18,7 +18,7 @@ resource "aws_api_gateway_method" "dportal_proxy" {
   resource_id   = aws_api_gateway_resource.dportal_proxy.id
   http_method   = "ANY"
   authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.BeaconUserPool-authorizer.id
+  authorizer_id = aws_api_gateway_authorizer.beacon_user_pool_authorizer.id
 
   request_parameters = {
     "method.request.path.proxy" = true

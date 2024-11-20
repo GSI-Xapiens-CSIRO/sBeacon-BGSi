@@ -198,9 +198,9 @@ def update_user_groups(event, context):
     removed_groups = []
 
     if body_dict["groups"]["admin"]:
-        chosen_groups.append("admin-group")
+        chosen_groups.append("administrators")
     else:
-        removed_groups.append("admin-group")
+        removed_groups.append("administrators")
     if body_dict["groups"]["record"]:
         chosen_groups.append("record-access-user-group")
     else:
@@ -217,7 +217,7 @@ def update_user_groups(event, context):
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)
     
-    if username == authorizer and "admin-group" in removed_groups:
+    if username == authorizer and "administrators" in removed_groups:
         print(f"Unsuccessful. Administrators are unable to decrease their own permissions.")
         return {"success": False}
 

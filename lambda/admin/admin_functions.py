@@ -197,22 +197,10 @@ def update_user_groups(event, context):
     chosen_groups = []
     removed_groups = []
 
-    if body_dict["groups"]["admin"]:
+    if body_dict["groups"]["administrators"]:
         chosen_groups.append("administrators")
     else:
         removed_groups.append("administrators")
-    if body_dict["groups"]["record"]:
-        chosen_groups.append("record-access-user-group")
-    else:
-        removed_groups.append("record-access-user-group")
-    if body_dict["groups"]["count"]:
-        chosen_groups.append("count-access-user-group")
-    else:
-        removed_groups.append("count-access-user-group")
-    if body_dict["groups"]["boolean"]:
-        chosen_groups.append("boolean-access-user-group")
-    else:
-        removed_groups.append("boolean-access-user-group")
 
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)

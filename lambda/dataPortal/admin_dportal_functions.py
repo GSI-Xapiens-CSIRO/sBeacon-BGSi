@@ -133,7 +133,6 @@ def create_project(event, context):
     body_dict = json.loads(event.get("body"))
     name = body_dict.get("name")
     description = body_dict.get("description")
-    files = body_dict.get("files")
 
     if Projects.count(name):
         raise PortalError(409, "Project already exists")
@@ -145,10 +144,8 @@ def create_project(event, context):
     project = Projects(
         name,
         description=description,
-        files=files,
     )
     project.save()
-
     return project.to_dict()
 
 

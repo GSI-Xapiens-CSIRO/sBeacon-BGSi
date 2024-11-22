@@ -111,8 +111,8 @@ def update_project(event, context):
     description = body_dict.get("description")
     project = Projects.get(name)
     # file diff
-    current_files = set(body_dict.get("files"))
-    initial_files = project.files
+    current_files = set(body_dict.get("files") or [])
+    initial_files = project.files or set()
     deleted_files = initial_files - current_files
     # update entry
     project.description = description

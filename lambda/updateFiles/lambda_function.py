@@ -178,10 +178,7 @@ def update_project(project_name, total_samples, all_project_files):
     if all_project_files:
         kwargs["UpdateExpression"] += ", files=:files"
         kwargs["ExpressionAttributeValues"][":files"] = {
-            "SS": [
-                f"projects/{project_name}/{file_name}"
-                for file_name in all_project_files
-            ],
+            "SS": all_project_files,
         }
     else:
         kwargs["UpdateExpression"] += " REMOVE files"

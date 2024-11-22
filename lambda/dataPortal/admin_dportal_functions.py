@@ -114,16 +114,14 @@ def update_project(event, context):
     current_files = set(body_dict.get("files"))
     initial_files = project.files
     deleted_files = initial_files - current_files
+    # update entry
+    project.description = description
+    project.save()
     # delete file diff
     delete_s3_objects(
         DPORTAL_BUCKET,
         [f"projects/{name}/{file.split('/')[-1]}" for file in deleted_files],
     )
-
-    # update entry
-    project.description = description
-    project.files = current_files
-    project.save()
 
     return project.to_dict()
 

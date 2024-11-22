@@ -716,6 +716,55 @@ data "aws_iam_policy_document" "athena-readonly-access" {
   }
 }
 
+#
+# updateFiles Lambda Function
+#
+data "aws_iam_policy_document" "lambda-updateFiles" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      aws_s3_bucket.dataportal-bucket.arn
+    ]
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values = [
+        "projects/*/",
+      ]
+    }
+  }
+
+  statement {
+    actions = [
+      "s3:GetObject",
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+    resources = [
+      aws_dynamodb_table.projects.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:UpdateItem",
+    ]
+    resources = [
+      aws_dynamodb_table.vcfs.arn,
+    ]
+  }
+}
 
 # DataPortal Lambda Access
 data "aws_iam_policy_document" "data-portal-lambda-access" {

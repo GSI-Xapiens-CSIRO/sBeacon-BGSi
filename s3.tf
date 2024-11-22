@@ -166,3 +166,21 @@ resource "aws_s3_bucket_cors_configuration" "dataportal-bucket" {
     max_age_seconds = 36000
   }
 }
+
+
+#
+# Enables S3 bucket notifications for updating file information
+#
+resource "aws_s3_bucket_notification" "updateFiles" {
+  bucket = aws_s3_bucket.dataportal-bucket.id
+  lambda_function {
+    lambda_function_arn = module.lambda-updateFiles.lambda_function_arn
+    events = [
+      "s3:ObjectCreated:*",
+      "s3:ObjectRemoved:*",
+    ]
+    filter_prefix = "projects/"
+  }
+
+  depends_on = [aws_lambda_permission.S3updateFiles]
+}

@@ -689,6 +689,37 @@ module "lambda-admin" {
 }
 
 #
+# updateFiles Lambda Function
+#
+module "lambda-updateFiles" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name      = "sbeacon-backend-updateFiles"
+  description        = "Updates the files for a project, including counting samples in VCFs"
+  handler            = "lambda_function.lambda_handler"
+  runtime            = "python3.12"
+  memory_size        = 1769
+  timeout            = 30
+  attach_policy_json = true
+  policy_json        = data.aws_iam_policy_document.lambda-updateFiles.json
+  source_path        = "${path.module}/lambda/updateFiles"
+  tags               = var.common-tags
+
+  environment_variables = {
+    DPORTAL_BUCKET        = aws_s3_bucket.dataportal-bucket.bucket
+    DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE     = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
+  }
+
+  layers = [
+    local.binaries_layer,
+    local.python_libraries_layer,
+    local.python_modules_layer,
+  ]
+}
+
+#
 # dataPortal Function
 #
 module "lambda-data-portal" {

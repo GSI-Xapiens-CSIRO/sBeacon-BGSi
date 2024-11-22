@@ -172,3 +172,16 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
     type = "S"
   }
 }
+
+# VCFs  Table
+# So we can keep track of the number of samples in each vcf
+resource "aws_dynamodb_table" "vcfs" {
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "vcfLocation"
+  name         = "sbeacon-vcfs"
+  tags         = var.common-tags
+  attribute {
+    name = "vcfLocation"
+    type = "S"
+  }
+}

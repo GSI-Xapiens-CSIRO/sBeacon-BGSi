@@ -42,3 +42,14 @@ resource "aws_lambda_permission" "SNSemailNotification" {
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.sesDeliveryLogger.arn
 }
+
+#
+# updateFiles Lambda Function
+#
+resource "aws_lambda_permission" "S3updateFiles" {
+  statement_id  = "SBeaconBackendAllowS3updateFilesInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda-updateFiles.lambda_function_arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.dataportal-bucket.arn
+}

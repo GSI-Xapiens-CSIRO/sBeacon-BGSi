@@ -3,7 +3,7 @@ from enum import Enum
 
 import boto3
 from pynamodb.models import Model
-from pynamodb.attributes import UnicodeAttribute, UnicodeSetAttribute
+from pynamodb.attributes import NumberAttribute, UnicodeAttribute, UnicodeSetAttribute
 
 
 SESSION = boto3.session.Session()
@@ -18,6 +18,7 @@ class Projects(Model):
     name = UnicodeAttribute(hash_key=True)
     description = UnicodeAttribute()
     files = UnicodeSetAttribute(default_for_new=tuple())
+    total_samples = NumberAttribute(default_for_new=0)
 
     def to_dict(self):
         return {
@@ -25,6 +26,7 @@ class Projects(Model):
             "description": self.description,
             # Convert set to list for JSON serialization
             "files": list(self.files) if self.files else [],
+            "total_samples": self.total_samples,
         }
 
 

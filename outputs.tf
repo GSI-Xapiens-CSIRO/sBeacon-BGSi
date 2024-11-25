@@ -12,3 +12,8 @@ output "data-portal-bucket" {
   value       = aws_s3_bucket.dataportal-bucket.bucket
   description = "S3 bucket for the data portal."
 }
+
+output "data-portal-bucket-arn" {
+  value       = aws_s3_bucket.dataportal-bucket.arn
+  description = "S3 bucket arn for the data portal."
+}

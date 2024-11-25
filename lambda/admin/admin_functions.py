@@ -5,7 +5,7 @@ import string
 import boto3
 from markupsafe import escape
 
-from admin_utils import authenticate_admin
+from shared.cognitoutils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
 from shared.utils.lambda_utils import ENV_COGNITO, ENV_BEACON, ENV_SES
 

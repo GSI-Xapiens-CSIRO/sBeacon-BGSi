@@ -231,3 +231,8 @@ variable "cognito-user-pool-id" {
   type        = string
   description = "Cognito user pool Id."
 }
+
+variable "cognito-admin-group-name" {
+  type        = string
+  description = "Cognito admin group name."
+}

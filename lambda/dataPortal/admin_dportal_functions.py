@@ -6,6 +6,7 @@ from utils.models import Projects, ProjectUsers
 from utils.s3_util import list_s3_prefix, delete_s3_objects
 from utils.cognito import get_user_from_attribute, get_user_attribute
 from pynamodb.exceptions import DoesNotExist
+from shared.cognitoutils import authenticate_admin
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
@@ -16,7 +17,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 #
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "get")
+@router.attach("/dportal/admin/projects/{name}/users", "get", authenticate_admin)
 def list_project_users(event, context):
     name = event["pathParameters"]["name"]
 
@@ -42,7 +43,7 @@ def list_project_users(event, context):
     return users
 
 
-@router.attach("/dportal/admin/projects/{name}/users/{email}", "delete")
+@router.attach("/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_admin)
 def remove_project_user(event, context):
     name = event["pathParameters"]["name"]
     email = event["pathParameters"]["email"]
@@ -57,7 +58,7 @@ def remove_project_user(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "post")
+@router.attach("/dportal/admin/projects/{name}/users", "post", authenticate_admin)
 def add_user_to_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -83,7 +84,7 @@ def add_user_to_project(event, context):
 #
 
 
-@router.attach("/dportal/admin/projects/{name}", "delete")
+@router.attach("/dportal/admin/projects/{name}", "delete", authenticate_admin)
 def delete_project(event, context):
     name = event["pathParameters"]["name"]
 
@@ -104,7 +105,7 @@ def delete_project(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}", "put")
+@router.attach("/dportal/admin/projects/{name}", "put", authenticate_admin)
 def update_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -126,7 +127,7 @@ def update_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects", "post")
+@router.attach("/dportal/admin/projects", "post", authenticate_admin)
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))
     name = body_dict.get("name")
@@ -147,7 +148,7 @@ def create_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects", "get")
+@router.attach("/dportal/admin/projects", "get", authenticate_admin)
 def list_projects(event, context):
     projects = Projects.scan()
     return [project.to_dict() for project in projects]

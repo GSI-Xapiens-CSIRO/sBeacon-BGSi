@@ -678,8 +678,9 @@ module "lambda-admin" {
   environment_variables = merge(
     local.sbeacon_variables,
     { COGNITO_USER_POOL_ID = var.cognito-user-pool-id },
+    { COGNITO_ADMIN_GROUP_NAME = var.cognito-admin-group-name },
     { SES_SOURCE_EMAIL = var.ses-source-email },
-    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name }
+    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name },
   )
 
   layers = [
@@ -740,14 +741,21 @@ module "lambda-data-portal" {
 
   tags = var.common-tags
 
-  environment_variables = {
-    DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name
-    DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
-    DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
-    JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn
-    USER_POOL_ID                   = var.cognito-user-pool-id
-    DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket
-  }
+  environment_variables = merge(
+    local.sbeacon_variables,
+    { DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name },
+    { DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name },
+    { DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name },
+    { JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn },
+    { USER_POOL_ID                   = var.cognito-user-pool-id },
+    { DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket },
+    { COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name },
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+  ]
 }
 
 #

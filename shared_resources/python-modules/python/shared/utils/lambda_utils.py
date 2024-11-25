@@ -276,6 +276,10 @@ class CognitoEnvironment:
     def COGNITO_USER_POOL_ID(self):
         return os.environ["COGNITO_USER_POOL_ID"]
 
+    @property
+    def COGNITO_ADMIN_GROUP_NAME(self):
+        return os.environ["COGNITO_ADMIN_GROUP_NAME"]
+
 class SesEnvironment:
     @property
     def SES_SOURCE_EMAIL(self):

@@ -44,18 +44,24 @@ def add_user(event, context):
 
     temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
 
-    cognito_client.admin_create_user(
-        UserPoolId=USER_POOL_ID,
-        Username=email,
-        TemporaryPassword=temp_password,
-        MessageAction="SUPPRESS",
-        UserAttributes=[
-            {"Name": "email", "Value": email},
-            {"Name": "given_name", "Value": first_name},
-            {"Name": "family_name", "Value": last_name},
-            {"Name": "email_verified", "Value": "true"},
-        ],
-    )
+    try:
+        cognito_client.admin_create_user(
+            UserPoolId=USER_POOL_ID,
+            Username=email,
+            TemporaryPassword=temp_password,
+            MessageAction="SUPPRESS",
+            UserAttributes=[
+                {"Name": "email", "Value": email},
+                {"Name": "given_name", "Value": first_name},
+                {"Name": "family_name", "Value": last_name},
+                {"Name": "email_verified", "Value": "true"},
+            ],
+        )
+    except:
+        raise BeaconError(
+            error_code="BeaconErrorCreatingUser",
+            error_message="Error creating user.",
+        )
 
     beacon_ui_url = f"{BEACON_UI_URL}/login"
     beacon_img_url = f"{BEACON_UI_URL}/assets/images/sbeacon.png" # There are likely better ways of doing this, but email template is not important for now
@@ -100,31 +106,41 @@ def add_user(event, context):
     </html>
     """
 
-    response = ses_client.send_email(
-        Destination={
-            'ToAddresses': [email],
-        },
-        Message={
-            'Body': 
-            {
-                'Html': {
-                    'Charset': 'UTF-8',
-                    'Data': body_html,
+    try:
+        response = ses_client.send_email(
+            Destination={
+                'ToAddresses': [email],
+            },
+            Message={
+                'Body': 
+                {
+                    'Html': {
+                        'Charset': 'UTF-8',
+                        'Data': body_html,
+                    },
+                    'Text': {
+                        'Charset': 'UTF-8',
+                        'Data': f"Hello {first_name} {last_name},\n\nWelcome to sBeacon - your sign-in credentials are as follows:\n\nEmail: {email}\n\nPassword: {temp_password}\n\nVerify: {beacon_ui_url}",
+                    }
                 },
-                'Text': {
+                'Subject': {
                     'Charset': 'UTF-8',
-                    'Data': f"Hello {first_name} {last_name},\n\nWelcome to sBeacon - your sign-in credentials are as follows:\n\nEmail: {email}\n\nPassword: {temp_password}\n\nVerify: {beacon_ui_url}",
-                }
+                    'Data': subject,
+                },
             },
-            'Subject': {
-                'Charset': 'UTF-8',
-                'Data': subject,
-            },
-        },
-        Source=SES_SOURCE_EMAIL,
-        ReturnPath=SES_SOURCE_EMAIL,
-        ConfigurationSetName=SES_CONFIG_SET_NAME
-    )
+            Source=SES_SOURCE_EMAIL,
+            ReturnPath=SES_SOURCE_EMAIL,
+            ConfigurationSetName=SES_CONFIG_SET_NAME
+        )
+    except:
+        cognito_client.admin_delete_user(
+            UserPoolId=USER_POOL_ID,
+            Username=email,
+        )
+        raise BeaconError(
+            error_code="BeaconRegistrationEmailFailed",
+            error_message="The registration email failed to send.",
+        )
 
     print(f"User {email} created successfully!")
     print(f"Email sent with message ID: {response["MessageId"]}")

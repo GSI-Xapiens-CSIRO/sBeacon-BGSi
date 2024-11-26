@@ -174,7 +174,9 @@ def list_projects(event, context):
         "projectName": body_dict["projectName"],
         "datasetId": body_dict["datasetId"],
     }
+    project = Projects.get(payload["projectName"])
     response = invoke_lambda_function(SUBMIT_LAMBDA, payload)
+    project.update(actions=[Projects.ingested_datasets.add([payload["datasetId"]])])
 
     return response
 

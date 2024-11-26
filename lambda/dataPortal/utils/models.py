@@ -17,8 +17,9 @@ class Projects(Model):
 
     name = UnicodeAttribute(hash_key=True)
     description = UnicodeAttribute()
-    files = UnicodeSetAttribute(default_for_new=tuple())
-    total_samples = NumberAttribute(default_for_new=0)
+    files = UnicodeSetAttribute(default=tuple())
+    total_samples = NumberAttribute(default=0)
+    ingested_datasets = UnicodeSetAttribute(default=tuple())
 
     def to_dict(self):
         return {
@@ -26,6 +27,9 @@ class Projects(Model):
             "description": self.description,
             # Convert set to list for JSON serialization
             "files": list(self.files) if self.files else [],
+            "ingested_datasets": (
+                list(self.ingested_datasets) if self.ingested_datasets else []
+            ),
             "total_samples": self.total_samples,
         }
 

@@ -3,7 +3,6 @@ from .lambda_utils import (
     ENV_ATHENA,
     ENV_BEACON,
     ENV_DYNAMO,
-    ENV_SNS,
     ENV_CONFIG,
     ENV_COGNITO,
     make_temp_file,

@@ -9,12 +9,6 @@ data "aws_caller_identity" "this" {}
 #                 https://stackoverflow.com/questions/66522916/aws-lambda-memory-vs-cpu-configuration
 #
 locals {
-  build_cpp_path     = abspath("${path.module}/build_cpp.sh")
-  shared_source_path = abspath("${path.module}/lambda/shared/source")
-  gzip_source_path   = abspath("${path.module}/lambda/shared/gzip")
-
-  maximum_load_file_size  = 750000000
-  vcf_processed_file_size = 50000000
   # TODO use the following organisation to refactor the IAM policy assignment
   # this makes the code simpler
   # sbeacon info variables
@@ -77,12 +71,9 @@ locals {
   }
   # dynamodb variables
   dynamodb_variables = {
-    DYNAMO_DATASETS_TABLE                = aws_dynamodb_table.datasets.name
-    DYNAMO_VARIANT_QUERIES_TABLE         = aws_dynamodb_table.variant_queries.name
-    DYNAMO_VARIANT_QUERY_RESPONSES_TABLE = aws_dynamodb_table.variant_query_responses.name
-    DYNAMO_ONTOLOGIES_TABLE              = aws_dynamodb_table.ontologies.name
-    DYNAMO_ANSCESTORS_TABLE              = aws_dynamodb_table.anscestor_terms.name
-    DYNAMO_DESCENDANTS_TABLE             = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_ONTOLOGIES_TABLE  = aws_dynamodb_table.ontologies.name
+    DYNAMO_ANSCESTORS_TABLE  = aws_dynamodb_table.anscestor_terms.name
+    DYNAMO_DESCENDANTS_TABLE = aws_dynamodb_table.descendant_terms.name
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"
@@ -116,9 +107,7 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
-      HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
-      DYNAMO_DATASETS_TABLE = aws_dynamodb_table.datasets.name
-      INDEXER_LAMBDA        = module.lambda-indexer.lambda_function_name
+      HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
     },
     local.sbeacon_variables,
     local.athena_variables,
@@ -144,8 +133,8 @@ module "lambda-getInfo" {
   runtime            = "python3.12"
   memory_size        = 1769
   timeout            = 60
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-getInfo.json
+  # attach_policy_json = false
+  # policy_json        = data.aws_iam_policy_document.lambda-getInfo.json
   source_path        = "${path.module}/lambda/getInfo"
   tags               = var.common-tags
 
@@ -173,8 +162,6 @@ module "lambda-getConfiguration" {
   handler            = "lambda_function.lambda_handler"
   memory_size        = 1769
   timeout            = 60
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-getConfiguration.json
   source_path        = "${path.module}/lambda/getConfiguration"
 
   tags = var.common-tags
@@ -203,8 +190,6 @@ module "lambda-getMap" {
   handler            = "lambda_function.lambda_handler"
   memory_size        = 1769
   timeout            = 60
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-getMap.json
   source_path        = "${path.module}/lambda/getMap"
 
   tags = var.common-tags
@@ -233,8 +218,6 @@ module "lambda-getEntryTypes" {
   handler            = "lambda_function.lambda_handler"
   memory_size        = 1769
   timeout            = 60
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-getEntryTypes.json
   source_path        = "${path.module}/lambda/getEntryTypes"
 
   tags = var.common-tags
@@ -631,12 +614,11 @@ module "lambda-indexer" {
   timeout             = 600
   attach_policy_jsons = true
   policy_jsons = [
-    data.aws_iam_policy_document.lambda-indexer.json,
     data.aws_iam_policy_document.athena-full-access.json,
     data.aws_iam_policy_document.dynamodb-onto-access.json,
     data.aws_iam_policy_document.dynamodb-onto-write-access.json
   ]
-  number_of_policy_jsons = 4
+  number_of_policy_jsons = 3
   source_path            = "${path.module}/lambda/indexer"
 
   tags = var.common-tags
@@ -645,7 +627,6 @@ module "lambda-indexer" {
     local.dynamodb_variables,
     local.sbeacon_variables,
     local.athena_variables,
-    { INDEXER_TOPIC_ARN : aws_sns_topic.indexer.arn }
   )
 
   layers = [
@@ -743,13 +724,17 @@ module "lambda-data-portal" {
 
   environment_variables = merge(
     local.sbeacon_variables,
-    { DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name },
-    { DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name },
-    { DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name },
-    { JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn },
-    { USER_POOL_ID                   = var.cognito-user-pool-id },
-    { DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket },
-    { COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name },
+    {
+      DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,
+      DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
+      DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
+      JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
+      USER_POOL_ID                   = var.cognito-user-pool-id,
+      DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,
+      COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name
+      SUBMIT_LAMBDA                  = module.lambda-submitDataset.lambda_function_name
+      INDEXER_LAMBDA                 = module.lambda-indexer.lambda_function_name
+    },
   )
 
   layers = [

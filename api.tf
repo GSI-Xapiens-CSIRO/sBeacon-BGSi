@@ -27,16 +27,16 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
   #       It will stabilize to only change when resources change afterwards.
   triggers = {
     redeployment = sha1(jsonencode([
-      # /submit-dataset
-      aws_api_gateway_method.submit-dataset_post,
-      aws_api_gateway_integration.submit-dataset_post,
-      aws_api_gateway_integration_response.submit-dataset_post,
-      aws_api_gateway_method_response.submit-dataset_post,
-      # /submit-cohort
-      aws_api_gateway_method.submit-cohort_post,
-      aws_api_gateway_integration.submit-cohort_post,
-      aws_api_gateway_integration_response.submit-cohort_post,
-      aws_api_gateway_method_response.submit-cohort_post,
+      # # /submit-dataset
+      # aws_api_gateway_method.submit-dataset_post,
+      # aws_api_gateway_integration.submit-dataset_post,
+      # aws_api_gateway_integration_response.submit-dataset_post,
+      # aws_api_gateway_method_response.submit-dataset_post,
+      # # /submit-cohort
+      # aws_api_gateway_method.submit-cohort_post,
+      # aws_api_gateway_integration.submit-cohort_post,
+      # aws_api_gateway_integration_response.submit-cohort_post,
+      # aws_api_gateway_method_response.submit-cohort_post,
       # /configuration
       aws_api_gateway_method.configuration,
       aws_api_gateway_integration.configuration,
@@ -378,9 +378,9 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       aws_api_gateway_method_response.cohorts-id-filtering_terms,
       aws_api_gateway_method_response.cohorts-id-filtering_terms_post,
       # index
-      aws_api_gateway_method.index_post,
-      aws_api_gateway_integration.index_post,
-      aws_api_gateway_method_response.index_post,
+      # aws_api_gateway_method.index_post,
+      # aws_api_gateway_integration.index_post,
+      # aws_api_gateway_method_response.index_post,
       # admin
       aws_api_gateway_method.admin_proxy,
       aws_api_gateway_integration.admin_proxy,

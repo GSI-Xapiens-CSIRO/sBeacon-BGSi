@@ -1,16 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from shared.utils import get_vcf_chromosomes
-from shared.dynamodb import VcfChromosomeMap
 
 
 def get_vcf_chromosome_map(vcf_location):
     errored, error, chroms = get_vcf_chromosomes(vcf_location)
     vcf_chromosome_map = None
     if not errored:
-        vcf_chromosome_map = VcfChromosomeMap()
-        vcf_chromosome_map.vcf = vcf_location
-        vcf_chromosome_map.chromosomes = chroms
+        vcf_chromosome_map = {"vcf": vcf_location, "chromosomes": chroms}
 
     return errored, error, vcf_chromosome_map
 

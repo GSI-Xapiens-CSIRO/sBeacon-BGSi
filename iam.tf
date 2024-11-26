@@ -19,18 +19,6 @@ data "aws_iam_policy_document" "main-apigateway" {
 data "aws_iam_policy_document" "lambda-submitDataset" {
   statement {
     actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-      "dynamodb:GetItem",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:GetObject",
       "s3:PutObject",
       "s3:ListBucket",
@@ -40,118 +28,12 @@ data "aws_iam_policy_document" "lambda-submitDataset" {
     ]
     resources = ["*"]
   }
-
-  statement {
-    actions = [
-      "lambda:InvokeFunction",
-    ]
-    resources = [module.lambda-indexer.lambda_function_arn]
-  }
-}
-
-#
-# getInfo Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getInfo" {
-  statement {
-    actions = [
-      "dynamodb:Scan",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-    ]
-  }
-}
-
-#
-# getConfiguration Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getConfiguration" {
-  statement {
-    actions = [
-      "dynamodb:Scan",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-    ]
-  }
-}
-
-#
-# getMap Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getMap" {
-  statement {
-    actions = [
-      "dynamodb:Scan",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-    ]
-  }
-}
-
-#
-# getEntryTypes Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getEntryTypes" {
-  statement {
-    actions = [
-      "dynamodb:Scan",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-    ]
-  }
-}
-
-#
-# getFilteringTerms Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getFilteringTerms" {
-  statement {
-    actions   = []
-    resources = []
-  }
 }
 
 #
 # getAnalyses Lambda Function
 #
 data "aws_iam_policy_document" "lambda-getAnalyses" {
-  statement {
-    actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
   statement {
     actions = [
       "s3:GetObject",
@@ -183,41 +65,6 @@ data "aws_iam_policy_document" "lambda-getAnalyses" {
 data "aws_iam_policy_document" "lambda-getGenomicVariants" {
   statement {
     actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
-  statement {
-    actions = [
       "lambda:InvokeFunction",
     ]
     resources = [module.lambda-splitQuery.lambda_function_arn]
@@ -245,39 +92,6 @@ data "aws_iam_policy_document" "lambda-getGenomicVariants" {
 # getIndividuals Lambda Function
 #
 data "aws_iam_policy_document" "lambda-getIndividuals" {
-  statement {
-    actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
   statement {
     actions = [
       "s3:GetObject",
@@ -309,39 +123,6 @@ data "aws_iam_policy_document" "lambda-getIndividuals" {
 data "aws_iam_policy_document" "lambda-getBiosamples" {
   statement {
     actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:GetObject",
       "s3:ListBucket",
     ]
@@ -369,39 +150,6 @@ data "aws_iam_policy_document" "lambda-getBiosamples" {
 # getDatasets Lambda Function
 #
 data "aws_iam_policy_document" "lambda-getDatasets" {
-  statement {
-    actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
   statement {
     actions = [
       "s3:GetObject",
@@ -433,39 +181,6 @@ data "aws_iam_policy_document" "lambda-getDatasets" {
 data "aws_iam_policy_document" "lambda-getCohorts" {
   statement {
     actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:GetObject",
       "s3:ListBucket",
     ]
@@ -477,39 +192,6 @@ data "aws_iam_policy_document" "lambda-getCohorts" {
 # getRuns Lambda Function
 #
 data "aws_iam_policy_document" "lambda-getRuns" {
-  statement {
-    actions = [
-      "dynamodb:Query",
-    ]
-    resources = [
-      "${aws_dynamodb_table.datasets.arn}/index/*",
-      "${aws_dynamodb_table.variant_query_responses.arn}/index/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-    ]
-    resources = [
-      aws_dynamodb_table.variant_queries.arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:BatchGetItem"
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn
-    ]
-  }
-
   statement {
     actions = [
       "s3:GetObject",
@@ -531,20 +213,6 @@ data "aws_iam_policy_document" "lambda-getRuns" {
     ]
     resources = [
       aws_sns_topic.splitQuery.arn,
-    ]
-  }
-}
-
-#
-# indexer Lambda Function
-#
-data "aws_iam_policy_document" "lambda-indexer" {
-  statement {
-    actions = [
-      "SNS:Publish",
-    ]
-    resources = [
-      aws_sns_topic.indexer.arn,
     ]
   }
 }
@@ -574,19 +242,7 @@ data "aws_iam_policy_document" "lambda-splitQuery" {
 # performQuery Lambda Function
 #
 data "aws_iam_policy_document" "lambda-performQuery" {
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-      "dynamodb:GetItem",
-    ]
-    resources = [
-      aws_dynamodb_table.datasets.arn,
-      aws_dynamodb_table.variant_queries.arn,
-      aws_dynamodb_table.variant_query_responses.arn,
-    ]
-  }
+
 
   statement {
     actions = [
@@ -849,6 +505,16 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
     resources = [
       "${aws_s3_bucket.dataportal-bucket.arn}/projects/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+    resources = [
+      module.lambda-indexer.lambda_function_arn,
+      module.lambda-submitDataset.lambda_function_arn,
     ]
   }
 }

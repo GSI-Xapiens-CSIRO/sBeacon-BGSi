@@ -236,17 +236,17 @@ class AthenaEnvironment:
 
 
 class DynamoDBEnvironment:
-    @property
-    def DYNAMO_DATASETS_TABLE(self):
-        return os.environ["DYNAMO_DATASETS_TABLE"]
+    # @property
+    # def DYNAMO_DATASETS_TABLE(self):
+    #     return os.environ["DYNAMO_DATASETS_TABLE"]
 
-    @property
-    def DYNAMO_VARIANT_QUERIES_TABLE(self):
-        return os.environ["DYNAMO_VARIANT_QUERIES_TABLE"]
+    # @property
+    # def DYNAMO_VARIANT_QUERIES_TABLE(self):
+    #     return os.environ["DYNAMO_VARIANT_QUERIES_TABLE"]
 
-    @property
-    def DYNAMO_VARIANT_QUERY_RESPONSES_TABLE(self):
-        return os.environ["DYNAMO_VARIANT_QUERY_RESPONSES_TABLE"]
+    # @property
+    # def DYNAMO_VARIANT_QUERY_RESPONSES_TABLE(self):
+    #     return os.environ["DYNAMO_VARIANT_QUERY_RESPONSES_TABLE"]
 
     @property
     def DYNAMO_ONTOLOGIES_TABLE(self):
@@ -260,15 +260,15 @@ class DynamoDBEnvironment:
     def DYNAMO_DESCENDANTS_TABLE(self):
         return os.environ["DYNAMO_DESCENDANTS_TABLE"]
 
-    @property
-    def DYNAMO_ONTO_INDEX_TABLE(self):
-        return os.environ["DYNAMO_ONTO_INDEX_TABLE"]
+    # @property
+    # def DYNAMO_ONTO_INDEX_TABLE(self):
+    #     return os.environ["DYNAMO_ONTO_INDEX_TABLE"]
 
 
-class SnsEnvironment:
-    @property
-    def INDEXER_TOPIC_ARN(self):
-        return os.environ["INDEXER_TOPIC_ARN"]
+# class SnsEnvironment:
+#     @property
+#     def INDEXER_TOPIC_ARN(self):
+#         return os.environ["INDEXER_TOPIC_ARN"]
 
 
 class CognitoEnvironment:
@@ -279,6 +279,7 @@ class CognitoEnvironment:
     @property
     def COGNITO_ADMIN_GROUP_NAME(self):
         return os.environ["COGNITO_ADMIN_GROUP_NAME"]
+
 
 class SesEnvironment:
     @property
@@ -323,7 +324,6 @@ def make_temp_file():
 ENV_BEACON = BeaconEnvironment()
 ENV_ATHENA = AthenaEnvironment()
 ENV_DYNAMO = DynamoDBEnvironment()
-ENV_SNS = SnsEnvironment()
 ENV_CONFIG = ConfigEnvironment()
 ENV_COGNITO = CognitoEnvironment()
 ENV_SES = SesEnvironment()

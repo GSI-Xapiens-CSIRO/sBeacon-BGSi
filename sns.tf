@@ -18,15 +18,15 @@ resource "aws_sns_topic_subscription" "performQuery" {
   endpoint  = module.lambda-performQuery.lambda_function_arn
 }
 
-resource "aws_sns_topic" "indexer" {
-  name = "indexer"
-}
+# resource "aws_sns_topic" "indexer" {
+#   name = "indexer"
+# }
 
-resource "aws_sns_topic_subscription" "indexer" {
-  topic_arn = aws_sns_topic.indexer.arn
-  protocol  = "lambda"
-  endpoint  = module.lambda-indexer.lambda_function_arn
-}
+# resource "aws_sns_topic_subscription" "indexer" {
+#   topic_arn = aws_sns_topic.indexer.arn
+#   protocol  = "lambda"
+#   endpoint  = module.lambda-indexer.lambda_function_arn
+# }
 
 resource "aws_sns_topic" "sesDeliveryLogger" {
   name = "sesDeliveryLogger"

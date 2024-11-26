@@ -3,13 +3,17 @@ import os
 
 from utils.router import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
+from pynamodb.exceptions import DoesNotExist
 from utils.s3_util import list_s3_prefix, delete_s3_objects
 from utils.cognito import get_user_from_attribute, get_user_attribute
-from pynamodb.exceptions import DoesNotExist
+from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_admin
+
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
+SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
+INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 
 
 #
@@ -43,7 +47,9 @@ def list_project_users(event, context):
     return users
 
 
-@router.attach("/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_admin)
+@router.attach(
+    "/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_admin
+)
 def remove_project_user(event, context):
     name = event["pathParameters"]["name"]
     email = event["pathParameters"]["email"]
@@ -152,3 +158,33 @@ def create_project(event, context):
 def list_projects(event, context):
     projects = Projects.scan()
     return [project.to_dict() for project in projects]
+
+
+#
+# sBeacon Functions
+#
+
+
+@router.attach("/dportal/admin/sbeacon/submit", "post", authenticate_admin)
+def list_projects(event, context):
+    body_dict = json.loads(event.get("body"))
+    payload = {
+        "s3Payload": body_dict["s3Payload"],
+        "vcfLocations": body_dict["vcfLocations"],
+        "projectName": body_dict["projectName"],
+        "datasetId": body_dict["datasetId"],
+    }
+    response = invoke_lambda_function(SUBMIT_LAMBDA, payload)
+
+    return response
+
+
+@router.attach("/dportal/admin/sbeacon/index", "post", authenticate_admin)
+def list_projects(event, context):
+    payload = {
+        "reIndexTables": True,
+        "reIndexOntologyTerms": True,
+    }
+    invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
+
+    return {"success": True, "message": "Indexing started asynchonously"}

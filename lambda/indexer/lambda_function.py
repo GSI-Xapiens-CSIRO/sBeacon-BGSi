@@ -9,8 +9,7 @@ import boto3
 
 from shared.dynamodb import Descendants, Anscestors, Ontology
 from shared.ontoutils import request_hierarchy
-from shared.apiutils import bundle_response
-from shared.utils import ENV_ATHENA, ENV_SNS
+from shared.utils import ENV_ATHENA
 from ctas_queries import QUERY as CTAS_TEMPLATE
 from generate_query_index import QUERY as INDEX_QUERY
 from generate_query_terms import QUERY as TERMS_QUERY
@@ -303,39 +302,10 @@ def clean_onto_index_tables():
         for entry in Ontology.scan():
             batch.delete(entry)
 
+
 def lambda_handler(event, context):
-    body_dict = dict()
-
-    # API call
-    if event.get("httpMethod", "") == "POST":
-        try:
-            body_dict = json.loads(event.get("body") or "{}")
-        except ValueError:
-            # fallback to defaul behaviour
-            body_dict = dict()
-        kwargs = {
-            "TopicArn": ENV_SNS.INDEXER_TOPIC_ARN,
-            "Message": json.dumps(body_dict),
-        }
-        print("Publishing to SNS: {}".format(json.dumps(kwargs)))
-        sns.publish(**kwargs)
-
-        return bundle_response(
-            200,
-            {
-                "success": True,
-                "message": "Running indexer asynchronously. Indexer may take upto few minutes.",
-            },
-        )
-    # SNS
-    elif "Sns" in event.get("Records", ["None"])[0]:
-        body_dict = json.loads(event["Records"][0]["Sns"]["Message"])
-    # Local
-    else:
-        body_dict = event
-
-    re_index_tables = body_dict.get("reIndexTables", True)
-    re_index_ontology_tables = body_dict.get("reIndexOntologyTerms", False)
+    re_index_tables = event.get("reIndexTables", True)
+    re_index_ontology_tables = event.get("reIndexOntologyTerms", False)
 
     # re-index all tables using CTAS
     if re_index_tables:
@@ -360,7 +330,7 @@ def lambda_handler(event, context):
 
     # create the global terms table with term, label, type and kind
     # derived from terms cache discarding entity ids
-    if body_dict.get("reIndexTables", True):
+    if event.get("reIndexTables", True):
         record_terms()
 
     # build ontology tree

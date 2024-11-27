@@ -504,7 +504,8 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
 
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*"
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+      "${aws_s3_bucket.metadata-bucket.arn}/*",
     ]
   }
 

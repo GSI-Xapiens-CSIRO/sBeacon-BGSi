@@ -12,6 +12,7 @@ from shared.cognitoutils import authenticate_admin
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
+ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 
@@ -102,6 +103,24 @@ def delete_project(event, context):
     keys = list_s3_prefix(DPORTAL_BUCKET, f"projects/{project.name}/")
     delete_s3_objects(DPORTAL_BUCKET, keys)
 
+    for dataset_id in project.ingested_datasets:
+        cache_prefixes = [
+            # entities
+            f"individuals-cache/{name}:{dataset_id}",
+            f"biosamples-cache/{name}:{dataset_id}",
+            f"runs-cache/{name}:{dataset_id}",
+            f"analyses-cache/{name}:{dataset_id}",
+            f"datasets-cache/{name}:{dataset_id}",
+            # terms
+            f"terms-cache/individuals-{name}:{dataset_id}",
+            f"terms-cache/biosamples-{name}:{dataset_id}",
+            f"terms-cache/runs-{name}:{dataset_id}",
+            f"terms-cache/analyses-{name}:{dataset_id}",
+            f"terms-cache/datasets-{name}:{dataset_id}",
+        ]
+        print(cache_prefixes)
+        delete_s3_objects(ATHENA_METADATA_BUCKET, cache_prefixes)
+
     with ProjectUsers.batch_write() as batch:
         for entry in ProjectUsers.scan():
             batch.delete(entry)
@@ -165,24 +184,60 @@ def list_projects(event, context):
 #
 
 
-@router.attach("/dportal/admin/sbeacon/submit", "post", authenticate_admin)
-def list_projects(event, context):
+@router.attach(
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "post", authenticate_admin
+)
+def ingest_dataset_to_sbeacon(event, context):
     body_dict = json.loads(event.get("body"))
+    project_name = event["pathParameters"]["name"]
+    dataset_id = event["pathParameters"]["dataset"]
     payload = {
         "s3Payload": body_dict["s3Payload"],
         "vcfLocations": body_dict["vcfLocations"],
-        "projectName": body_dict["projectName"],
-        "datasetId": body_dict["datasetId"],
+        "projectName": project_name,
+        "datasetId": dataset_id,
     }
-    project = Projects.get(payload["projectName"])
+    project = Projects.get(project_name)
     response = invoke_lambda_function(SUBMIT_LAMBDA, payload)
-    project.update(actions=[Projects.ingested_datasets.add([payload["datasetId"]])])
+    project.update(actions=[Projects.ingested_datasets.add([dataset_id])])
 
     return response
 
 
+@router.attach(
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "delete", authenticate_admin
+)
+def un_ingest_dataset_from_sbeacon(event, context):
+    project_name = event["pathParameters"]["name"]
+    dataset_id = event["pathParameters"]["dataset"]
+
+    cache_prefixes = [
+        # entities
+        f"individuals-cache/{project_name}:{dataset_id}",
+        f"biosamples-cache/{project_name}:{dataset_id}",
+        f"runs-cache/{project_name}:{dataset_id}",
+        f"analyses-cache/{project_name}:{dataset_id}",
+        f"datasets-cache/{project_name}:{dataset_id}",
+        # terms
+        f"terms-cache/individuals-{project_name}:{dataset_id}",
+        f"terms-cache/biosamples-{project_name}:{dataset_id}",
+        f"terms-cache/runs-{project_name}:{dataset_id}",
+        f"terms-cache/analyses-{project_name}:{dataset_id}",
+        f"terms-cache/datasets-{project_name}:{dataset_id}",
+    ]
+    delete_s3_objects(ATHENA_METADATA_BUCKET, cache_prefixes)
+
+    project = Projects.get(project_name)
+    project.update(actions=[Projects.ingested_datasets.delete([dataset_id])])
+
+    return {
+        "success": True,
+        "message": "Dataset removed from sBeacon. Please index when you have un-ingested all the desired datasets.",
+    }
+
+
 @router.attach("/dportal/admin/sbeacon/index", "post", authenticate_admin)
-def list_projects(event, context):
+def index_sbeacon(event, context):
     payload = {
         "reIndexTables": True,
         "reIndexOntologyTerms": True,

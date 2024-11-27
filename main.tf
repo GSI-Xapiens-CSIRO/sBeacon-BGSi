@@ -127,16 +127,16 @@ module "lambda-submitDataset" {
 module "lambda-getInfo" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-getInfo"
-  description        = "Returns basic information about the beacon and the datasets."
-  handler            = "lambda_function.lambda_handler"
-  runtime            = "python3.12"
-  memory_size        = 1769
-  timeout            = 60
+  function_name = "sbeacon-backend-getInfo"
+  description   = "Returns basic information about the beacon and the datasets."
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.12"
+  memory_size   = 1769
+  timeout       = 60
   # attach_policy_json = false
   # policy_json        = data.aws_iam_policy_document.lambda-getInfo.json
-  source_path        = "${path.module}/lambda/getInfo"
-  tags               = var.common-tags
+  source_path = "${path.module}/lambda/getInfo"
+  tags        = var.common-tags
 
   environment_variables = merge(
     local.sbeacon_variables,
@@ -156,13 +156,13 @@ module "lambda-getInfo" {
 module "lambda-getConfiguration" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-getConfiguration"
-  description        = "Get the beacon configuration."
-  runtime            = "python3.12"
-  handler            = "lambda_function.lambda_handler"
-  memory_size        = 1769
-  timeout            = 60
-  source_path        = "${path.module}/lambda/getConfiguration"
+  function_name = "sbeacon-backend-getConfiguration"
+  description   = "Get the beacon configuration."
+  runtime       = "python3.12"
+  handler       = "lambda_function.lambda_handler"
+  memory_size   = 1769
+  timeout       = 60
+  source_path   = "${path.module}/lambda/getConfiguration"
 
   tags = var.common-tags
 
@@ -184,13 +184,13 @@ module "lambda-getConfiguration" {
 module "lambda-getMap" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-getMap"
-  description        = "Get the beacon map."
-  runtime            = "python3.12"
-  handler            = "lambda_function.lambda_handler"
-  memory_size        = 1769
-  timeout            = 60
-  source_path        = "${path.module}/lambda/getMap"
+  function_name = "sbeacon-backend-getMap"
+  description   = "Get the beacon map."
+  runtime       = "python3.12"
+  handler       = "lambda_function.lambda_handler"
+  memory_size   = 1769
+  timeout       = 60
+  source_path   = "${path.module}/lambda/getMap"
 
   tags = var.common-tags
 
@@ -212,13 +212,13 @@ module "lambda-getMap" {
 module "lambda-getEntryTypes" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-getEntryTypes"
-  description        = "Get the beacon map."
-  runtime            = "python3.12"
-  handler            = "lambda_function.lambda_handler"
-  memory_size        = 1769
-  timeout            = 60
-  source_path        = "${path.module}/lambda/getEntryTypes"
+  function_name = "sbeacon-backend-getEntryTypes"
+  description   = "Get the beacon map."
+  runtime       = "python3.12"
+  handler       = "lambda_function.lambda_handler"
+  memory_size   = 1769
+  timeout       = 60
+  source_path   = "${path.module}/lambda/getEntryTypes"
 
   tags = var.common-tags
 
@@ -725,6 +725,7 @@ module "lambda-data-portal" {
   environment_variables = merge(
     local.sbeacon_variables,
     {
+      ATHENA_METADATA_BUCKET         = aws_s3_bucket.metadata-bucket.bucket
       DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,
       DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,

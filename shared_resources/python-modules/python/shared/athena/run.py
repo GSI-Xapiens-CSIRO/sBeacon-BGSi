@@ -80,7 +80,7 @@ class Run(jsons.JsonSerializable, AthenaModel):
         header_terms = (
             "struct<kind:string,id:string,term:string,label:string,type:string>"
         )
-        key = f"{array[0]['datasetId']}-runs"
+        key = f"{array[0]['datasetId']}"
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/runs-cache/{key}", "wb"
@@ -100,9 +100,11 @@ class Run(jsons.JsonSerializable, AthenaModel):
             ) as writer_terms:
                 for run in array:
                     row = tuple(
-                        run.get(k, "")
-                        if type(run.get(k, "")) == str
-                        else json.dumps(run.get(k, ""))
+                        (
+                            run.get(k, "")
+                            if type(run.get(k, "")) == str
+                            else json.dumps(run.get(k, ""))
+                        )
                         for k in [k.strip("_") for k in cls._table_columns]
                     )
                     writer_entity.write(row)

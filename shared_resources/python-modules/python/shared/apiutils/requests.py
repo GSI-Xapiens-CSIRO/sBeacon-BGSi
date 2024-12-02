@@ -189,6 +189,7 @@ class RequestQuery(CamelModel):
 # Thirdparty Code
 class RequestParams(CamelModel):
     meta: RequestMeta = RequestMeta()
+    projects: list[str]
     query: RequestQuery = RequestQuery()
 
     # TODO update to parse body of API gateway POST and GET requests
@@ -226,6 +227,7 @@ class RequestParams(CamelModel):
         return {
             "apiVersion": self.meta.api_version,
             "requestedSchemas": self.meta.requested_schemas,
+            "projects": self.projects,
             "filters": self.query._filters,
             "req_params": self.query.request_parameters._user_params,
             "includeResultsetResponses": self.query.include_resultset_responses,

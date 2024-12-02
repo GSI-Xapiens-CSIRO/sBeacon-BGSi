@@ -20,7 +20,6 @@ class Run(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_datasetId",
-        "_cohortId",
         "biosampleId",
         "individualId",
         "info",
@@ -39,7 +38,6 @@ class Run(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         datasetId="",
-        cohortId="",
         biosampleId="",
         individualId="",
         info={},
@@ -53,7 +51,6 @@ class Run(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._datasetId = datasetId
-        self._cohortId = cohortId
         self.biosampleId = biosampleId
         self.individualId = individualId
         self.info = info

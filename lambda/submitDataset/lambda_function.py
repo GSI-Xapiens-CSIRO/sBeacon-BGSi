@@ -106,22 +106,15 @@ def lambda_handler(event, context):
         # set dataset id from project name
         body_dict["datasetId"] = f'{event.get("projectName")}:{event.get("datasetId")}'
         body_dict["dataset"]["id"] = body_dict["datasetId"]
-        # ignore cohortIds
-        body_dict["cohortId"] = ""
-        del body_dict["cohort"]
 
         for individual in body_dict.get("individuals", []):
             individual["datasetId"] = body_dict["datasetId"]
-            individual["cohortId"] = body_dict["cohortId"]
         for biosample in body_dict.get("biosamples", []):
             biosample["datasetId"] = body_dict["datasetId"]
-            biosample["cohortId"] = body_dict["cohortId"]
         for run in body_dict.get("runs", []):
             run["datasetId"] = body_dict["datasetId"]
-            run["cohortId"] = body_dict["cohortId"]
         for analysis in body_dict.get("analyses", []):
             analysis["datasetId"] = body_dict["datasetId"]
-            analysis["cohortId"] = body_dict["cohortId"]
         body_dict["index"] = False
 
     except ValueError:

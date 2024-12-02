@@ -20,7 +20,6 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_datasetId",
-        "_cohortId",
         "_vcfSampleId",
         "individualId",
         "biosampleId",
@@ -39,7 +38,6 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         datasetId="",
-        cohortId="",
         individualId="",
         biosampleId="",
         runId="",
@@ -53,7 +51,6 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._datasetId = datasetId
-        self._cohortId = cohortId
         self._vcfSampleId = vcfSampleId
         self.individualId = individualId
         self.biosampleId = biosampleId

@@ -240,13 +240,6 @@ def reindex_tables():
             "'id', '_assemblyid'",
         ),
         (
-            ENV_ATHENA.ATHENA_COHORTS_CACHE_TABLE,
-            ENV_ATHENA.ATHENA_COHORTS_TABLE,
-            "cohorts/",
-            10,
-            "'id'",
-        ),
-        (
             ENV_ATHENA.ATHENA_INDIVIDUALS_CACHE_TABLE,
             ENV_ATHENA.ATHENA_INDIVIDUALS_TABLE,
             "individuals/",

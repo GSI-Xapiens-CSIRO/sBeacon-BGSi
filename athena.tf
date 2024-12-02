@@ -10,84 +10,6 @@ resource "aws_glue_catalog_database" "metadata-database" {
 }
 
 # 
-# Cohorts metadata
-# 
-resource "aws_glue_catalog_table" "sbeacon-cohorts" {
-  name          = "sbeacon_cohorts"
-  database_name = aws_glue_catalog_database.metadata-database.name
-
-  table_type = "EXTERNAL_TABLE"
-
-  parameters = {
-    EXTERNAL       = "TRUE"
-    "orc.compress" = "SNAPPY"
-  }
-
-  storage_descriptor {
-    location      = "s3://${aws_s3_bucket.metadata-bucket.bucket}/cohorts"
-    input_format  = "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"
-    output_format = "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"
-
-
-    ser_de_info {
-      name                  = "ORC"
-      serialization_library = "org.apache.hadoop.hive.ql.io.orc.OrcSerde"
-
-      parameters = {
-        "serialization.format"      = 1,
-        "orc.column.index.access"   = "FALSE"
-        "hive.orc.use-column-names" = "TRUE"
-      }
-    }
-
-    columns {
-      name = "id"
-      type = "string"
-    }
-
-    columns {
-      name = "cohortdatatypes"
-      type = "string"
-    }
-
-    columns {
-      name = "cohortdesign"
-      type = "string"
-    }
-
-    columns {
-      name = "cohortsize"
-      type = "int"
-    }
-
-    columns {
-      name = "cohorttype"
-      type = "string"
-    }
-
-    columns {
-      name = "collectionevents"
-      type = "string"
-    }
-
-    columns {
-      name = "exclusioncriteria"
-      type = "string"
-    }
-
-    columns {
-      name = "inclusioncriteria"
-      type = "string"
-    }
-
-    columns {
-      name = "name"
-      type = "string"
-    }
-  }
-}
-
-# 
 # Datasets metadata
 # 
 resource "aws_glue_catalog_table" "sbeacon-datasets" {
@@ -222,11 +144,6 @@ resource "aws_glue_catalog_table" "sbeacon-individuals" {
     }
 
     columns {
-      name = "_cohortid"
-      type = "string"
-    }
-
-    columns {
       name = "diseases"
       type = "string"
     }
@@ -325,11 +242,6 @@ resource "aws_glue_catalog_table" "sbeacon-biosamples" {
 
     columns {
       name = "_datasetid"
-      type = "string"
-    }
-
-    columns {
-      name = "_cohortid"
       type = "string"
     }
 
@@ -472,11 +384,6 @@ resource "aws_glue_catalog_table" "sbeacon-runs" {
     }
 
     columns {
-      name = "_cohortid"
-      type = "string"
-    }
-
-    columns {
       name = "biosampleid"
       type = "string"
     }
@@ -566,11 +473,6 @@ resource "aws_glue_catalog_table" "sbeacon-analyses" {
 
     columns {
       name = "_datasetid"
-      type = "string"
-    }
-
-    columns {
-      name = "_cohortid"
       type = "string"
     }
 
@@ -816,11 +718,6 @@ resource "aws_glue_catalog_table" "sbeacon-relations" {
 
     columns {
       name = "datasetid"
-      type = "string"
-    }
-
-    columns {
-      name = "cohortid"
       type = "string"
     }
 

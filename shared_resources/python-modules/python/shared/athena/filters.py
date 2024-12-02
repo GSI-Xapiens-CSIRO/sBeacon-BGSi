@@ -15,7 +15,6 @@ from shared.utils import ENV_ATHENA
 
 from .analysis import Analysis
 from .biosample import Biosample
-from .cohort import Cohort
 from .dataset import Dataset
 from .individual import Individual
 from .run import Run
@@ -26,7 +25,6 @@ type_class = {
     "runs": Run,
     "analyses": Analysis,
     "datasets": Dataset,
-    "cohorts": Cohort,
 }
 type_relations_table_id = {
     "individuals": "individualid",
@@ -34,7 +32,6 @@ type_relations_table_id = {
     "runs": "runid",
     "analyses": "analysisid",
     "datasets": "datasetid",
-    "cohorts": "cohortid",
 }
 
 

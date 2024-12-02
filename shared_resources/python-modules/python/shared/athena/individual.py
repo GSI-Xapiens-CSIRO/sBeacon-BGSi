@@ -20,7 +20,6 @@ class Individual(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_datasetId",
-        "_cohortId",
         "diseases",
         "ethnicity",
         "exposures",
@@ -41,7 +40,6 @@ class Individual(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         datasetId="",
-        cohortId="",
         diseases=[],
         ethnicity={},
         exposures=[],
@@ -57,7 +55,6 @@ class Individual(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._datasetId = datasetId
-        self._cohortId = cohortId
         self.diseases = diseases
         self.ethnicity = ethnicity
         self.exposures = exposures

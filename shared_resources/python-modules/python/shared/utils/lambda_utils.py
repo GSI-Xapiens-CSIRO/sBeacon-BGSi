@@ -179,14 +179,6 @@ class AthenaEnvironment:
         return os.environ["ATHENA_DATASETS_CACHE_TABLE"]
 
     @property
-    def ATHENA_COHORTS_TABLE(self):
-        return os.environ["ATHENA_COHORTS_TABLE"]
-
-    @property
-    def ATHENA_COHORTS_CACHE_TABLE(self):
-        return os.environ["ATHENA_COHORTS_CACHE_TABLE"]
-
-    @property
     def ATHENA_INDIVIDUALS_TABLE(self):
         return os.environ["ATHENA_INDIVIDUALS_TABLE"]
 

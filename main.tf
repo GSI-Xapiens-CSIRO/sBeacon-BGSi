@@ -54,8 +54,6 @@ locals {
     ATHENA_METADATA_BUCKET         = aws_s3_bucket.metadata-bucket.bucket
     ATHENA_DATASETS_TABLE          = aws_glue_catalog_table.sbeacon-datasets.name
     ATHENA_DATASETS_CACHE_TABLE    = aws_glue_catalog_table.sbeacon-datasets-cache.name
-    ATHENA_COHORTS_TABLE           = aws_glue_catalog_table.sbeacon-cohorts.name
-    ATHENA_COHORTS_CACHE_TABLE     = aws_glue_catalog_table.sbeacon-cohorts-cache.name
     ATHENA_INDIVIDUALS_TABLE       = aws_glue_catalog_table.sbeacon-individuals.name
     ATHENA_INDIVIDUALS_CACHE_TABLE = aws_glue_catalog_table.sbeacon-individuals-cache.name
     ATHENA_BIOSAMPLES_TABLE        = aws_glue_catalog_table.sbeacon-biosamples.name
@@ -451,44 +449,6 @@ module "lambda-getDatasets" {
     {
       SPLIT_QUERY_LAMBDA    = module.lambda-splitQuery.lambda_function_name,
       SPLIT_QUERY_TOPIC_ARN = aws_sns_topic.splitQuery.arn
-    },
-    local.athena_variables,
-    local.sbeacon_variables,
-    local.dynamodb_variables
-  )
-
-  layers = [
-    local.python_libraries_layer,
-    local.python_modules_layer
-  ]
-}
-
-#
-# getCohorts Lambda Function
-#
-module "lambda-getCohorts" {
-  source = "terraform-aws-modules/lambda/aws"
-
-  function_name       = "sbeacon-backend-getCohorts"
-  description         = "Get the cohorts."
-  runtime             = "python3.12"
-  handler             = "lambda_function.lambda_handler"
-  memory_size         = 1769
-  timeout             = 60
-  attach_policy_jsons = true
-  policy_jsons = [
-    data.aws_iam_policy_document.lambda-getCohorts.json,
-    data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
-  ]
-  number_of_policy_jsons = 3
-  source_path            = "${path.module}/lambda/getCohorts"
-
-  tags = var.common-tags
-
-  environment_variables = merge(
-    {
-      SPLIT_QUERY_LAMBDA = module.lambda-splitQuery.lambda_function_name
     },
     local.athena_variables,
     local.sbeacon_variables,

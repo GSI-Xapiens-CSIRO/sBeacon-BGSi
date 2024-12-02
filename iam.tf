@@ -176,19 +176,6 @@ data "aws_iam_policy_document" "lambda-getDatasets" {
 }
 
 #
-# getCohorts Lambda Function
-#
-data "aws_iam_policy_document" "lambda-getCohorts" {
-  statement {
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket",
-    ]
-    resources = ["*"]
-  }
-}
-
-#
 # getRuns Lambda Function
 #
 data "aws_iam_policy_document" "lambda-getRuns" {

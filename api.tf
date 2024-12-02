@@ -27,16 +27,6 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
   #       It will stabilize to only change when resources change afterwards.
   triggers = {
     redeployment = sha1(jsonencode([
-      # # /submit-dataset
-      # aws_api_gateway_method.submit-dataset_post,
-      # aws_api_gateway_integration.submit-dataset_post,
-      # aws_api_gateway_integration_response.submit-dataset_post,
-      # aws_api_gateway_method_response.submit-dataset_post,
-      # # /submit-cohort
-      # aws_api_gateway_method.submit-cohort_post,
-      # aws_api_gateway_integration.submit-cohort_post,
-      # aws_api_gateway_integration_response.submit-cohort_post,
-      # aws_api_gateway_method_response.submit-cohort_post,
       # /configuration
       aws_api_gateway_method.configuration,
       aws_api_gateway_integration.configuration,
@@ -341,46 +331,6 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       aws_api_gateway_integration_response.datasets-id-biosamples_post,
       aws_api_gateway_method_response.datasets-id-biosamples,
       aws_api_gateway_method_response.datasets-id-biosamples_post,
-      # /cohorts
-      aws_api_gateway_method.cohorts,
-      aws_api_gateway_method.cohorts_post,
-      aws_api_gateway_integration.cohorts,
-      aws_api_gateway_integration.cohorts_post,
-      aws_api_gateway_integration_response.cohorts,
-      aws_api_gateway_integration_response.cohorts_post,
-      aws_api_gateway_method_response.cohorts,
-      aws_api_gateway_method_response.cohorts_post,
-      # /cohorts/{id}
-      aws_api_gateway_method.cohorts-id,
-      aws_api_gateway_method.cohorts-id_post,
-      aws_api_gateway_integration.cohorts-id,
-      aws_api_gateway_integration.cohorts-id_post,
-      aws_api_gateway_integration_response.cohorts-id,
-      aws_api_gateway_integration_response.cohorts-id_post,
-      aws_api_gateway_method_response.cohorts-id,
-      aws_api_gateway_method_response.cohorts-id_post,
-      # /cohorts/{id}/individuals
-      aws_api_gateway_method.cohorts-id-individuals,
-      aws_api_gateway_method.cohorts-id-individuals_post,
-      aws_api_gateway_integration.cohorts-id-individuals,
-      aws_api_gateway_integration.cohorts-id-individuals_post,
-      aws_api_gateway_integration_response.cohorts-id-individuals,
-      aws_api_gateway_integration_response.cohorts-id-individuals_post,
-      aws_api_gateway_method_response.cohorts-id-individuals,
-      aws_api_gateway_method_response.cohorts-id-individuals_post,
-      # /cohorts/{id}/filtering_terms
-      aws_api_gateway_method.cohorts-id-filtering_terms,
-      aws_api_gateway_method.cohorts-id-filtering_terms_post,
-      aws_api_gateway_integration.cohorts-id-filtering_terms,
-      aws_api_gateway_integration.cohorts-id-filtering_terms_post,
-      aws_api_gateway_integration_response.cohorts-id-filtering_terms,
-      aws_api_gateway_integration_response.cohorts-id-filtering_terms_post,
-      aws_api_gateway_method_response.cohorts-id-filtering_terms,
-      aws_api_gateway_method_response.cohorts-id-filtering_terms_post,
-      # index
-      # aws_api_gateway_method.index_post,
-      # aws_api_gateway_integration.index_post,
-      # aws_api_gateway_method_response.index_post,
       # admin
       aws_api_gateway_method.admin_proxy,
       aws_api_gateway_integration.admin_proxy,

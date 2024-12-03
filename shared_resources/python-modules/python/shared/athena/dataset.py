@@ -113,39 +113,6 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
                         writer_terms.write(row)
 
 
-def get_datasets(
-    assembly_id, dataset_id=None, dataset_ids=None, conditions="", skip=0, limit=100
-):
-    if dataset_id:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            AND id='{dataset_id}'
-            LIMIT 1
-        """
-    elif dataset_ids:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            AND id IN ({','.join([f"'{id}'" for id in dataset_ids])})
-            ORDER BY id 
-            OFFSET {skip} 
-            LIMIT {limit};
-        """
-    else:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            ORDER BY id 
-            OFFSET {skip} 
-            LIMIT {limit};
-        """
-    return Dataset.get_by_query(query)
-
-
 def parse_datasets_with_samples(exec_id):
     datasets = []
     samples = []

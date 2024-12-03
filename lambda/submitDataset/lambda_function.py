@@ -8,13 +8,19 @@ from shared.athena import Analysis, Biosample, Dataset, Individual, Run
 
 from shared.utils import clear_tmp
 from smart_open import open as sopen
-from util import get_vcf_chromosome_maps
+from util import get_vcf_chromosome_maps, get_vcfs_samples
 
 # uncomment below for debugging
 # os.environ['LD_DEBUG'] = 'all'
 
 
-def create_dataset(attributes, vcf_chromosome_maps):
+def create_dataset(attributes):
+    vcf_locations = set(attributes.get("vcfLocations", []))
+    errored, errors, vcf_chromosome_maps = get_vcf_chromosome_maps(vcf_locations)
+
+    if errored:
+        raise Exception(f"Error getting VCF chromosome maps: {errors}")
+
     datasetId = attributes.get("datasetId", None)
     threads = []
 
@@ -36,6 +42,18 @@ def create_dataset(attributes, vcf_chromosome_maps):
     analyses = attributes.get("analyses", [])
     print("De-serialising complete")
 
+    analyses_samples = set([analysis["vcfSampleId"] for analysis in analyses])
+    errored, errors, vcfs_samples = get_vcfs_samples(attributes["vcfLocations"])
+
+    if errored:
+        raise Exception(f"Error getting VCF samples: {errors}")
+
+    # check if all samples in analyses are in the VCFs
+    if not analyses_samples.issubset(vcfs_samples):
+        raise Exception(f"All samples in analyses not in VCFs")
+    if not vcfs_samples.issubset(vcfs_samples):
+        raise Exception(f"All samples in VCFs not in analyses")
+
     # upload to s3
     if len(individuals) > 0:
         threads.append(Thread(target=Individual.upload_array, args=(individuals,)))
@@ -56,22 +74,6 @@ def create_dataset(attributes, vcf_chromosome_maps):
     print("Awaiting uploads")
     [thread.join() for thread in threads]
     print("Upload finished")
-
-
-def submit_dataset(body_dict):
-    vcf_locations = set(body_dict.get("vcfLocations", []))
-    errored, errors, vcf_chromosome_maps = get_vcf_chromosome_maps(vcf_locations)
-    if errored:
-        return {"success": False, "message": "\n".join(errors)}
-
-    print("Validated the VCF files")
-
-    try:
-        create_dataset(body_dict, vcf_chromosome_maps)
-    except Exception as e:
-        return {"success": False, "message": f"Failed to submit dataset: {e}"}
-
-    return {"success": True, "message": "Dataset submitted successfully"}
 
 
 def validate_request(parameters):
@@ -126,10 +128,16 @@ def lambda_handler(event, context):
 
     print("Validated the payload")
 
-    result = submit_dataset(body_dict)
-    # cleanup of files in /tmp caused by bcftools/tabix
-    clear_tmp()
-    return result
+    try:
+        create_dataset(body_dict)
+        response = {"success": True, "message": "Dataset submitted successfully"}
+    except Exception as e:
+        response = {"success": False, "message": str(e)}
+    finally:
+        # cleanup of files in /tmp caused by bcftools/tabix
+        clear_tmp()
+
+    return response
 
 
 if __name__ == "__main__":

@@ -199,7 +199,9 @@ def ingest_dataset_to_sbeacon(event, context):
     }
     project = Projects.get(project_name)
     response = invoke_lambda_function(SUBMIT_LAMBDA, payload)
-    project.update(actions=[Projects.ingested_datasets.add([dataset_id])])
+
+    if "success" in response and response["success"]:
+        project.update(actions=[Projects.ingested_datasets.add([dataset_id])])
 
     return response
 

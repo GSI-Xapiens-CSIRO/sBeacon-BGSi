@@ -1,4 +1,8 @@
-from .chrom_matching import get_matching_chromosome, get_vcf_chromosomes
+from .chrom_matching import (
+    get_matching_chromosome,
+    get_vcf_chromosomes,
+    get_vcf_samples,
+)
 from .lambda_utils import (
     ENV_ATHENA,
     ENV_BEACON,

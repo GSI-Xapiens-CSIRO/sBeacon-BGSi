@@ -65,8 +65,39 @@ def get_vcf_chromosomes(vcf):
             error = str(e)
         errored = True
         tabix_output = ""
-    
+
     return errored, error, chromosomes
+
+
+def get_vcf_samples(vcf):
+    args = ["bcftools", "query", "--list-samples", vcf]
+    errored = False
+    error = ""
+    samples = []
+
+    try:
+        tabix_output = subprocess.check_output(args=args, cwd="/tmp", encoding="utf-8")
+        samples = tabix_output.strip().split("\n")
+        print(f"vcf - {vcf} has samples - {samples}")
+    except subprocess.CalledProcessError as e:
+        error_message = e.stderr
+        print(
+            "cmd {} returned non-zero error code {}. stderr:\n{}".format(
+                e.cmd, e.returncode, error_message
+            )
+        )
+        if error_message.startswith("[E::hts_open_format] Failed to open"):
+            error = "Could not access {}.".format(vcf)
+        elif error_message.startswith("[E::hts_hopen] Failed to open"):
+            error = "{} is not a gzipped vcf file.".format(vcf)
+        elif error_message.startswith("Could not load .tbi index"):
+            error = "Could not open index file for {}.".format(vcf)
+        else:
+            error = str(e)
+        errored = True
+        tabix_output = ""
+
+    return errored, error, samples
 
 
 def get_matching_chromosome(vcf_chromosomes, target_chromosome):

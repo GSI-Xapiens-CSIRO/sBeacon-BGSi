@@ -50,7 +50,16 @@
         }
     },
     "required": [
+        "datasetId",
+        "assemblyId",
+        "vcfLocations",
+        "dataset",
+        "individuals",
+        "biosamples",
+        "runs",
+        "analyses"
     ],
+    "additionalProperties": false,
     "dependentSchemas": {
         "dataset": {
             "required": [

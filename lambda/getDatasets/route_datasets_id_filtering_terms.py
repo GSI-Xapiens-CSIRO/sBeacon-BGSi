@@ -66,7 +66,9 @@ def route(request: RequestParams, dataset_id):
 
     print("Performing query \n", query)
 
-    exec_id = run_custom_query(query, return_id=True)
+    exec_id = run_custom_query(
+        query, return_id=True, projects=request.projects, sub=request.sub
+    )
     filteringTerms = []
     ontologies = set()
 

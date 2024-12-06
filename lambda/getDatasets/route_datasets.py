@@ -54,7 +54,10 @@ def route(request: RequestParams):
         count = (
             1
             if Dataset.get_existence_by_query(
-                query, execution_parameters=execution_parameters
+                query,
+                execution_parameters=execution_parameters,
+                projects=request.projects,
+                sub=request.sub,
             )
             else 0
         )
@@ -67,7 +70,10 @@ def route(request: RequestParams):
     if request.query.requested_granularity == "count":
         query = get_count_query(conditions)
         count = Dataset.get_count_by_query(
-            query, execution_parameters=execution_parameters
+            query,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         response = build_beacon_count_response(
             {}, count, request, {}, DefaultSchemas.DATASETS
@@ -85,6 +91,8 @@ def route(request: RequestParams):
             Dataset.get_by_query,
             record_query,
             execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         # counts fetching
         count_query = get_count_query(conditions)
@@ -92,6 +100,8 @@ def route(request: RequestParams):
             Dataset.get_count_by_query,
             count_query,
             execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         executor.shutdown()
         count = count_future.result()

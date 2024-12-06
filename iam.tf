@@ -278,6 +278,15 @@ data "aws_iam_policy_document" "athena-full-access" {
       "${aws_s3_bucket.metadata-bucket.arn}/*"
     ]
   }
+
+  statement {
+    actions = [
+      "dynamodb:Query",
+    ]
+    resources = [
+      "${aws_dynamodb_table.project_users.arn}/index/${local.project_users_uid_index}",
+    ]
+  }
 }
 
 # DynamoDB Ontology Related Access

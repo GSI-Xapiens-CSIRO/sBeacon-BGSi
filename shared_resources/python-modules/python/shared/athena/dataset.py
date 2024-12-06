@@ -23,6 +23,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_assemblyId",
+        "_projectName",
         "_vcfLocations",
         "_vcfChromosomeMap",
         "createDateTime",
@@ -41,6 +42,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         assemblyId="",
+        projectName="",
         vcfLocations="",
         vcfChromosomeMap="",
         createDateTime="",
@@ -54,6 +56,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._assemblyId = assemblyId
+        self._projectName = projectName
         self._vcfLocations = vcfLocations
         self._vcfChromosomeMap = vcfChromosomeMap
         self.createDateTime = createDateTime

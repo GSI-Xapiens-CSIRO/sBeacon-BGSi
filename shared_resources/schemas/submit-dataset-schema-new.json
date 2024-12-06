@@ -8,6 +8,9 @@
         "assemblyId": {
             "type": "string"
         },
+        "projectName": {
+            "type": "string"
+        },
         "vcfLocations": {
             "type": "array",
             "items": {
@@ -50,6 +53,7 @@
         }
     },
     "required": [
+        "projectName",
         "datasetId",
         "assemblyId",
         "vcfLocations",

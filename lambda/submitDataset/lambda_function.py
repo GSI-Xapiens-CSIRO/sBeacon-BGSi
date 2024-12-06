@@ -105,18 +105,25 @@ def lambda_handler(event, context):
             body_dict.update(json.loads(payload.read()))
         # vcf files attached to the request
         body_dict["vcfLocations"] = event.get("vcfLocations", [])
+        project_name = event.get("projectName")  # This is a required field
+        body_dict["projectName"] = project_name
         # set dataset id from project name
-        body_dict["datasetId"] = f'{event.get("projectName")}:{event.get("datasetId")}'
+        body_dict["datasetId"] = f'{project_name}:{event.get("datasetId")}'
         body_dict["dataset"]["id"] = body_dict["datasetId"]
+        body_dict["dataset"]["projectName"] = project_name
 
         for individual in body_dict.get("individuals", []):
             individual["datasetId"] = body_dict["datasetId"]
+            individual["projectName"] = project_name
         for biosample in body_dict.get("biosamples", []):
             biosample["datasetId"] = body_dict["datasetId"]
+            biosample["projectName"] = project_name
         for run in body_dict.get("runs", []):
             run["datasetId"] = body_dict["datasetId"]
+            run["projectName"] = project_name
         for analysis in body_dict.get("analyses", []):
             analysis["datasetId"] = body_dict["datasetId"]
+            analysis["projectName"] = project_name
         body_dict["index"] = False
 
     except ValueError:

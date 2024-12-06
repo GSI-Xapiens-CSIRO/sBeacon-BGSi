@@ -51,6 +51,11 @@ resource "aws_glue_catalog_table" "sbeacon-datasets" {
     }
 
     columns {
+      name = "_projectname"
+      type = "string"
+    }
+
+    columns {
       name = "_vcflocations"
       type = "string"
     }
@@ -140,6 +145,11 @@ resource "aws_glue_catalog_table" "sbeacon-individuals" {
 
     columns {
       name = "_datasetid"
+      type = "string"
+    }
+
+    columns {
+      name = "_projectname"
       type = "string"
     }
 
@@ -242,6 +252,11 @@ resource "aws_glue_catalog_table" "sbeacon-biosamples" {
 
     columns {
       name = "_datasetid"
+      type = "string"
+    }
+
+    columns {
+      name = "_projectname"
       type = "string"
     }
 
@@ -384,6 +399,11 @@ resource "aws_glue_catalog_table" "sbeacon-runs" {
     }
 
     columns {
+      name = "_projectname"
+      type = "string"
+    }
+
+    columns {
       name = "biosampleid"
       type = "string"
     }
@@ -473,6 +493,11 @@ resource "aws_glue_catalog_table" "sbeacon-analyses" {
 
     columns {
       name = "_datasetid"
+      type = "string"
+    }
+
+    columns {
+      name = "_projectname"
       type = "string"
     }
 

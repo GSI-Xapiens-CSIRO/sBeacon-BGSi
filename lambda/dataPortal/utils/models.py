@@ -60,3 +60,13 @@ class JupyterInstances(Model):
 
     uid = UnicodeAttribute(hash_key=True)
     instanceName = UnicodeAttribute(range_key=True)
+
+class Quota(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_QUOTA_USER_TABLE")
+        region = REGION
+
+    IdentityUser = UnicodeAttribute(hash_key=True)
+    CostEstimation = UnicodeAttribute()
+    Usage = UnicodeAttribute()
+    Updatedat = UnicodeAttribute(range_key=True)

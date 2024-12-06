@@ -72,6 +72,8 @@ locals {
     DYNAMO_ONTOLOGIES_TABLE  = aws_dynamodb_table.ontologies.name
     DYNAMO_ANSCESTORS_TABLE  = aws_dynamodb_table.anscestor_terms.name
     DYNAMO_DESCENDANTS_TABLE = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_PROJECT_USERS_TABLE = aws_dynamodb_table.project_users.name
+    DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"

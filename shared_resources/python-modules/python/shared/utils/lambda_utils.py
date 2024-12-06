@@ -256,6 +256,14 @@ class DynamoDBEnvironment:
     # def DYNAMO_ONTO_INDEX_TABLE(self):
     #     return os.environ["DYNAMO_ONTO_INDEX_TABLE"]
 
+    @property
+    def DYNAMO_PROJECT_USERS_TABLE(self):
+        return os.environ["DYNAMO_PROJECT_USERS_TABLE"]
+
+    @property
+    def DYNAMO_PROJECT_USERS_UID_INDEX(self):
+        return os.environ["DYNAMO_PROJECT_USERS_UID_INDEX"]
+
 
 # class SnsEnvironment:
 #     @property

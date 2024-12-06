@@ -432,6 +432,15 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
+      "dynamodb:Query",
+    ]
+    resources = [
+      "${aws_dynamodb_table.project_users.arn}/index/${local.project_users_uid_index}",
+    ]
+  }
+
+  statement {
+    actions = [
       "cognito-idp:ListUsers",
     ]
     resources = [

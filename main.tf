@@ -705,6 +705,40 @@ module "lambda-data-portal" {
 }
 
 #
+# getProjects Function
+#
+module "lambda-getProjects" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-getProjects"
+  description         = "Endpoint for retrieving public project information."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 512
+  timeout             = 60
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-getProjects.json
+  ]
+  number_of_policy_jsons = 1
+  source_path            = "${path.module}/lambda/getProjects"
+
+  tags = var.common-tags
+
+  environment_variables = merge(
+    local.sbeacon_variables,
+    {
+      DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
+    }
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+  ]
+}
+
+#
 # email notification Lambda function
 #
 module "lambda-logEmailDelivery" {

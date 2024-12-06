@@ -507,6 +507,20 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
   }
 }
 
+# getProjects lambda access
+data "aws_iam_policy_document" "lambda-getProjects" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+    resources = [
+      aws_dynamodb_table.projects.arn,
+    ]
+  }
+}
 
 # SES Email Notification Logging
 data "aws_iam_policy_document" "ses-sns-access" {

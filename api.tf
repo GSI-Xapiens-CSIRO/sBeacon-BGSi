@@ -341,6 +341,11 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       aws_api_gateway_integration.dportal_proxy,
       aws_api_gateway_integration_response.dportal_proxy,
       aws_api_gateway_method_response.dportal_proxy,
+      # projects
+      aws_api_gateway_method.projects,
+      aws_api_gateway_integration.projects,
+      aws_api_gateway_integration_response.projects,
+      aws_api_gateway_method_response.projects,
     ]))
   }
 }

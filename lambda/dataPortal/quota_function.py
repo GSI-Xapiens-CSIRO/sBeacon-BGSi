@@ -26,27 +26,35 @@ def store_quota(event, context):
         
     IdentityUser = body.get("IdentityUser")
     CostEstimation = body.get("CostEstimation")
-    Usage = body.get("Usage")
-    Updatedat = body.get("Updatedat")
-    print(IdentityUser, CostEstimation, Usage, Updatedat)
+    Usage = body.get("Usage",{})
     try:
-        quota = Quota.get(IdentityUser, Updatedat)
+        quota = Quota.get(IdentityUser)
+        actions = []
+        if CostEstimation:
+            actions.append(Quota.CostEstimation.set(CostEstimation))
+        for key, value in Usage.items():
+            if key in ['usageCount']:
+                continue
+            try:
+                attribute = getattr(Quota.Usage, key)
+                actions.append(attribute.set(value))
+            except Exception as exc:
+                raise PortalError(
+                    error_code=404,
+                    error_message=str(exc),
+                )
         quota.update(
-            actions=[
-                Quota.CostEstimation.set(CostEstimation),
-                Quota.Usage.set(Usage)
-            ]
+            actions=actions
         )
     except Quota.DoesNotExist:
         quota = Quota(
-            IdentityUser=IdentityUser,
+            uid=IdentityUser,
             CostEstimation=CostEstimation,
             Usage=Usage,
-            Updatedat=Updatedat
         )
         quota.save()
 
-    return quota.attribute_values
+    return quota.to_dict()
 
 """
 This module provides Lambda functions to store and retrieve quota information.
@@ -61,13 +69,12 @@ Functions:
         Returns:
             dict: The attribute values of the retrieved quota.
 """
-@router.attach("/dportal/quota/{userIdentity}/{updatedAt}", "get")
+@router.attach("/dportal/quota/{userIdentity}", "get")
 def get_quota(event, context):
     uId = event["pathParameters"]["userIdentity"]
-    updatedAt = event["pathParameters"]["updatedAt"]
     
     try:
-        myQuota = Quota.get(uId, updatedAt)
+        myQuota = Quota.get(uId)
 
     except Quota.DoesNotExist:
         raise PortalError(
@@ -75,4 +82,21 @@ def get_quota(event, context):
             error_message="No data available here.",
         )
     
-    return myQuota
+    return myQuota.to_dict()
+
+@router.attach("/dportal/quota/{userIdentity}/increment_usagecount", "post")
+def increment_usagecount(event, context):
+    uId = event["pathParameters"]["userIdentity"]
+    
+    try:
+        myQuota = Quota.get(uId)
+        myQuota.update(
+            actions=[Quota.Usage.usageCount.add(1)]
+        )
+    except Quota.DoesNotExist:
+        raise PortalError(
+            error_code=409,
+            error_message="No data available here.",
+        )
+    
+    return myQuota.to_dict()

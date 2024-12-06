@@ -112,11 +112,10 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
   billing_mode   = "PAY_PER_REQUEST" # on demand
   #read_capacity  = 5
   #write_capacity = 5
-  hash_key       = "IdentityUser"
-  range_key      = "Updatedat"
+  hash_key       = "uid"
 
   attribute {
-    name = "IdentityUser"
+    name = "uid"
     type = "S"
   }
 
@@ -127,15 +126,11 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
 
   attribute {
     name = "Usage"
-    type = "S"
+    type = "M"
   }
 
-  attribute {
-    name = "Updatedat"
-    type = "S"
-  }
 
-    tags = {
+  tags = {
     Owner       = "gaspi"
     Environment = "dev"
     Name        = "sbeacon-backend"

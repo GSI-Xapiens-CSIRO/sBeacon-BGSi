@@ -1,8 +1,20 @@
 import json
 import traceback
+from urllib.parse import unquote
 
 from botocore.exceptions import ClientError
+
 from shared.apiutils.responses import DateTimeEncoder, bundle_response
+
+
+class PortalError(Exception):
+    def __init__(self, error_code, error_message):
+        self.error_code = error_code
+        self.error_message = error_message
+        super().__init__(self.error_message)
+
+    def __str__(self):
+        return f'Error Code: {self.error_code}, Error Message: "{self.error_message}"'
 
 
 class BeaconError(Exception):
@@ -100,13 +112,14 @@ class LambdaRouter:
             print(traceback.format_exc())
             return bundle_response(500, {"error": error_code, "message": error_message})
 
-        except BeaconError as error:
-            print(
-                f"A beacon error occurred: {error.error_code} - {error.error_message}"
-            )
+        except PortalError as error:
+            error_code = error.error_code
+            error_message = error.error_message
+            print(f"A portal error occurred: {error_code} - {error_message}")
             print(traceback.format_exc())
             return bundle_response(
-                500, {"error": error.error_code, "message": error.error_message}
+                error_code,
+                {"error": error_code, "message": error_message},
             )
 
         except AuthError as error:
@@ -165,6 +178,6 @@ class LambdaRouter:
         for route_part, path_part in zip(route_parts, path_parts):
             if route_part.startswith("{") and route_part.endswith("}"):
                 param_name = route_part.strip("{}")
-                params[param_name] = path_part
+                params[param_name] = unquote(path_part)
 
         return params

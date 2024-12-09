@@ -695,6 +695,7 @@ module "lambda-data-portal" {
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,
       COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name
+      COGNITO_MANAGER_GROUP_NAME     = var.cognito-manager-group-name
       SUBMIT_LAMBDA                  = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                 = module.lambda-indexer.lambda_function_name
     },

@@ -2,10 +2,10 @@ import os
 
 import boto3
 
-from utils.router import LambdaRouter, PortalError
+from shared.apiutils import LambdaRouter, PortalError
 from utils.models import InstanceStatus, JupyterInstances
 from utils.cognito import get_user_from_attribute, get_user_attribute
-from shared.cognitoutils import authenticate_admin
+from shared.cognitoutils import authenticate_manager
 
 router = LambdaRouter()
 cognito_client = boto3.client("cognito-idp")
@@ -19,7 +19,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 #
 
 
-@router.attach("/dportal/admin/notebooks", "get", authenticate_admin)
+@router.attach("/dportal/admin/notebooks", "get", authenticate_manager)
 def list_notebooks(event, context):
     instances = list(JupyterInstances.scan())
     statuses = [
@@ -49,7 +49,7 @@ def list_notebooks(event, context):
     ]
 
 
-@router.attach("/dportal/admin/notebooks/{name}", "get", authenticate_admin)
+@router.attach("/dportal/admin/notebooks/{name}", "get", authenticate_manager)
 def get_notebook_status(event, context):
     notebook_name = event["pathParameters"]["name"]
 
@@ -68,7 +68,7 @@ def get_notebook_status(event, context):
     }
 
 
-@router.attach("/dportal/admin/notebooks/{name}/stop", "post", authenticate_admin)
+@router.attach("/dportal/admin/notebooks/{name}/stop", "post", authenticate_manager)
 def stop_notebook(event, context):
     notebook_name = event["pathParameters"]["name"]
 
@@ -89,7 +89,7 @@ def stop_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/admin/notebooks/{name}/delete", "post", authenticate_admin)
+@router.attach("/dportal/admin/notebooks/{name}/delete", "post", authenticate_manager)
 def delete_my_notebook(event, context):
     notebook_name = event["pathParameters"]["name"]
 

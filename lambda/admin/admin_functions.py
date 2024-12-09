@@ -214,19 +214,17 @@ def update_user_groups(event, context):
     chosen_groups = []
     removed_groups = []
 
-    if body_dict["groups"]["administrators"]:
-        chosen_groups.append("administrators")
-    else:
-        removed_groups.append("administrators")
-
-    if body_dict["groups"]["managers"]:
-        chosen_groups.append("managers")
-    else:
-        removed_groups.append("managers")
+    # changed group associations
+    for group, chosen in body_dict["groups"].items():
+        if chosen:
+            chosen_groups.append(group)
+        else:
+            removed_groups.append(group)
 
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)
 
+    # admin cannot remove themself from administrators group
     if username == authorizer and "administrators" in removed_groups:
         print(
             f"Unsuccessful. Administrators are unable to decrease their own permissions."

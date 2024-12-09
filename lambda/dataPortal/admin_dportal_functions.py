@@ -1,13 +1,13 @@
 import json
 import os
 
-from utils.router import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
 from utils.s3_util import list_s3_prefix, delete_s3_objects
 from utils.cognito import get_user_from_attribute, get_user_attribute
 from utils.lambda_util import invoke_lambda_function
-from shared.cognitoutils import authenticate_admin
+from shared.cognitoutils import authenticate_manager
+from shared.apiutils import LambdaRouter, PortalError
 
 
 router = LambdaRouter()
@@ -22,7 +22,7 @@ INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 #
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "get", authenticate_admin)
+@router.attach("/dportal/admin/projects/{name}/users", "get", authenticate_manager)
 def list_project_users(event, context):
     name = event["pathParameters"]["name"]
 
@@ -49,7 +49,7 @@ def list_project_users(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_admin
+    "/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_manager
 )
 def remove_project_user(event, context):
     name = event["pathParameters"]["name"]
@@ -65,7 +65,7 @@ def remove_project_user(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "post", authenticate_admin)
+@router.attach("/dportal/admin/projects/{name}/users", "post", authenticate_manager)
 def add_user_to_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -91,7 +91,7 @@ def add_user_to_project(event, context):
 #
 
 
-@router.attach("/dportal/admin/projects/{name}", "delete", authenticate_admin)
+@router.attach("/dportal/admin/projects/{name}", "delete", authenticate_manager)
 def delete_project(event, context):
     name = event["pathParameters"]["name"]
 
@@ -130,7 +130,7 @@ def delete_project(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}", "put", authenticate_admin)
+@router.attach("/dportal/admin/projects/{name}", "put", authenticate_manager)
 def update_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -152,7 +152,7 @@ def update_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects", "post", authenticate_admin)
+@router.attach("/dportal/admin/projects", "post", authenticate_manager)
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))
     name = body_dict.get("name")
@@ -173,7 +173,7 @@ def create_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects", "get", authenticate_admin)
+@router.attach("/dportal/admin/projects", "get", authenticate_manager)
 def list_projects(event, context):
     projects = Projects.scan()
     return [project.to_dict() for project in projects]
@@ -185,7 +185,7 @@ def list_projects(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/ingest/{dataset}", "post", authenticate_admin
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "post", authenticate_manager
 )
 def ingest_dataset_to_sbeacon(event, context):
     body_dict = json.loads(event.get("body"))
@@ -207,7 +207,7 @@ def ingest_dataset_to_sbeacon(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/ingest/{dataset}", "delete", authenticate_admin
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "delete", authenticate_manager
 )
 def un_ingest_dataset_from_sbeacon(event, context):
     project_name = event["pathParameters"]["name"]
@@ -238,7 +238,7 @@ def un_ingest_dataset_from_sbeacon(event, context):
     }
 
 
-@router.attach("/dportal/admin/sbeacon/index", "post", authenticate_admin)
+@router.attach("/dportal/admin/sbeacon/index", "post", authenticate_manager)
 def index_sbeacon(event, context):
     payload = {
         "reIndexTables": True,

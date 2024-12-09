@@ -1,6 +1,6 @@
 import os
 
-from utils.router import LambdaRouter, PortalError
+from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
 from utils.s3_util import get_presigned_url
 

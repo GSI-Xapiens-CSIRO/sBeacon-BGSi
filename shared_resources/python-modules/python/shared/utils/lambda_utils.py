@@ -280,6 +280,10 @@ class CognitoEnvironment:
     def COGNITO_ADMIN_GROUP_NAME(self):
         return os.environ["COGNITO_ADMIN_GROUP_NAME"]
 
+    @property
+    def COGNITO_MANAGER_GROUP_NAME(self):
+        return os.environ["COGNITO_MANAGER_GROUP_NAME"]
+
 
 class SesEnvironment:
     @property

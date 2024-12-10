@@ -29,6 +29,13 @@ def get_username_by_email(email):
     raise Exception(f"User with email {email} not found")
 
 
+def logout_all_sessions(email):
+    username = get_username_by_email(email)
+    cognito_client.admin_user_global_sign_out(
+        UserPoolId=USER_POOL_ID, Username=username
+    )
+
+
 @router.attach("/admin/users", "post", authenticate_admin)
 def add_user(event, context):
     body_dict = json.loads(event.get("body"))
@@ -244,4 +251,6 @@ def update_user_groups(event, context):
     print(
         f"User with email {email} added to {len(chosen_groups)} and removed from {len(removed_groups)} groups"
     )
+
+    logout_all_sessions(email)
     return {"success": True}

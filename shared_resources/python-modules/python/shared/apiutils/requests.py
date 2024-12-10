@@ -180,6 +180,7 @@ class RequestQuery(CamelModel):
     test_mode: bool = False
     requested_granularity: Granularity = Granularity(BEACON_DEFAULT_GRANULARITY)
     _filters: dict = PrivateAttr()
+    projects: list[str] = []
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -189,7 +190,7 @@ class RequestQuery(CamelModel):
 # Thirdparty Code
 class RequestParams(CamelModel):
     meta: RequestMeta = RequestMeta()
-    projects: list[str]
+    projects: list[str] = []
     sub: str = None
     query: RequestQuery = RequestQuery()
 
@@ -217,6 +218,9 @@ class RequestParams(CamelModel):
                 self.query.filters = adapter.validate_python(
                     [{"id": term} for term in filters]
                 )
+            elif k == "projects":
+                projects = v.split(",")
+                self.projects = projects
             else:
                 req_params_dict[k] = v
         # query parameters related to variants

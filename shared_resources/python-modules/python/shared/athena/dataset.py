@@ -81,9 +81,10 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
             + ">"
         )
         header_terms = (
-            "struct<kind:string,id:string,term:string,label:string,type:string>"
+            "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
         )
-        key = f"{array[0]['id']}"
+        key = array[0]['id']
+        projectname = array[0]['projectName']
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/datasets-cache/{key}", "wb"
@@ -112,7 +113,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
                     )
                     writer_entity.write(row)
                     for term, label, typ in extract_terms([dataset]):
-                        row = ("datasets", dataset["id"], term, label, typ)
+                        row = ("datasets", dataset["id"], term, label, typ, projectname)
                         writer_terms.write(row)
 
 

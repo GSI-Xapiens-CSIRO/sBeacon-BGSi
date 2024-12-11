@@ -22,11 +22,13 @@ def create_dataset(attributes):
         raise Exception(f"Error getting VCF chromosome maps: {errors}")
 
     datasetId = attributes.get("datasetId", None)
+    projectName = attributes.get("projectName", None)
     threads = []
 
     # dataset metadata entry information
     json_dataset = attributes.get("dataset", None)
     json_dataset["id"] = datasetId
+    json_dataset["projectName"] = projectName
     json_dataset["assemblyId"] = attributes["assemblyId"]
     json_dataset["vcfLocations"] = attributes["vcfLocations"]
     json_dataset["vcfChromosomeMap"] = [vcfm for vcfm in vcf_chromosome_maps]

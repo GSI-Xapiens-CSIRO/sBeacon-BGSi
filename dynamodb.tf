@@ -129,11 +129,6 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
     type = "S"
   }
 
-  attribute {
-    name = "CostEstimation"
-    type = "N"       
-  }
-
   tags = {
     Owner       = "gaspi"
     Environment = "dev"

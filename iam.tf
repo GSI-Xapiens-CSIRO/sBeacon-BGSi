@@ -436,6 +436,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.projects.arn,
       aws_dynamodb_table.project_users.arn,
       aws_dynamodb_table.juptyer_notebooks.arn,
+      aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
     ]
   }
 

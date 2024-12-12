@@ -52,7 +52,7 @@ def add_user(event, context):
     temp_password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
 
     try:
-        cognito_client.admin_create_user(
+        congnito_user = cognito_client.admin_create_user(
             UserPoolId=USER_POOL_ID,
             Username=email,
             TemporaryPassword=temp_password,
@@ -113,6 +113,7 @@ def add_user(event, context):
     </html>
     """
 
+    res = {"success": True}
     try:
         response = ses_client.send_email(
             Destination={
@@ -138,6 +139,10 @@ def add_user(event, context):
             ReturnPath=SES_SOURCE_EMAIL,
             ConfigurationSetName=SES_CONFIG_SET_NAME,
         )
+        user_sub = next(attr["Value"] for attr in congnito_user["User"]["Attributes"] if attr["Name"] == "sub")
+        if user_sub:
+            res['uid'] = user_sub
+        
     except:
         cognito_client.admin_delete_user(
             UserPoolId=USER_POOL_ID,
@@ -150,7 +155,7 @@ def add_user(event, context):
 
     print(f"User {email} created successfully!")
     print(f"Email sent with message ID: {response["MessageId"]}")
-    return {"success": True}
+    return res
 
 
 @router.attach("/admin/users", "get", authenticate_admin)

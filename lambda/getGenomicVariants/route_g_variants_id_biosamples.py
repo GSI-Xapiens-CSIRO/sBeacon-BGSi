@@ -133,13 +133,20 @@ def route(request: RequestParams, variant_id):
     if conditions:
         query = datasets_query(conditions, assembly_id)
         exec_id = run_custom_query(
-            query, return_id=True, execution_parameters=execution_parameters
+            query,
+            return_id=True,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         datasets, samples = parse_datasets_with_samples(exec_id)
     else:
         query = datasets_query_fast(assembly_id)
         datasets = Dataset.get_by_query(
-            query, execution_parameters=execution_parameters
+            query,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         samples = []
 
@@ -168,14 +175,19 @@ def route(request: RequestParams, variant_id):
             )
 
     queries = []
-    
+
     dataset_samples_sorted = OrderedDict(sorted(dataset_samples.items()))
     iterated_biosamples = 0
     chosen_biosamples = 0
-    total_biosamples = sum([len(sample_names) for sample_names in dataset_samples_sorted.values()])
+    total_biosamples = sum(
+        [len(sample_names) for sample_names in dataset_samples_sorted.values()]
+    )
 
     for dataset_id, sample_names in dataset_samples.items():
-        if len(sample_names) > 0 and request.query.requested_granularity == Granularity.RECORD:
+        if (
+            len(sample_names) > 0
+            and request.query.requested_granularity == Granularity.RECORD
+        ):
             # TODO optimise for duplicate individuals
             chosen_samples = []
 
@@ -210,7 +222,11 @@ def route(request: RequestParams, variant_id):
 
     if request.query.requested_granularity == Granularity.RECORD:
         query = " UNION ".join(queries)
-        biosamples = Biosample.get_by_query(query) if len(queries) > 0 else []
+        biosamples = (
+            Biosample.get_by_query(query, projects=request.projects, sub=request.sub)
+            if len(queries) > 0
+            else []
+        )
         response = build_beacon_resultset_response(
             jsons.dump(biosamples, strip_privates=True),
             total_biosamples,

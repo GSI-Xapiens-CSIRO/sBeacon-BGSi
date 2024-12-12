@@ -2,7 +2,7 @@ import boto3
 import os
 from functools import lru_cache
 
-from .router import PortalError
+from shared.apiutils import PortalError
 
 cognito_client = boto3.client("cognito-idp")
 USER_POOL_ID = os.environ.get("USER_POOL_ID")

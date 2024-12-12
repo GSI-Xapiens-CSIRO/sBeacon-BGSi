@@ -3,7 +3,7 @@ import os
 
 import boto3
 
-from utils.router import PortalError, LambdaRouter
+from shared.apiutils import LambdaRouter, PortalError
 from utils.models import JupyterInstances, InstanceStatus
 
 sagemaker_client = boto3.client("sagemaker")

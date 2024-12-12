@@ -20,6 +20,7 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_datasetId",
+        "_projectName",
         "_vcfSampleId",
         "individualId",
         "biosampleId",
@@ -38,6 +39,7 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         datasetId="",
+        projectName="",
         individualId="",
         biosampleId="",
         runId="",
@@ -51,6 +53,7 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._datasetId = datasetId
+        self._projectName = projectName
         self._vcfSampleId = vcfSampleId
         self.individualId = individualId
         self.biosampleId = biosampleId
@@ -75,9 +78,10 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
             + ">"
         )
         header_terms = (
-            "struct<kind:string,id:string,term:string,label:string,type:string>"
+            "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
         )
-        key = f"{array[0]['datasetId']}"
+        key = array[0]['id']
+        projectname = array[0]['projectName']
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/analyses-cache/{key}", "wb"
@@ -106,7 +110,7 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
                     )
                     writer_entity.write(row)
                     for term, label, typ in extract_terms([jsons.dump(analysis)]):
-                        row = ("analyses", analysis["id"], term, label, typ)
+                        row = ("analyses", analysis["id"], term, label, typ, projectname)
                         writer_terms.write(row)
 
 

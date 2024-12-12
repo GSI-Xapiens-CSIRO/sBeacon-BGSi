@@ -85,8 +85,8 @@ def get_record_query(dataset_id, sample_names):
 
 def route(request: RequestParams, variant_id):
     dataset_hash = base64.b64decode(variant_id.encode()).decode()
-    assembly_id, reference_name, pos, reference_bases, alternate_bases = dataset_hash.split(
-        "\t"
+    assembly_id, reference_name, pos, reference_bases, alternate_bases = (
+        dataset_hash.split("\t")
     )
     pos = int(pos) - 1
     start = [pos]
@@ -100,13 +100,20 @@ def route(request: RequestParams, variant_id):
     if conditions:
         query = datasets_query(conditions, assembly_id)
         exec_id = run_custom_query(
-            query, return_id=True, execution_parameters=execution_parameters
+            query,
+            return_id=True,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         datasets, samples = parse_datasets_with_samples(exec_id)
     else:
         query = datasets_query_fast(assembly_id)
         datasets = Dataset.get_by_query(
-            query, execution_parameters=execution_parameters
+            query,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         samples = []
 
@@ -139,10 +146,15 @@ def route(request: RequestParams, variant_id):
     dataset_samples_sorted = OrderedDict(sorted(dataset_samples.items()))
     iterated_individuals = 0
     chosen_individuals = 0
-    total_individuals = sum([len(sample_names) for sample_names in dataset_samples_sorted.values()])
+    total_individuals = sum(
+        [len(sample_names) for sample_names in dataset_samples_sorted.values()]
+    )
 
     for dataset_id, sample_names in dataset_samples_sorted.items():
-        if len(sample_names) > 0 and request.query.requested_granularity == Granularity.RECORD:
+        if (
+            len(sample_names) > 0
+            and request.query.requested_granularity == Granularity.RECORD
+        ):
             # TODO optimise for duplicate individuals
             chosen_samples = []
 
@@ -177,7 +189,11 @@ def route(request: RequestParams, variant_id):
 
     if request.query.requested_granularity == Granularity.RECORD:
         query = " UNION ".join(queries)
-        individuals = Individual.get_by_query(query) if len(queries) > 0 else []
+        individuals = (
+            Individual.get_by_query(query, projects=request.projects, sub=request.sub)
+            if len(queries) > 0
+            else []
+        )
         response = build_beacon_resultset_response(
             jsons.dump(individuals, strip_privates=True),
             total_individuals,

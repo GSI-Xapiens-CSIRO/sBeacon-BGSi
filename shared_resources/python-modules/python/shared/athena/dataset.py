@@ -23,6 +23,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
     _table_columns = [
         "id",
         "_assemblyId",
+        "_projectName",
         "_vcfLocations",
         "_vcfChromosomeMap",
         "createDateTime",
@@ -41,6 +42,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
         *,
         id="",
         assemblyId="",
+        projectName="",
         vcfLocations="",
         vcfChromosomeMap="",
         createDateTime="",
@@ -54,6 +56,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
     ):
         self.id = id
         self._assemblyId = assemblyId
+        self._projectName = projectName
         self._vcfLocations = vcfLocations
         self._vcfChromosomeMap = vcfChromosomeMap
         self.createDateTime = createDateTime
@@ -78,9 +81,10 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
             + ">"
         )
         header_terms = (
-            "struct<kind:string,id:string,term:string,label:string,type:string>"
+            "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
         )
-        key = f"{array[0]['id']}"
+        key = array[0]['id']
+        projectname = array[0]['projectName']
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/datasets-cache/{key}", "wb"
@@ -109,41 +113,8 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
                     )
                     writer_entity.write(row)
                     for term, label, typ in extract_terms([dataset]):
-                        row = ("datasets", dataset["id"], term, label, typ)
+                        row = ("datasets", dataset["id"], term, label, typ, projectname)
                         writer_terms.write(row)
-
-
-def get_datasets(
-    assembly_id, dataset_id=None, dataset_ids=None, conditions="", skip=0, limit=100
-):
-    if dataset_id:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            AND id='{dataset_id}'
-            LIMIT 1
-        """
-    elif dataset_ids:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            AND id IN ({','.join([f"'{id}'" for id in dataset_ids])})
-            ORDER BY id 
-            OFFSET {skip} 
-            LIMIT {limit};
-        """
-    else:
-        query = f"""
-            SELECT id, _vcflocations, _vcfchromosomemap 
-            FROM "{{database}}"."{{table}}" 
-            WHERE _assemblyid='{assembly_id}' 
-            ORDER BY id 
-            OFFSET {skip} 
-            LIMIT {limit};
-        """
-    return Dataset.get_by_query(query)
 
 
 def parse_datasets_with_samples(exec_id):

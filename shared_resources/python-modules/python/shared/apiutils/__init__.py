@@ -23,5 +23,5 @@ from .responses import (
     build_filtering_terms_response,
     bundle_response,
 )
-from .router import AuthError, BeaconError, LambdaRouter
+from .router import AuthError, BeaconError, PortalError, LambdaRouter
 from .schemas import DefaultSchemas

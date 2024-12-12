@@ -29,6 +29,13 @@ def get_username_by_email(email):
     raise Exception(f"User with email {email} not found")
 
 
+def logout_all_sessions(email):
+    username = get_username_by_email(email)
+    cognito_client.admin_user_global_sign_out(
+        UserPoolId=USER_POOL_ID, Username=username
+    )
+
+
 @router.attach("/admin/users", "post", authenticate_admin)
 def add_user(event, context):
     body_dict = json.loads(event.get("body"))
@@ -42,7 +49,7 @@ def add_user(event, context):
             error_message="Missing required attributes!",
         )
 
-    temp_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+    temp_password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
 
     try:
         congnito_user = cognito_client.admin_create_user(
@@ -64,7 +71,7 @@ def add_user(event, context):
         )
 
     beacon_ui_url = f"{BEACON_UI_URL}/login"
-    beacon_img_url = f"{BEACON_UI_URL}/assets/images/sbeacon.png" # There are likely better ways of doing this, but email template is not important for now
+    beacon_img_url = f"{BEACON_UI_URL}/assets/images/sbeacon.png"  # There are likely better ways of doing this, but email template is not important for now
 
     subject = "sBeacon Registration"
     body_html = f"""
@@ -110,28 +117,27 @@ def add_user(event, context):
     try:
         response = ses_client.send_email(
             Destination={
-                'ToAddresses': [email],
+                "ToAddresses": [email],
             },
             Message={
-                'Body': 
-                {
-                    'Html': {
-                        'Charset': 'UTF-8',
-                        'Data': body_html,
+                "Body": {
+                    "Html": {
+                        "Charset": "UTF-8",
+                        "Data": body_html,
                     },
-                    'Text': {
-                        'Charset': 'UTF-8',
-                        'Data': f"Hello {first_name} {last_name},\n\nWelcome to sBeacon - your sign-in credentials are as follows:\n\nEmail: {email}\n\nPassword: {temp_password}\n\nVerify: {beacon_ui_url}",
-                    }
+                    "Text": {
+                        "Charset": "UTF-8",
+                        "Data": f"Hello {first_name} {last_name},\n\nWelcome to sBeacon - your sign-in credentials are as follows:\n\nEmail: {email}\n\nPassword: {temp_password}\n\nVerify: {beacon_ui_url}",
+                    },
                 },
-                'Subject': {
-                    'Charset': 'UTF-8',
-                    'Data': subject,
+                "Subject": {
+                    "Charset": "UTF-8",
+                    "Data": subject,
                 },
             },
             Source=SES_SOURCE_EMAIL,
             ReturnPath=SES_SOURCE_EMAIL,
-            ConfigurationSetName=SES_CONFIG_SET_NAME
+            ConfigurationSetName=SES_CONFIG_SET_NAME,
         )
         user_sub = next(attr["Value"] for attr in congnito_user["User"]["Attributes"] if attr["Name"] == "sub")
         if user_sub:
@@ -186,7 +192,9 @@ def delete_user(event, context):
     authorizer = get_username_by_email(authorizer_email)
 
     if username == authorizer:
-        print(f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves.")
+        print(
+            f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves."
+        )
         return {"success": False}
 
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
@@ -218,16 +226,21 @@ def update_user_groups(event, context):
     chosen_groups = []
     removed_groups = []
 
-    if body_dict["groups"]["administrators"]:
-        chosen_groups.append("administrators")
-    else:
-        removed_groups.append("administrators")
+    # changed group associations
+    for group, chosen in body_dict["groups"].items():
+        if chosen:
+            chosen_groups.append(group)
+        else:
+            removed_groups.append(group)
 
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)
-    
+
+    # admin cannot remove themself from administrators group
     if username == authorizer and "administrators" in removed_groups:
-        print(f"Unsuccessful. Administrators are unable to decrease their own permissions.")
+        print(
+            f"Unsuccessful. Administrators are unable to decrease their own permissions."
+        )
         return {"success": False}
 
     for group_name in chosen_groups:
@@ -243,4 +256,6 @@ def update_user_groups(event, context):
     print(
         f"User with email {email} added to {len(chosen_groups)} and removed from {len(removed_groups)} groups"
     )
+
+    logout_all_sessions(email)
     return {"success": True}

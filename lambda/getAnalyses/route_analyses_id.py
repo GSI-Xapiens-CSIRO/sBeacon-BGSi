@@ -26,7 +26,13 @@ def get_record_query(id):
 def route(request: RequestParams, analysis_id):
     if request.query.requested_granularity == Granularity.BOOLEAN:
         query = get_record_query(analysis_id)
-        count = 1 if Analysis.get_existence_by_query(query) else 0
+        count = (
+            1
+            if Analysis.get_existence_by_query(
+                query, projects=request.projects, sub=request.sub
+            )
+            else 0
+        )
         response = build_beacon_boolean_response(
             {}, count, request, {}, DefaultSchemas.ANALYSES
         )
@@ -35,7 +41,13 @@ def route(request: RequestParams, analysis_id):
 
     if request.query.requested_granularity == Granularity.COUNT:
         query = get_record_query(analysis_id)
-        count = 1 if Analysis.get_existence_by_query(query) else 0
+        count = (
+            1
+            if Analysis.get_existence_by_query(
+                query, projects=request.projects, sub=request.sub
+            )
+            else 0
+        )
         response = build_beacon_count_response(
             {}, count, request, {}, DefaultSchemas.ANALYSES
         )
@@ -44,7 +56,9 @@ def route(request: RequestParams, analysis_id):
 
     if request.query.requested_granularity == Granularity.RECORD:
         query = get_record_query(analysis_id)
-        analyses = Analysis.get_by_query(query)
+        analyses = Analysis.get_by_query(
+            query, projects=request.projects, sub=request.sub
+        )
         response = build_beacon_resultset_response(
             jsons.dump(analyses, strip_privates=True),
             len(analyses),

@@ -3,7 +3,11 @@ import csv
 
 from smart_open import open as sopen
 
-from shared.apiutils import RequestParams, build_filtering_terms_response, bundle_response
+from shared.apiutils import (
+    RequestParams,
+    build_filtering_terms_response,
+    bundle_response,
+)
 from shared.athena import run_custom_query
 from shared.utils import ENV_ATHENA
 
@@ -18,7 +22,9 @@ def route(request: RequestParams):
     LIMIT {request.query.pagination.limit};
     """
 
-    exec_id = run_custom_query(query, return_id=True)
+    exec_id = run_custom_query(
+        query, return_id=True, projects=request.projects, sub=request.sub
+    )
     filteringTerms = []
 
     with sopen(

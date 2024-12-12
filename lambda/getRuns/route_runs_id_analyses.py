@@ -59,7 +59,10 @@ def route(request: RequestParams, run_id):
         count = (
             1
             if Analysis.get_existence_by_query(
-                query, execution_parameters=execution_parameters
+                query,
+                execution_parameters=execution_parameters,
+                projects=request.projects,
+                sub=request.sub,
             )
             else 0
         )
@@ -72,7 +75,10 @@ def route(request: RequestParams, run_id):
     if request.query.requested_granularity == Granularity.COUNT:
         query = get_count_query(run_id, conditions)
         count = Analysis.get_count_by_query(
-            query, execution_parameters=execution_parameters
+            query,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         response = build_beacon_count_response(
             {}, count, request, {}, DefaultSchemas.ANALYSES
@@ -93,6 +99,8 @@ def route(request: RequestParams, run_id):
             Analysis.get_by_query,
             record_query,
             execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         # counts fetching
         count_query = get_count_query(run_id, conditions)
@@ -100,6 +108,8 @@ def route(request: RequestParams, run_id):
             Analysis.get_count_by_query,
             count_query,
             execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         executor.shutdown()
         count = count_future.result()

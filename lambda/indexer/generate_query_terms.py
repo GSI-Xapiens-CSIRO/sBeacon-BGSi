@@ -9,7 +9,7 @@ WITH (
     bucket_count = 15
 )
 AS
-SELECT DISTINCT term, label, type, kind FROM "{table}"
+SELECT DISTINCT term, label, type, _projectname, kind FROM "{table}"
 ORDER BY term 
 ASC;
 """

@@ -2,6 +2,7 @@ import os
 from enum import Enum
 
 import boto3
+from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
 from pynamodb.models import Model
 from pynamodb.attributes import NumberAttribute, UnicodeAttribute, UnicodeSetAttribute, MapAttribute
 
@@ -34,6 +35,15 @@ class Projects(Model):
         }
 
 
+class ProjectUsersIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "uid-index"
+        projection = KeysOnlyProjection()
+
+    uid = UnicodeAttribute(hash_key=True)
+    name = UnicodeAttribute(range_key=True)
+
+
 class ProjectUsers(Model):
     class Meta:
         table_name = os.environ.get("DYNAMO_PROJECT_USERS_TABLE")
@@ -41,6 +51,7 @@ class ProjectUsers(Model):
 
     name = UnicodeAttribute(hash_key=True)
     uid = UnicodeAttribute(range_key=True)
+    uid_index = ProjectUsersIndex()
 
 
 class InstanceStatus(Enum):

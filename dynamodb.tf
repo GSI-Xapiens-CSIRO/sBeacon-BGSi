@@ -55,6 +55,9 @@ resource "aws_dynamodb_table" "projects" {
   }
 }
 
+locals {
+  project_users_uid_index = "uid-index"
+}
 # User Projects Table
 resource "aws_dynamodb_table" "project_users" {
   billing_mode = "PAY_PER_REQUEST"
@@ -71,6 +74,13 @@ resource "aws_dynamodb_table" "project_users" {
   attribute {
     name = "uid"
     type = "S"
+  }
+
+  global_secondary_index {
+    name               = local.project_users_uid_index
+    hash_key           = "uid"
+    range_key          = "name"
+    projection_type    = "KEYS_ONLY"
   }
 }
 
@@ -117,11 +127,6 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
   attribute {
     name = "uid"
     type = "S"
-  }
-
-  attribute {
-    name = "CostEstimation"
-    type = "N"       
   }
 
   tags = {

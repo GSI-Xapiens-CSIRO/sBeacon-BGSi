@@ -60,13 +60,20 @@ def route(request: RequestParams, dataset_id):
     if conditions:
         query = datasets_query(conditions, query_params.assembly_id, dataset_id)
         exec_id = run_custom_query(
-            query, return_id=True, execution_parameters=execution_parameters
+            query,
+            return_id=True,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         datasets, samples = parse_datasets_with_samples(exec_id)
     else:
         query = datasets_query_fast(query_params.assembly_id, dataset_id)
         datasets = Dataset.get_by_query(
-            query, execution_parameters=execution_parameters
+            query,
+            execution_parameters=execution_parameters,
+            projects=request.projects,
+            sub=request.sub,
         )
         samples = []
 

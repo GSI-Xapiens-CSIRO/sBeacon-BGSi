@@ -256,6 +256,14 @@ class DynamoDBEnvironment:
     # def DYNAMO_ONTO_INDEX_TABLE(self):
     #     return os.environ["DYNAMO_ONTO_INDEX_TABLE"]
 
+    @property
+    def DYNAMO_PROJECT_USERS_TABLE(self):
+        return os.environ["DYNAMO_PROJECT_USERS_TABLE"]
+
+    @property
+    def DYNAMO_PROJECT_USERS_UID_INDEX(self):
+        return os.environ["DYNAMO_PROJECT_USERS_UID_INDEX"]
+
 
 # class SnsEnvironment:
 #     @property
@@ -271,6 +279,10 @@ class CognitoEnvironment:
     @property
     def COGNITO_ADMIN_GROUP_NAME(self):
         return os.environ["COGNITO_ADMIN_GROUP_NAME"]
+
+    @property
+    def COGNITO_MANAGER_GROUP_NAME(self):
+        return os.environ["COGNITO_MANAGER_GROUP_NAME"]
 
 
 class SesEnvironment:

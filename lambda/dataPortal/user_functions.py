@@ -1,6 +1,6 @@
 import os
 
-from utils.router import LambdaRouter, PortalError
+from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
 from utils.s3_util import get_presigned_url
 
@@ -13,7 +13,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 @router.attach("/dportal/projects", "get")
 def list_my_projects(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    user_projects = list(ProjectUsers.scan(ProjectUsers.uid == sub))
+    user_projects = ProjectUsers.uid_index.query(sub)
 
     projects = [
         Projects.get(user_project.name).to_dict() for user_project in user_projects

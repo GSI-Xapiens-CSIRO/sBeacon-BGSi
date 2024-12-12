@@ -22,11 +22,13 @@ def create_dataset(attributes):
         raise Exception(f"Error getting VCF chromosome maps: {errors}")
 
     datasetId = attributes.get("datasetId", None)
+    projectName = attributes.get("projectName", None)
     threads = []
 
     # dataset metadata entry information
     json_dataset = attributes.get("dataset", None)
     json_dataset["id"] = datasetId
+    json_dataset["projectName"] = projectName
     json_dataset["assemblyId"] = attributes["assemblyId"]
     json_dataset["vcfLocations"] = attributes["vcfLocations"]
     json_dataset["vcfChromosomeMap"] = [vcfm for vcfm in vcf_chromosome_maps]
@@ -105,18 +107,25 @@ def lambda_handler(event, context):
             body_dict.update(json.loads(payload.read()))
         # vcf files attached to the request
         body_dict["vcfLocations"] = event.get("vcfLocations", [])
+        project_name = event.get("projectName")  # This is a required field
+        body_dict["projectName"] = project_name
         # set dataset id from project name
-        body_dict["datasetId"] = f'{event.get("projectName")}:{event.get("datasetId")}'
+        body_dict["datasetId"] = f'{project_name}:{event.get("datasetId")}'
         body_dict["dataset"]["id"] = body_dict["datasetId"]
+        body_dict["dataset"]["projectName"] = project_name
 
         for individual in body_dict.get("individuals", []):
             individual["datasetId"] = body_dict["datasetId"]
+            individual["projectName"] = project_name
         for biosample in body_dict.get("biosamples", []):
             biosample["datasetId"] = body_dict["datasetId"]
+            biosample["projectName"] = project_name
         for run in body_dict.get("runs", []):
             run["datasetId"] = body_dict["datasetId"]
+            run["projectName"] = project_name
         for analysis in body_dict.get("analyses", []):
             analysis["datasetId"] = body_dict["datasetId"]
+            analysis["projectName"] = project_name
         body_dict["index"] = False
 
     except ValueError:

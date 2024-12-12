@@ -180,6 +180,7 @@ class RequestQuery(CamelModel):
     test_mode: bool = False
     requested_granularity: Granularity = Granularity(BEACON_DEFAULT_GRANULARITY)
     _filters: dict = PrivateAttr()
+    projects: list[str] = []
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -189,12 +190,13 @@ class RequestQuery(CamelModel):
 # Thirdparty Code
 class RequestParams(CamelModel):
     meta: RequestMeta = RequestMeta()
-    projects: list[str]
+    projects: list[str] = []
+    sub: str = None
     query: RequestQuery = RequestQuery()
 
     # TODO update to parse body of API gateway POST and GET requests
     # CHANGE: parse API gateway request
-    def from_request(self, query_params) -> Self:
+    def from_request(self, query_params, sub=None) -> Self:
         req_params_dict = dict()
         for k, v in query_params.items():
             if k == "requestedSchema":
@@ -216,11 +218,15 @@ class RequestParams(CamelModel):
                 self.query.filters = adapter.validate_python(
                     [{"id": term} for term in filters]
                 )
+            elif k == "projects":
+                projects = v.split(",")
+                self.projects = projects
             else:
                 req_params_dict[k] = v
         # query parameters related to variants
         if len(req_params_dict):
             self.query.request_parameters = RequestQueryParams(**req_params_dict)
+        self.sub = sub
         return self
 
     def summary(self):
@@ -228,6 +234,7 @@ class RequestParams(CamelModel):
             "apiVersion": self.meta.api_version,
             "requestedSchemas": self.meta.requested_schemas,
             "projects": self.projects,
+            "sub": str(self.sub),
             "filters": self.query._filters,
             "req_params": self.query.request_parameters._user_params,
             "includeResultsetResponses": self.query.include_resultset_responses,
@@ -250,9 +257,15 @@ def parse_request(event) -> Tuple[RequestParams, str]:
     errors = None
     request_params = None
     status = 200
+    sub = (
+        event.get("requestContext", {})
+        .get("authorizer", {})
+        .get("claims", {})
+        .get("sub")
+    )
 
     try:
-        request_params = RequestParams(**body_dict).from_request(params)
+        request_params = RequestParams(**body_dict).from_request(params, sub)
     except ValidationError as e:
         errors = defaultdict(set)
 

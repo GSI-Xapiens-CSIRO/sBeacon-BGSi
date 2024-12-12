@@ -47,7 +47,11 @@ def route(request: RequestParams, individual_id):
     query_params = request.query.request_parameters
     query = datasets_query(conditions, query_params.assembly_id, individual_id)
     exec_id = run_custom_query(
-        query, return_id=True, execution_parameters=execution_parameters
+        query,
+        return_id=True,
+        execution_parameters=execution_parameters,
+        projects=request.projects,
+        sub=request.sub,
     )
     datasets, samples = parse_datasets_with_samples(exec_id)
     check_all = request.query.include_resultset_responses in (

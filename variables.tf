@@ -236,3 +236,8 @@ variable "cognito-admin-group-name" {
   type        = string
   description = "Cognito admin group name."
 }
+
+variable "cognito-manager-group-name" {
+  type        = string
+  description = "Cognito manager group name."
+}

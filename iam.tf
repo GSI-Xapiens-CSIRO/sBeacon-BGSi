@@ -278,6 +278,15 @@ data "aws_iam_policy_document" "athena-full-access" {
       "${aws_s3_bucket.metadata-bucket.arn}/*"
     ]
   }
+
+  statement {
+    actions = [
+      "dynamodb:Query",
+    ]
+    resources = [
+      "${aws_dynamodb_table.project_users.arn}/index/${local.project_users_uid_index}",
+    ]
+  }
 }
 
 # DynamoDB Ontology Related Access
@@ -433,6 +442,15 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
+      "dynamodb:Query",
+    ]
+    resources = [
+      "${aws_dynamodb_table.project_users.arn}/index/${local.project_users_uid_index}",
+    ]
+  }
+
+  statement {
+    actions = [
       "cognito-idp:ListUsers",
     ]
     resources = [
@@ -508,6 +526,20 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
   }
 }
 
+# getProjects lambda access
+data "aws_iam_policy_document" "lambda-getProjects" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+    resources = [
+      aws_dynamodb_table.projects.arn,
+    ]
+  }
+}
 
 # SES Email Notification Logging
 data "aws_iam_policy_document" "ses-sns-access" {

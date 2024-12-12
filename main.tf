@@ -72,6 +72,8 @@ locals {
     DYNAMO_ONTOLOGIES_TABLE  = aws_dynamodb_table.ontologies.name
     DYNAMO_ANSCESTORS_TABLE  = aws_dynamodb_table.anscestor_terms.name
     DYNAMO_DESCENDANTS_TABLE = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_PROJECT_USERS_TABLE = aws_dynamodb_table.project_users.name
+    DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"
@@ -694,9 +696,44 @@ module "lambda-data-portal" {
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,
       COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name
+      COGNITO_MANAGER_GROUP_NAME     = var.cognito-manager-group-name
       SUBMIT_LAMBDA                  = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                 = module.lambda-indexer.lambda_function_name
     },
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+  ]
+}
+
+#
+# getProjects Function
+#
+module "lambda-getProjects" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-getProjects"
+  description         = "Endpoint for retrieving public project information."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 512
+  timeout             = 60
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-getProjects.json
+  ]
+  number_of_policy_jsons = 1
+  source_path            = "${path.module}/lambda/getProjects"
+
+  tags = var.common-tags
+
+  environment_variables = merge(
+    local.sbeacon_variables,
+    {
+      DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
+    }
   )
 
   layers = [

@@ -1,6 +1,6 @@
 import json
 
-from utils.router import PortalError, LambdaRouter
+from shared.apiutils import PortalError, LambdaRouter
 from utils.models import Quota
 
 router = LambdaRouter()

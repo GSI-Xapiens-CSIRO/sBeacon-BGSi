@@ -691,6 +691,7 @@ module "lambda-data-portal" {
       DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,
       DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
+      DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name,
       JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,

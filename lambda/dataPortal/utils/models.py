@@ -4,7 +4,7 @@ from enum import Enum
 import boto3
 from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
 from pynamodb.models import Model
-from pynamodb.attributes import NumberAttribute, UnicodeAttribute, UnicodeSetAttribute
+from pynamodb.attributes import NumberAttribute, UnicodeAttribute, UnicodeSetAttribute, MapAttribute
 
 
 SESSION = boto3.session.Session()
@@ -71,3 +71,26 @@ class JupyterInstances(Model):
 
     uid = UnicodeAttribute(hash_key=True)
     instanceName = UnicodeAttribute(range_key=True)
+
+class UsageMap(MapAttribute):
+    quotaSize = NumberAttribute(attr_name='quotaSize')
+    quotaQueryCount = NumberAttribute(attr_name='quotaQueryCount')
+    usageSize = NumberAttribute(attr_name='usageSize')
+    usageCount = NumberAttribute(attr_name='usageCount')
+
+
+class Quota(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_QUOTA_USER_TABLE")
+        region = REGION
+
+    uid = UnicodeAttribute(hash_key=True)
+    CostEstimation = NumberAttribute()
+    Usage = UsageMap()
+    
+    def to_dict(self):
+        return {
+            "uid": self.uid,
+            "CostEstimation": self.CostEstimation,
+            "Usage": self.Usage.as_dict(),
+        }

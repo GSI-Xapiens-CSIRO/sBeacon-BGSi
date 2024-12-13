@@ -115,3 +115,23 @@ resource "aws_dynamodb_table" "vcfs" {
     type = "S"
   }
 }
+
+# Keep User sagemaker Usage information
+resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
+  name           = "sbeacon-dataportal-users-quota"
+  billing_mode   = "PAY_PER_REQUEST" # on demand
+  #read_capacity  = 5
+  #write_capacity = 5
+  hash_key       = "uid"
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  tags = {
+    Owner       = "gaspi"
+    Environment = "dev"
+    Name        = "sbeacon-backend"
+  }
+}

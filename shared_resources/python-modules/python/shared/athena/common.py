@@ -115,6 +115,16 @@ def get_projects_filter(tables, project_names):
     return words, execution_parameters
 
 
+def is_project_name_table(table):
+    table_parts = {
+        part
+        for dotted_part in table.split(".")
+        for part in dotted_part.split('"')
+        if part
+    }
+    return bool(table_parts & PROJECT_NAME_TABLES)
+
+
 def add_project_names(query, execution_parameters, project_names, user_sub):
     # I'm not writing a full parser, so I hope all the inputs are in the execution parameters
     # Because we're about to split by spaces
@@ -141,7 +151,7 @@ def add_project_names(query, execution_parameters, project_names, user_sub):
             pass
         elif next_is_table:
             next_is_table = False
-            if any(table in stripped_word for table in PROJECT_NAME_TABLES):
+            if is_project_name_table(stripped_word):
                 tables.append(stripped_word)
                 possible_alias = True
         elif upper_word == "?":

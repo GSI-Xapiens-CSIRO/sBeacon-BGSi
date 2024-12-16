@@ -125,6 +125,11 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
   #write_capacity = 5
   hash_key = "uid"
 
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
   tags = {
     Owner       = "gaspi"
     Environment = "dev"

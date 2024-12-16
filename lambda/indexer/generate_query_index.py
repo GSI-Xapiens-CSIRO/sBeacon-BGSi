@@ -9,5 +9,5 @@ WITH (
     bucket_count = 50
 )
 AS
-SELECT id, term, kind FROM "{table}";
+SELECT id, term, _projectname, kind FROM "{table}";
 """

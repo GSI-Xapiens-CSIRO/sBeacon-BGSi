@@ -64,7 +64,7 @@ def entity_search_conditions(
             # karyotypicSex = "XX" for default scope (Individuals)
             if f.scope is None or f.scope == default_scope:
                 operator = _get_comparison_operator(f)
-                outer_constraints.append("{} {} ?".format(f.id, operator))
+                outer_constraints.append(" {} {} ? ".format(f.id, operator))
                 outer_execution_parameters.append(f"'{str(f.value)}'")
             # otherwise, we have to use the relations table
             # eg: scope = "cohorts", cohortType = "beacon-defined"
@@ -72,7 +72,7 @@ def entity_search_conditions(
                 group = f.scope
                 joined_class = type_class[group]
                 operator = _get_comparison_operator(f)
-                comparison = "{} {} ?".format(f.id, operator)
+                comparison = " {} {} ? ".format(f.id, operator)
                 join_execution_parameters.append(f"'{str(f.value)}'")
                 join_constraints.append(
                     f""" SELECT RI.{type_relations_table_id[id_type]} FROM "{ENV_ATHENA.ATHENA_RELATIONS_TABLE}" RI JOIN "{joined_class._table_name}" TN ON RI.{type_relations_table_id[group]}=TN.id WHERE TN.{comparison} """
@@ -102,7 +102,7 @@ def entity_search_conditions(
                         expanded_terms = ancestor_descendants[-1]
 
             join_execution_parameters += [str(a) for a in expanded_terms]
-            expanded_terms = " , ".join(["?" for a in expanded_terms])
+            expanded_terms = ",".join([" ? " for a in expanded_terms])
             # process scope clarification if specified different
             group = f.scope or default_scope
             join_constraints.append(
@@ -111,7 +111,7 @@ def entity_search_conditions(
         elif isinstance(f, CustomFilter):
             # TODO this is a dummy replacement, for future implementation
             group = f.scope or default_scope
-            expanded_terms = "?"
+            expanded_terms = " ? "
             join_execution_parameters += [f.id]
             join_constraints.append(
                 f""" SELECT RI.{type_relations_table_id[id_type]} FROM "{ENV_ATHENA.ATHENA_RELATIONS_TABLE}" RI JOIN "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI ON RI.{type_relations_table_id[group]}=TI.id WHERE TI.kind='{group}' AND TI.term IN ({expanded_terms}) """

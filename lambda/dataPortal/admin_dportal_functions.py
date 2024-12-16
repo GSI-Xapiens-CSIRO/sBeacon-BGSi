@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
@@ -155,7 +156,13 @@ def update_project(event, context):
 @router.attach("/dportal/admin/projects", "post", authenticate_manager)
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))
-    name = body_dict.get("name")
+    name = body_dict.get("name").strip()
+
+    if not len(name):
+        raise PortalError(400, "Project name cannot be empty")
+
+    # sanitise name
+    name = re.sub(r"[,.:;/\\]", "-", name)
     description = body_dict.get("description")
 
     if Projects.count(name):
@@ -190,7 +197,14 @@ def list_projects(event, context):
 def ingest_dataset_to_sbeacon(event, context):
     body_dict = json.loads(event.get("body"))
     project_name = event["pathParameters"]["name"]
-    dataset_id = event["pathParameters"]["dataset"]
+    dataset_id = event["pathParameters"]["dataset"].strip()
+
+    if not len(dataset_id):
+        raise PortalError(400, "Dataset id cannot be empty")
+
+    # sanitise dataset_id
+    dataset_id = re.sub(r"[,.:;/\\]", "-", dataset_id)
+
     payload = {
         "s3Payload": body_dict["s3Payload"],
         "vcfLocations": body_dict["vcfLocations"],

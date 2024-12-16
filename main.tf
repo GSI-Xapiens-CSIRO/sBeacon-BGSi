@@ -69,10 +69,10 @@ locals {
   }
   # dynamodb variables
   dynamodb_variables = {
-    DYNAMO_ONTOLOGIES_TABLE  = aws_dynamodb_table.ontologies.name
-    DYNAMO_ANSCESTORS_TABLE  = aws_dynamodb_table.anscestor_terms.name
-    DYNAMO_DESCENDANTS_TABLE = aws_dynamodb_table.descendant_terms.name
-    DYNAMO_PROJECT_USERS_TABLE = aws_dynamodb_table.project_users.name
+    DYNAMO_ONTOLOGIES_TABLE        = aws_dynamodb_table.ontologies.name
+    DYNAMO_ANSCESTORS_TABLE        = aws_dynamodb_table.anscestor_terms.name
+    DYNAMO_DESCENDANTS_TABLE       = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
   }
   # layers
@@ -692,6 +692,7 @@ module "lambda-data-portal" {
       DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
       DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name,
+      DYNAMO_SAVED_QUERIES_TABLE     = aws_dynamodb_table.saved_queries.name
       JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,

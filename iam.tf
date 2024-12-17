@@ -478,6 +478,15 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
+      "sagemaker:ListNotebookInstances",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
       "iam:PassRole"
     ]
 

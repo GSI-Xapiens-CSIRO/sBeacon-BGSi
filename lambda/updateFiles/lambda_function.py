@@ -6,8 +6,8 @@ from urllib.parse import unquote_plus
 import boto3
 from botocore.exceptions import ClientError
 
-
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
+STAGING_BUCKET = os.environ["STAGING_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 VCFS_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
 VCF_SUFFIXES = [
@@ -25,11 +25,23 @@ def count_samples_and_update_vcf(project, file_name):
     vcf_location = f"{project}/{file_name}"
     try:
         num_samples = count_samples(f"s3://{DPORTAL_BUCKET}/projects/{vcf_location}")
+        update_fields = {
+            "num_samples": {
+                "N": str(num_samples),
+            },
+        }
     except subprocess.CalledProcessError as e:
         print(f"Error counting samples for {vcf_location}: {e.__dict__}")
-        update_vcf(vcf_location, 0, error_message=e.stderr)
-        return 0
-    update_vcf(vcf_location, num_samples)
+        num_samples = 0
+        update_fields = {
+            "num_samples": {
+                "N": str(num_samples),
+            },
+            "error_message": {
+                "S": e.stderr
+            }
+        }
+    update_file(vcf_location, update_fields)
     return num_samples
 
 
@@ -97,21 +109,28 @@ def get_all_counts(project, all_files):
 
 
 def get_all_project_files(project_prefix):
-    kwargs = {
-        "Bucket": DPORTAL_BUCKET,
-        "Prefix": project_prefix,
-    }
+    kwargs_list = [
+        {
+            "Bucket": DPORTAL_BUCKET,
+            "Prefix": project_prefix,
+        },
+        {
+            "Bucket": STAGING_BUCKET,
+            "Prefix": project_prefix,
+        }
+    ]
     prefix_length = len(project_prefix)
-    remaining_files = True
     all_files = set()
-    while remaining_files:
-        print(f"Calling s3.list_objects_v2 with kwargs: {json.dumps(kwargs)}")
-        response = s3.list_objects_v2(**kwargs)
-        print(f"Received response: {json.dumps(response, default=str)}")
-        all_files = [obj["Key"][prefix_length:] for obj in response.get("Contents", [])]
-        remaining_files = response.get("IsTruncated", False)
-        if remaining_files:
-            kwargs["ContinuationToken"] = response["NextContinuationToken"]
+    for kwargs in kwargs_list:
+        remaining_files = True
+        while remaining_files:
+            print(f"Calling s3.list_objects_v2 with kwargs: {json.dumps(kwargs)}")
+            response = s3.list_objects_v2(**kwargs)
+            print(f"Received response: {json.dumps(response, default=str)}")
+            all_files.update([obj["Key"][prefix_length:] for obj in response.get("Contents", [])])
+            remaining_files = response.get("IsTruncated", False)
+            if remaining_files:
+                kwargs["ContinuationToken"] = response["NextContinuationToken"]
     return list(all_files)
 
 
@@ -196,27 +215,19 @@ def update_project(project_name, total_samples, all_project_files):
             raise e
     print(f"Received response: {json.dumps(response, default=str)}")
 
+def update_file(location, update_fields):
+    update_expression = "SET " + ", ".join(f"{k} = :{k}" for k in update_fields.keys())
+    expression_attribute_values = {f":{k}": v for k, v in update_fields.items()}
 
-def update_vcf(vcf_location, num_samples, error_message=None):
     kwargs = {
         "TableName": VCFS_TABLE,
         "Key": {
-            "vcfLocation": {
-                "S": vcf_location,
-            },
+            "vcfLocation": {"S": location},
         },
-        "UpdateExpression": "SET num_samples=:num_samples",
-        "ExpressionAttributeValues": {
-            ":num_samples": {
-                "N": str(num_samples),
-            },
-        },
+        "UpdateExpression": update_expression,
+        "ExpressionAttributeValues": expression_attribute_values,
     }
-    if error_message:
-        kwargs["UpdateExpression"] += ", error_message=:error_message"
-        kwargs["ExpressionAttributeValues"][":error_message"] = {
-            "S": error_message,
-        }
+
     print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
     response = dynamodb.update_item(**kwargs)
     print(f"Received response: {json.dumps(response, default=str)}")

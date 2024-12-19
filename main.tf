@@ -633,6 +633,33 @@ module "lambda-admin" {
 }
 
 #
+# deidentifyFiles Lambda Function
+#
+module "lambda-deidentifyFiles" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name      = "sbeacon-backend-deidentifyFiles"
+  description        = "Deidentifies files before moving them to the dataportal bucket"
+  handler            = "lambda_function.lambda_handler"
+  runtime            = "python3.12"
+  memory_size        = 1769
+  timeout            = 30
+  attach_policy_json = true
+  policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
+  source_path        = "${path.module}/lambda/deidentifyFiles"
+  tags               = var.common-tags
+
+  environment_variables = {
+    DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
+    STAGING_BUCKET           = aws_s3_bucket.staging-bucket.bucket
+    DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
+    EC2_IAM_INSTANCE_PROFILE = aws_iam_instance_profile.ec2_deidentification_instance_profile.name
+  }
+}
+
+#
 # updateFiles Lambda Function
 #
 module "lambda-updateFiles" {
@@ -650,10 +677,11 @@ module "lambda-updateFiles" {
   tags               = var.common-tags
 
   environment_variables = {
-    DPORTAL_BUCKET        = aws_s3_bucket.dataportal-bucket.bucket
-    DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
-    DYNAMO_VCFS_TABLE     = aws_dynamodb_table.vcfs.name
-    HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
+    DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
+    STAGING_BUCKET           = aws_s3_bucket.staging-bucket.bucket
+    DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
   }
 
   layers = [

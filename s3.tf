@@ -167,7 +167,6 @@ resource "aws_s3_bucket_cors_configuration" "dataportal-bucket" {
   }
 }
 
-
 #
 # Enables S3 bucket notifications for updating file information
 #
@@ -183,4 +182,58 @@ resource "aws_s3_bucket_notification" "updateFiles" {
   }
 
   depends_on = [aws_lambda_permission.S3updateFiles]
+}
+
+#
+# S3 bucket for staged content
+#
+resource "aws_s3_bucket" "staging-bucket" {
+  bucket_prefix = var.staging-bucket-prefix
+  force_destroy = true
+  tags          = var.common-tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "staging_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.staging-bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "staging_bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.staging_bucket_ownership_controls]
+
+  bucket = aws_s3_bucket.staging-bucket.id
+  acl    = "private"
+}
+
+# 
+# enable cors for staging bucket
+# 
+resource "aws_s3_bucket_cors_configuration" "staging-bucket" {
+  bucket = aws_s3_bucket.staging-bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag", "x-amz-multipart-parts-count", "x-amz-abort-date"]
+    max_age_seconds = 36000
+  }
+}
+
+#
+# Enables S3 bucket notifications for deidentification process
+#
+resource "aws_s3_bucket_notification" "deidentifyFiles" {
+  bucket = aws_s3_bucket.staging-bucket.id
+  lambda_function {
+    lambda_function_arn = module.lambda-deidentifyFiles.lambda_function_arn
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix = "projects/"
+  }
+
+  depends_on = [aws_lambda_permission.S3deidentifyFiles]
 }

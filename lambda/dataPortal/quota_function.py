@@ -72,17 +72,13 @@ Functions:
 @router.attach("/dportal/quota/{userIdentity}", "get")
 def get_quota(event, context):
     uId = event["pathParameters"]["userIdentity"]
-    
     try:
         myQuota = Quota.get(uId)
 
     except Quota.DoesNotExist:
-        raise PortalError(
-            error_code=409,
-            error_message="No data available here.",
-        )
+        return {'success': False, 'data': None}
     
-    return myQuota.to_dict()
+    return {'success': True, 'data': myQuota.to_dict()}
 
 @router.attach("/dportal/quota/{userIdentity}/increment_usagecount", "post")
 def increment_usagecount(event, context):

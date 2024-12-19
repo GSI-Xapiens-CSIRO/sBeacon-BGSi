@@ -369,6 +369,77 @@ data "aws_iam_policy_document" "athena-readonly-access" {
 }
 
 #
+# deidentifyFiles Lambda Function
+#
+data "aws_iam_policy_document" "lambda-deidentifyFiles" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      aws_s3_bucket.staging-bucket.arn,
+      aws_s3_bucket.dataportal-bucket.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.staging-bucket.arn}/projects/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+    resources = [
+      aws_dynamodb_table.projects.arn,
+      aws_dynamodb_table.vcfs.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:RunInstances",
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+    ]
+    resources = [
+      "arn:aws:ec2:*:*:instance/*",
+      "arn:aws:ec2:*:*:network-interface/*",
+      "arn:aws:ec2:*:*:subnet/*",
+      "arn:aws:ec2:*:*:security-group/*",
+      "arn:aws:ec2:*:*:volume/*",
+      "arn:aws:ec2:*::image/*",
+      "arn:aws:ec2:*:*:key-pair/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = [
+      aws_iam_role.ec2_deidentification_instance_role.arn,
+    ]
+  }
+}
+
+#
 # updateFiles Lambda Function
 #
 data "aws_iam_policy_document" "lambda-updateFiles" {
@@ -377,7 +448,8 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.dataportal-bucket.arn
+      aws_s3_bucket.staging-bucket.arn,
+      aws_s3_bucket.dataportal-bucket.arn,
     ]
     condition {
       test     = "StringLike"
@@ -390,6 +462,7 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
 
   statement {
     actions = [
+      "s3:PutObject",
       "s3:GetObject",
     ]
     resources = [

@@ -651,12 +651,15 @@ module "lambda-deidentifyFiles" {
 
   environment_variables = {
     DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
-    STAGING_BUCKET           = aws_s3_bucket.staging-bucket.bucket
     DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
     DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
     HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
     EC2_IAM_INSTANCE_PROFILE = aws_iam_instance_profile.ec2_deidentification_instance_profile.name
   }
+
+  layers = [
+    local.binaries_layer,
+  ]
 }
 
 #
@@ -678,7 +681,6 @@ module "lambda-updateFiles" {
 
   environment_variables = {
     DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
-    STAGING_BUCKET           = aws_s3_bucket.staging-bucket.bucket
     DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
     DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
     HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"

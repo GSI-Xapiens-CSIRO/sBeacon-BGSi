@@ -31,7 +31,6 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.staging-bucket.arn,
       aws_s3_bucket.dataportal-bucket.arn,
     ]
     condition {
@@ -39,6 +38,7 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
       variable = "s3:prefix"
       values = [
         "projects/*/",
+        "staging/projects/*/",
       ]
     }
   }
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.staging-bucket.arn}/projects/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*",
     ]
   }
 

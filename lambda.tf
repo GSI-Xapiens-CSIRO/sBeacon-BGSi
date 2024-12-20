@@ -51,5 +51,5 @@ resource "aws_lambda_permission" "S3deidentifyFiles" {
   action        = "lambda:InvokeFunction"
   function_name = module.lambda-deidentifyFiles.lambda_function_arn
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.staging-bucket.arn
+  source_arn    = aws_s3_bucket.dataportal-bucket.arn
 }

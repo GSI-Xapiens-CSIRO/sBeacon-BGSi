@@ -377,7 +377,6 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.staging-bucket.arn,
       aws_s3_bucket.dataportal-bucket.arn,
     ]
   }
@@ -389,7 +388,7 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
     ]
 
     resources = [
-      "${aws_s3_bucket.staging-bucket.arn}/projects/*"
+      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*"
     ]
   }
 
@@ -417,15 +416,10 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
       "ec2:RunInstances",
       "ec2:DescribeInstances",
       "ec2:CreateTags",
+      "ec2:DescribeImages",
     ]
     resources = [
-      "arn:aws:ec2:*:*:instance/*",
-      "arn:aws:ec2:*:*:network-interface/*",
-      "arn:aws:ec2:*:*:subnet/*",
-      "arn:aws:ec2:*:*:security-group/*",
-      "arn:aws:ec2:*:*:volume/*",
-      "arn:aws:ec2:*::image/*",
-      "arn:aws:ec2:*:*:key-pair/*"
+      "*"
     ]
   }
 
@@ -448,7 +442,6 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.staging-bucket.arn,
       aws_s3_bucket.dataportal-bucket.arn,
     ]
     condition {
@@ -456,6 +449,7 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       variable = "s3:prefix"
       values = [
         "projects/*/",
+        "staging/projects/*/",
       ]
     }
   }

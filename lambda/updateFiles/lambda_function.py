@@ -7,7 +7,6 @@ import boto3
 from botocore.exceptions import ClientError
 
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
-STAGING_BUCKET = os.environ["STAGING_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 VCFS_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
 VCF_SUFFIXES = [
@@ -37,9 +36,7 @@ def count_samples_and_update_vcf(project, file_name):
             "num_samples": {
                 "N": str(num_samples),
             },
-            "error_message": {
-                "S": e.stderr
-            }
+            "error_message": {"S": e.stderr},
         }
     update_file(vcf_location, update_fields)
     return num_samples
@@ -109,25 +106,26 @@ def get_all_counts(project, all_files):
 
 
 def get_all_project_files(project_prefix):
-    kwargs_list = [
-        {
-            "Bucket": DPORTAL_BUCKET,
-            "Prefix": project_prefix,
-        },
-        {
-            "Bucket": STAGING_BUCKET,
-            "Prefix": project_prefix,
-        }
-    ]
-    prefix_length = len(project_prefix)
+    prefixes = [project_prefix, f"staging/{project_prefix}"]
     all_files = set()
-    for kwargs in kwargs_list:
+    for prefix in prefixes:
+        kwargs = {
+            "Bucket": DPORTAL_BUCKET,
+            "Prefix": prefix,
+        }
+        prefix_length = len(prefix)
         remaining_files = True
         while remaining_files:
             print(f"Calling s3.list_objects_v2 with kwargs: {json.dumps(kwargs)}")
             response = s3.list_objects_v2(**kwargs)
             print(f"Received response: {json.dumps(response, default=str)}")
-            all_files.update([obj["Key"][prefix_length:] for obj in response.get("Contents", [])])
+            all_files.update(
+                [
+                    obj["Key"][prefix_length:]
+                    for obj in response.get("Contents", [])
+                    if obj["Key"][-1] != "/"
+                ]
+            )
             remaining_files = response.get("IsTruncated", False)
             if remaining_files:
                 kwargs["ContinuationToken"] = response["NextContinuationToken"]
@@ -146,6 +144,9 @@ def get_project(object_key):
     if len(path_parts) < 3:
         # This is a projects/* file, not a projects/*/* file
         # Therefore it isn't in a project directory
+        return None, None, None
+    if path_parts[-1] == "":
+        # This is a directory, not a file
         return None, None, None
     return path_parts[1], f"{path_parts[0]}/{path_parts[1]}/", "/".join(path_parts[2:])
 
@@ -214,6 +215,7 @@ def update_project(project_name, total_samples, all_project_files):
             )
             raise e
     print(f"Received response: {json.dumps(response, default=str)}")
+
 
 def update_file(location, update_fields):
     update_expression = "SET " + ", ".join(f"{k} = :{k}" for k in update_fields.keys())

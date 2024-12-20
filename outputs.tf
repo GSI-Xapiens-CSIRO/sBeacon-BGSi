@@ -13,11 +13,6 @@ output "data-portal-bucket" {
   description = "S3 bucket for the data portal."
 }
 
-output "staging-bucket" {
-  value       = aws_s3_bucket.staging-bucket.bucket
-  description = "S3 bucket for staging."
-}
-
 output "data-portal-bucket-arn" {
   value       = aws_s3_bucket.dataportal-bucket.arn
   description = "S3 bucket arn for the data portal."

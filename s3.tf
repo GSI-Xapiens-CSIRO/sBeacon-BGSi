@@ -212,19 +212,3 @@ resource "aws_s3_bucket_notification" "updateFiles" {
     aws_lambda_permission.S3deidentifyFiles,
   ]
 }
-
-#
-# Enables S3 bucket notifications for deidentification process
-#
-resource "aws_s3_bucket_notification" "deidentifyFiles" {
-  bucket = aws_s3_bucket.dataportal-bucket.id
-  lambda_function {
-    lambda_function_arn = module.lambda-deidentifyFiles.lambda_function_arn
-    events = [
-      "s3:ObjectCreated:*",
-    ]
-    filter_prefix = "staging/projects/"
-  }
-
-  depends_on = [aws_lambda_permission.S3deidentifyFiles]
-}

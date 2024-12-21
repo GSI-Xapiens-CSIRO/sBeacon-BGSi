@@ -8,9 +8,9 @@ import subprocess
 import boto3
 
 
-ANNOTATION_PATH = "/tmp/annotation.vcf.gz"
-BGZIPPED_PATH = "/tmp/bgzipped.bcf.gz"
-HEADER_PATH = "/tmp/header.vcf"
+ANNOTATION_PATH = "annotation.vcf.gz"
+BGZIPPED_PATH = "bgzipped.bcf.gz"
+HEADER_PATH = "header.vcf"
 MAX_LINES_PER_PRINT = 100
 MASK = "XXXXXXXXXX"
 
@@ -78,6 +78,10 @@ METADATA_SUFFIXES = [
     ".tsv",
 ]
 
+# Check if the script is running in AWS Lambda.
+# EC2 instances don't have as much space in tmp
+WORKING_DIR = "/tmp" if ("AWS_LAMBDA_FUNCTION_NAME" in os.environ) else "."
+
 dynamodb = boto3.client("dynamodb")
 s3 = boto3.client("s3")
 
@@ -103,7 +107,7 @@ class CheckedProcess:
     def __init__(self, error_message, **kwargs):
         defaults = {
             "stderr": subprocess.PIPE,
-            "cwd": "/tmp",
+            "cwd": WORKING_DIR,
             "encoding": "utf-8",
         }
         kwargs.update({k: v for k, v in defaults.items() if k not in kwargs})
@@ -285,7 +289,7 @@ def process_header(file_path):
     view_process.check()
     if header_changes:
         print("Header PII detected, creating anonymised header")
-        with open(HEADER_PATH, "w") as header_file:
+        with open(f"{WORKING_DIR}/{HEADER_PATH}", "w") as header_file:
             print("\n".join(header_lines), file=header_file)
     else:
         print("No PII detected in header")
@@ -504,8 +508,8 @@ def deidentify(
 ):
     update_deidentification_status(files_table, f"{project}/{file_name}", "Pending")
 
-    local_input_path = f"/tmp/input_{file_name}"
-    local_output_path = f"/tmp/deidentified_{file_name}"
+    local_input_path = f"{WORKING_DIR}/input_{file_name}"
+    local_output_path = f"{WORKING_DIR}/deidentified_{file_name}"
 
     s3.download_file(Bucket=input_bucket, Key=object_key, Filename=local_input_path)
     if any(object_key.endswith(suffix) for suffix in GENOMIC_SUFFIX_TYPES.keys()):

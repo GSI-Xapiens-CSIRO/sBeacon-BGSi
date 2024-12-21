@@ -298,7 +298,9 @@ def process_records(file_path, header_lines, info_whitelist):
         stdout=subprocess.PIPE,
         error_message="Reading records failed",
     )
-    changed_lines = header_lines
+    changed_lines = header_lines.copy()
+    # Remove sample columns from header
+    changed_lines[-1] = "\t".join(changed_lines[-1].split("\t", 8)[:8])
     num_records_changed = 0
     viewer = Viewer(ANNOTATION_PATH)
     for line in view_process.stdout:

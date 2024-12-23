@@ -509,6 +509,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       variable = "s3:prefix"
       values = [
         "projects/*",
+        "private/*",
       ]
     }
   }
@@ -522,6 +523,16 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     resources = [
       "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
       "${aws_s3_bucket.metadata-bucket.arn}/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/private/*",
     ]
   }
 

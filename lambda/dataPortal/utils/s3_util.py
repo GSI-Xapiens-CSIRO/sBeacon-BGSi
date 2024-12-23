@@ -26,6 +26,32 @@ def list_s3_prefix(bucket, prefix):
     return [item["Key"] for item in all_contents]
 
 
+def list_s3_folder(bucket, folder):
+    continuation_token = None
+    all_contents = []
+
+    while True:
+        if continuation_token:
+            response = s3.list_objects_v2(
+                Bucket=bucket,
+                Prefix=folder,
+                ContinuationToken=continuation_token,
+                Delimiter="/",
+            )
+        else:
+            response = s3.list_objects_v2(Bucket=bucket, Prefix=folder, Delimiter="/")
+
+        if "CommonPrefixes" in response:
+            all_contents.extend(response["CommonPrefixes"])
+
+        if response.get("IsTruncated"):  # Check if there are more pages
+            continuation_token = response.get("NextContinuationToken")
+        else:
+            break
+
+    return [item["Prefix"] for item in all_contents]
+
+
 def delete_s3_objects(bucket, keys):
     # S3 delete_objects API allows a maximum of 1000 keys per request
     max_keys_per_request = 1000

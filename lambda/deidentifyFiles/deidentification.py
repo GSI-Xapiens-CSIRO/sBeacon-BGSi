@@ -59,7 +59,7 @@ PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
     r"(?<!\.)\(?(?:\+62\)?[- ]?|\b0)(?:\d\)?[- ]?){1,3}\d{3,4}[- ]?\d{3,4}\b",  # Phone number
     r"(?<!SNOMED:)\b\d{16}\b",  # NIK
-    r"\b[A-Z]{1,2}\s\d{1,4}\s[A-Z]{1,3}\b",  # License plate
+    r"\b(?:[A-Z]{1,2})\s?\d{1,4}\s?[A-Z]{0,3}\b",  # License plate
     r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kabupaten|Provinsi|Jakarta|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
     r"\b(?:Dr\.|Prof\.|Ir\.|Haji|Hajjah|Putra|Putri|Sri|Adi)(?:\s[A-Z][a-z]+){1,2}\b",  # Name
 ]

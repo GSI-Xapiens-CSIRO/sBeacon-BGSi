@@ -76,6 +76,7 @@ METADATA_SUFFIXES = [
     ".json",
     ".csv",
     ".tsv",
+    ".txt",
 ]
 
 # Check if the script is running in AWS Lambda.
@@ -432,8 +433,8 @@ def process_tabular(input_path, output_path, delimiter):
                 writer.writerow(deidentified_row)
 
 
-def process_json(input_path, output_path):
-    """Processes JSON files to deidentify PII, writing results line-by-line."""
+def process_flatfile(input_path, output_path):
+    """Processes flat files (.txt, .json) to deidentify PII, writing results line-by-line."""
     with open(input_path, "r") as infile, open(output_path, "w") as outfile:
         for line in infile:
             deidentified_line = anonymise(line)
@@ -443,8 +444,8 @@ def process_json(input_path, output_path):
 def deidentify_metadata(local_input_path, local_output_path):
     """Main function to process file from S3, deidentify, and upload back to S3."""
 
-    if local_input_path.endswith(".json"):
-        process_json(local_input_path, local_output_path)
+    if local_input_path.endswith(".json") or local_input_path.endswith(".txt"):
+        process_flatfile(local_input_path, local_output_path)
     elif local_input_path.endswith(".csv"):
         process_tabular(local_input_path, local_output_path, delimiter=",")
     elif local_input_path.endswith(".tsv"):

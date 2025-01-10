@@ -23,6 +23,7 @@ SUFFIXES = [
     ".json",
     ".csv",
     ".tsv",
+    ".txt",
 ]
 
 

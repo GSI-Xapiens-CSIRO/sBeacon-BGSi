@@ -1,4 +1,5 @@
 import os
+import json
 
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers
@@ -12,14 +13,26 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 
 @router.attach("/dportal/projects", "get")
 def list_my_projects(event, context):
+    query_params = event.get('queryStringParameters', {})
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    user_projects = ProjectUsers.uid_index.query(sub)
+    
+    params = {
+        "limit": 10
+    }
+    if query_params:
+        limit = query_params.get('limit', None)
+        last_evaluated_key = query_params.get('last_evaluated_key', None)
+        if limit:
+            params["limit"] = int(limit)
+        if last_evaluated_key:
+            params["last_evaluated_key"] = json.loads(last_evaluated_key)
 
-    projects = [
+    user_projects = ProjectUsers.uid_index.query(sub,**params)
+    data = [
         Projects.get(user_project.name).to_dict() for user_project in user_projects
     ]
-
-    return projects
+    last_evaluated_key = json.dumps(user_projects.last_evaluated_key)
+    return {"success":True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 
 @router.attach("/dportal/projects/{name}/file", "get")

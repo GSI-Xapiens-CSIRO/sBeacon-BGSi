@@ -20,28 +20,6 @@
         "version": "v1.1"
     },
     "assemblyId": "GRCH38",
-    "cohortId": "UNQ_1",
-    "cohort": {
-        "id": "UNQ_1",
-        "cohortDataTypes": [
-            {
-                "id": "OMIABIS:0000060",
-                "label": "survey data"
-            },
-            {
-                "id": "OBI:0000070",
-                "label": "genotyping assay"
-            }
-        ],
-        "cohortDesign": {
-            "id": "orcid:0000-0003-3463-0775"
-        },
-        "cohortType": "beacon-defined",
-        "name": "CGG group"
-    },
-    "vcfLocations": [
-        "s3://<bucket>/<prefix>/chr1.vcf.gz"
-    ],
     "individuals": [
         {
             "id": "UNQ_1-1",

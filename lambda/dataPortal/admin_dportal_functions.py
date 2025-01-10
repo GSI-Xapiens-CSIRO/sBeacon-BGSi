@@ -1,10 +1,11 @@
 import json
 import os
+import re
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
-from utils.s3_util import list_s3_prefix, delete_s3_objects
-from utils.cognito import get_user_from_attribute, get_user_attribute
+from utils.s3_util import list_s3_prefix, list_s3_folder, delete_s3_objects
+from utils.cognito import get_user_from_attribute, get_user_attribute, list_users
 from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_manager
 from shared.apiutils import LambdaRouter, PortalError
@@ -18,7 +19,45 @@ INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 
 
 #
-# Project User Functions
+# Files' Admin Functions
+#
+@router.attach("/dportal/admin/folders", "get", authenticate_manager)
+def list_folders(event, context):
+    folders = list_s3_folder(DPORTAL_BUCKET, "private/")
+    identity_ids = [file.strip("/").split("/")[-1] for file in folders]
+    all_users = list_users()
+    users_with_identity = {
+        user["custom:identity_id"]: user
+        for user in all_users
+        if user.get("custom:identity_id")
+    }
+    active_users = [
+        users_with_identity[identity_id]
+        for identity_id in identity_ids
+        if identity_id in users_with_identity
+    ]
+    inactive_user_folders = [
+        identity_id
+        for identity_id in identity_ids
+        if identity_id not in users_with_identity
+    ]
+    return {
+        "active": active_users,
+        "inactive": inactive_user_folders,
+    }
+
+
+@router.attach("/dportal/admin/folders/{folder}", "delete", authenticate_manager)
+def delete_folder(event, context):
+    folder = event["pathParameters"]["folder"]
+    keys = list_s3_prefix(DPORTAL_BUCKET, f"private/{folder}/")
+    delete_s3_objects(DPORTAL_BUCKET, keys)
+
+    return {"success": True}
+
+
+#
+# Project Admin Functions
 #
 
 
@@ -155,7 +194,13 @@ def update_project(event, context):
 @router.attach("/dportal/admin/projects", "post", authenticate_manager)
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))
-    name = body_dict.get("name")
+    name = body_dict.get("name").strip()
+
+    if not len(name):
+        raise PortalError(400, "Project name cannot be empty")
+
+    # sanitise name
+    name = re.sub(r"[,.:;/\\]", "-", name)
     description = body_dict.get("description")
 
     if Projects.count(name):
@@ -204,7 +249,14 @@ def list_projects(event, context):
 def ingest_dataset_to_sbeacon(event, context):
     body_dict = json.loads(event.get("body"))
     project_name = event["pathParameters"]["name"]
-    dataset_id = event["pathParameters"]["dataset"]
+    dataset_id = event["pathParameters"]["dataset"].strip()
+
+    if not len(dataset_id):
+        raise PortalError(400, "Dataset id cannot be empty")
+
+    # sanitise dataset_id
+    dataset_id = re.sub(r"[,.:;/\\]", "-", dataset_id)
+
     payload = {
         "s3Payload": body_dict["s3Payload"],
         "vcfLocations": body_dict["vcfLocations"],

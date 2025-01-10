@@ -1,10 +1,12 @@
 import os
 
 import boto3
+from pynamodb.exceptions import DeleteError
 
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import InstanceStatus, JupyterInstances
 from utils.cognito import get_user_from_attribute, get_user_attribute
+from utils.sagemaker import list_all_notebooks
 from shared.cognitoutils import authenticate_manager
 
 router = LambdaRouter()
@@ -21,32 +23,28 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 
 @router.attach("/dportal/admin/notebooks", "get", authenticate_manager)
 def list_notebooks(event, context):
-    instances = list(JupyterInstances.scan())
-    statuses = [
-        sagemaker_client.describe_notebook_instance(
-            NotebookInstanceName=f"{instance.instanceName}-{instance.uid}"
-        )
-        for instance in instances
-    ]
+    instances = {
+        f"{instance.instanceName}-{instance.uid}": instance
+        for instance in JupyterInstances.scan()
+    }
+    notebooks = list_all_notebooks()
 
-    return [
-        {
-            "instanceName": f"{instance.instanceName}-{instance.uid}",
-            "userFirstName": get_user_attribute(
-                get_user_from_attribute("sub", instance.uid), "given_name"
-            ),
-            "userLastName": get_user_attribute(
-                get_user_from_attribute("sub", instance.uid), "family_name"
-            ),
-            "userEmail": get_user_attribute(
-                get_user_from_attribute("sub", instance.uid), "email"
-            ),
-            "status": status["NotebookInstanceStatus"],
-            "volumeSize": status["VolumeSizeInGB"],
-            "instanceType": status["InstanceType"],
-        }
-        for instance, status in zip(instances, statuses)
-    ]
+    for notebook in notebooks:
+        if InstanceStatus(notebook["status"]) == InstanceStatus.DELETING:
+            continue
+        try:
+            user = get_user_from_attribute(
+                "sub", instances[notebook["instanceName"]].uid
+            )
+            notebook["userFirstName"] = get_user_attribute(user, "given_name")
+            notebook["userLastName"] = get_user_attribute(user, "family_name")
+            notebook["userEmail"] = get_user_attribute(user, "email")
+        except PortalError:
+            notebook["userFirstName"] = "Unassigned"
+            notebook["userLastName"] = "Unassigned"
+            notebook["userEmail"] = "Unassigned"
+
+    return notebooks
 
 
 @router.attach("/dportal/admin/notebooks/{name}", "get", authenticate_manager)
@@ -105,6 +103,10 @@ def delete_my_notebook(event, context):
     response = sagemaker_client.delete_notebook_instance(
         NotebookInstanceName=notebook_name
     )
-    JupyterInstances(notebook_name[-36:], notebook_name[:-37]).delete()
+
+    try:
+        JupyterInstances(notebook_name[-36:], notebook_name[:-37]).delete()
+    except DeleteError:
+        print("Notebook not found in database, skipping deletion.")
 
     return response

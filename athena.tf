@@ -611,6 +611,10 @@ resource "aws_cloudformation_stack" "sbeacon_terms_index_stack" {
                   {
                     Name = "term"
                     Type = "string"
+                  },
+                  {
+                    Name = "_projectname"
+                    Type = "string"
                   }
                 ]
               }

@@ -77,10 +77,10 @@ resource "aws_dynamodb_table" "project_users" {
   }
 
   global_secondary_index {
-    name               = local.project_users_uid_index
-    hash_key           = "uid"
-    range_key          = "name"
-    projection_type    = "KEYS_ONLY"
+    name            = local.project_users_uid_index
+    hash_key        = "uid"
+    range_key       = "name"
+    projection_type = "KEYS_ONLY"
   }
 }
 
@@ -110,6 +110,7 @@ resource "aws_dynamodb_table" "vcfs" {
   hash_key     = "vcfLocation"
   name         = "sbeacon-vcfs"
   tags         = var.common-tags
+
   attribute {
     name = "vcfLocation"
     type = "S"
@@ -118,11 +119,11 @@ resource "aws_dynamodb_table" "vcfs" {
 
 # Keep User sagemaker Usage information
 resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
-  name           = "sbeacon-dataportal-users-quota"
-  billing_mode   = "PAY_PER_REQUEST" # on demand
+  name         = "sbeacon-dataportal-users-quota"
+  billing_mode = "PAY_PER_REQUEST" # on demand
   #read_capacity  = 5
   #write_capacity = 5
-  hash_key       = "uid"
+  hash_key = "uid"
 
   attribute {
     name = "uid"
@@ -133,5 +134,25 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
     Owner       = "gaspi"
     Environment = "dev"
     Name        = "sbeacon-backend"
+  }
+}
+
+# saved queries trable
+# this stores the saved queries of the users
+resource "aws_dynamodb_table" "saved_queries" {
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "uid"
+  range_key    = "name"
+  name         = "sbeacon-dataportal-saved-queries"
+  tags         = var.common-tags
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  attribute {
+    name = "name"
+    type = "S"
   }
 }

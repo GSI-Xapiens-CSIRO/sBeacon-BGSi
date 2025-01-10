@@ -152,6 +152,23 @@ resource "aws_s3_bucket_acl" "dataportal_bucket_acl" {
   acl    = "private"
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "staging_bucket_lifecycle" {
+  bucket = aws_s3_bucket.dataportal-bucket.id
+
+  rule {
+    id     = "remove-zombie-staging-files"
+    status = "Enabled"
+
+    filter {
+      prefix = "staging/"
+    }
+
+    expiration {
+      days = 3
+    }
+  }
+}
+
 # 
 # enable cors for dataportal bucket
 # 
@@ -167,12 +184,12 @@ resource "aws_s3_bucket_cors_configuration" "dataportal-bucket" {
   }
 }
 
-
 #
 # Enables S3 bucket notifications for updating file information
 #
 resource "aws_s3_bucket_notification" "updateFiles" {
   bucket = aws_s3_bucket.dataportal-bucket.id
+
   lambda_function {
     lambda_function_arn = module.lambda-updateFiles.lambda_function_arn
     events = [
@@ -182,5 +199,16 @@ resource "aws_s3_bucket_notification" "updateFiles" {
     filter_prefix = "projects/"
   }
 
-  depends_on = [aws_lambda_permission.S3updateFiles]
+  lambda_function {
+    lambda_function_arn = module.lambda-deidentifyFiles.lambda_function_arn
+    events = [
+      "s3:ObjectCreated:*",
+    ]
+    filter_prefix = "staging/projects/"
+  }
+
+  depends_on = [
+    aws_lambda_permission.S3updateFiles,
+    aws_lambda_permission.S3deidentifyFiles,
+  ]
 }

@@ -69,10 +69,10 @@ locals {
   }
   # dynamodb variables
   dynamodb_variables = {
-    DYNAMO_ONTOLOGIES_TABLE  = aws_dynamodb_table.ontologies.name
-    DYNAMO_ANSCESTORS_TABLE  = aws_dynamodb_table.anscestor_terms.name
-    DYNAMO_DESCENDANTS_TABLE = aws_dynamodb_table.descendant_terms.name
-    DYNAMO_PROJECT_USERS_TABLE = aws_dynamodb_table.project_users.name
+    DYNAMO_ONTOLOGIES_TABLE        = aws_dynamodb_table.ontologies.name
+    DYNAMO_ANSCESTORS_TABLE        = aws_dynamodb_table.anscestor_terms.name
+    DYNAMO_DESCENDANTS_TABLE       = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
   }
   # layers
@@ -633,6 +633,36 @@ module "lambda-admin" {
 }
 
 #
+# deidentifyFiles Lambda Function
+#
+module "lambda-deidentifyFiles" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name      = "sbeacon-backend-deidentifyFiles"
+  description        = "Deidentifies files before moving them to the dataportal bucket"
+  handler            = "lambda_function.lambda_handler"
+  runtime            = "python3.12"
+  memory_size        = 1769
+  timeout            = 30
+  attach_policy_json = true
+  policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
+  source_path        = "${path.module}/lambda/deidentifyFiles"
+  tags               = var.common-tags
+
+  environment_variables = {
+    DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
+    DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
+    EC2_IAM_INSTANCE_PROFILE = aws_iam_instance_profile.ec2_deidentification_instance_profile.name
+  }
+
+  layers = [
+    local.binaries_layer,
+  ]
+}
+
+#
 # updateFiles Lambda Function
 #
 module "lambda-updateFiles" {
@@ -650,10 +680,10 @@ module "lambda-updateFiles" {
   tags               = var.common-tags
 
   environment_variables = {
-    DPORTAL_BUCKET        = aws_s3_bucket.dataportal-bucket.bucket
-    DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
-    DYNAMO_VCFS_TABLE     = aws_dynamodb_table.vcfs.name
-    HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
+    DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
+    DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
   }
 
   layers = [
@@ -692,6 +722,7 @@ module "lambda-data-portal" {
       DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
       DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name,
+      DYNAMO_SAVED_QUERIES_TABLE     = aws_dynamodb_table.saved_queries.name
       JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,

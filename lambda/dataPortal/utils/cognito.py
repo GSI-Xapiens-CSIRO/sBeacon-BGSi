@@ -29,3 +29,26 @@ def get_user_attribute(user, attribute_name):
         if attribute["Name"] == attribute_name:
             return attribute["Value"]
     return "NULL"
+
+
+def list_users():
+    users = []
+    pagination_token = None
+
+    while True:
+        if pagination_token:
+            response = cognito_client.list_users(
+                UserPoolId=USER_POOL_ID, PaginationToken=pagination_token
+            )
+        else:
+            response = cognito_client.list_users(UserPoolId=USER_POOL_ID)
+
+        users.extend(response.get("Users", []))
+        pagination_token = response.get("PaginationToken")
+
+        if not pagination_token:
+            break
+    users = [
+        {attr["Name"]: attr["Value"] for attr in user["Attributes"]} for user in users
+    ]
+    return users

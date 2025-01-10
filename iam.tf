@@ -369,6 +369,71 @@ data "aws_iam_policy_document" "athena-readonly-access" {
 }
 
 #
+# deidentifyFiles Lambda Function
+#
+data "aws_iam_policy_document" "lambda-deidentifyFiles" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      aws_s3_bucket.dataportal-bucket.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+    resources = [
+      aws_dynamodb_table.projects.arn,
+      aws_dynamodb_table.vcfs.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "ec2:RunInstances",
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+      "ec2:DescribeImages",
+    ]
+    resources = [
+      "*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = [
+      aws_iam_role.ec2_deidentification_instance_role.arn,
+    ]
+  }
+}
+
+#
 # updateFiles Lambda Function
 #
 data "aws_iam_policy_document" "lambda-updateFiles" {
@@ -377,19 +442,21 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.dataportal-bucket.arn
+      aws_s3_bucket.dataportal-bucket.arn,
     ]
     condition {
       test     = "StringLike"
       variable = "s3:prefix"
       values = [
         "projects/*/",
+        "staging/projects/*/",
       ]
     }
   }
 
   statement {
     actions = [
+      "s3:PutObject",
       "s3:GetObject",
     ]
     resources = [
@@ -437,6 +504,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.project_users.arn,
       aws_dynamodb_table.juptyer_notebooks.arn,
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
+      aws_dynamodb_table.saved_queries.arn,
     ]
   }
 
@@ -477,6 +545,15 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
+      "sagemaker:ListNotebookInstances",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    actions = [
       "iam:PassRole"
     ]
 
@@ -499,6 +576,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       variable = "s3:prefix"
       values = [
         "projects/*",
+        "private/*",
       ]
     }
   }
@@ -512,6 +590,16 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     resources = [
       "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
       "${aws_s3_bucket.metadata-bucket.arn}/*",
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/private/*",
     ]
   }
 

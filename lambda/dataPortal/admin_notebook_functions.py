@@ -29,43 +29,22 @@ def list_notebooks(event, context):
     }
     notebooks = list_all_notebooks()
 
-    return [
-        {
-            **notebook,
-            "userFirstName": (
-                get_user_attribute(
-                    get_user_from_attribute(
-                        "sub", instances[notebook["instanceName"]].uid
-                    ),
-                    "given_name",
-                )
-                if notebook["instanceName"] in instances
-                else "Unassigned"
-            ),
-            "userLastName": (
-                get_user_attribute(
-                    get_user_from_attribute(
-                        "sub", instances[notebook["instanceName"]].uid
-                    ),
-                    "family_name",
-                )
-                if notebook["instanceName"] in instances
-                else "Unassigned"
-            ),
-            "userEmail": (
-                get_user_attribute(
-                    get_user_from_attribute(
-                        "sub", instances[notebook["instanceName"]].uid
-                    ),
-                    "email",
-                )
-                if notebook["instanceName"] in instances
-                else "Unassigned"
-            ),
-        }
-        for notebook in notebooks
-        if InstanceStatus(notebook["status"]) != InstanceStatus.DELETING
-    ]
+    for notebook in notebooks:
+        if InstanceStatus(notebook["status"]) == InstanceStatus.DELETING:
+            continue
+        try:
+            user = get_user_from_attribute(
+                "sub", instances[notebook["instanceName"]].uid
+            )
+            notebook["userFirstName"] = get_user_attribute(user, "given_name")
+            notebook["userLastName"] = get_user_attribute(user, "family_name")
+            notebook["userEmail"] = get_user_attribute(user, "email")
+        except PortalError:
+            notebook["userFirstName"] = "Unassigned"
+            notebook["userLastName"] = "Unassigned"
+            notebook["userEmail"] = "Unassigned"
+
+    return notebooks
 
 
 @router.attach("/dportal/admin/notebooks/{name}", "get", authenticate_manager)

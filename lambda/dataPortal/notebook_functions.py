@@ -35,6 +35,7 @@ def create_notebook(event, context):
         DirectInternetAccess="Enabled",
         RootAccess="Disabled",
         Tags=[{"Key": "IdentityId", "Value": identity_id}],
+        LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME"),
     )
     entry = JupyterInstances(sub, notebook_name)
     entry.save()

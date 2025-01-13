@@ -10,6 +10,17 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 
 
 @router.attach("/dportal/projects", "get")
+def list_all_projects(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    user_projects = ProjectUsers.uid_index.query(sub)
+
+    projects = [
+        Projects.get(user_project.name).to_dict() for user_project in user_projects
+    ]
+
+    return projects
+
+@router.attach("/dportal/my-projects", "get")
 def list_my_projects(event, context):
     query_params = event.get('queryStringParameters', {})
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -29,7 +40,7 @@ def list_my_projects(event, context):
     data = [
         Projects.get(user_project.name).to_dict() for user_project in user_projects
     ]
-    last_evaluated_key = json.dumps(user_projects.last_evaluated_key)
+    last_evaluated_key = json.dumps(user_projects.last_evaluated_key) if user_projects.last_evaluated_key else user_projects.last_evaluated_key
     return {"success":True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 

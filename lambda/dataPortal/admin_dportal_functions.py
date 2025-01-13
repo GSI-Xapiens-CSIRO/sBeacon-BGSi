@@ -234,7 +234,7 @@ def list_projects(event, context):
 
     projects = Projects.scan(**params)
     data = [project.to_dict() for project in projects]
-    last_evaluated_key = json.dumps(projects.last_evaluated_key)
+    last_evaluated_key = json.dumps(projects.last_evaluated_key) if projects.last_evaluated_key else projects.last_evaluated_key
     return {"success":True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 

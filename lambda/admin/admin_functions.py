@@ -8,6 +8,7 @@ from markupsafe import escape
 from shared.cognitoutils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
 from shared.utils.lambda_utils import ENV_COGNITO, ENV_BEACON, ENV_SES
+from shared.dynamodb import Quota, UsageMap
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
 BEACON_UI_URL = ENV_BEACON.BEACON_UI_URL
@@ -178,9 +179,18 @@ def get_users(event, context):
     response = cognito_client.list_users(**kwargs)
     # Extract users and next pagination token
     users = response.get("Users", [])
+    
+    data = []
+    for user in users:
+        user_sub = next(attr["Value"] for attr in user["User"]["Attributes"] if attr["Name"] == "sub")
+        try:
+            myQuota = Quota.get(user_sub)
+            user["Usage"] = myQuota.to_dict().get("Usage", UsageMap().as_dict())
+        except Quota.DoesNotExist:
+            user["Usage"] = UsageMap().as_dict()
     next_pagination_token = response.get("PaginationToken", None)
 
-    return {"users": users, "pagination_token": next_pagination_token}
+    return {"users": data, "pagination_token": next_pagination_token}
 
 
 @router.attach("/admin/users/{email}", "delete", authenticate_admin)

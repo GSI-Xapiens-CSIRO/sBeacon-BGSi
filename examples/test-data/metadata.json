@@ -34,12 +34,14 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C79426"
+                        "id": "NCIT:C79426",
+                        "label": "Cancer Diagnostic or Therapeutic Procedure"
                     }
                 },
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64264"
+                        "id": "NCIT:C64264",
+                        "label": "Imaging Biomarker Analysis"
                     }
                 }
             ],
@@ -82,12 +84,14 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C79426"
+                        "id": "NCIT:C79426",
+                        "label": "Cancer Diagnostic or Therapeutic Procedure"
                     }
                 },
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64264"
+                        "id": "NCIT:C64264",
+                        "label": "Imaging Biomarker Analysis"
                     }
                 }
             ],
@@ -130,12 +134,14 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C79426"
+                        "id": "NCIT:C79426",
+                        "label": "Cancer Diagnostic or Therapeutic Procedure"
                     }
                 },
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64263"
+                        "id": "NCIT:C64263",
+                        "label": "Laboratory Biomarker Analysis"
                     }
                 }
             ],
@@ -158,12 +164,14 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C79426"
+                        "id": "NCIT:C79426",
+                        "label": "Cancer Diagnostic or Therapeutic Procedure"
                     }
                 },
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64264"
+                        "id": "NCIT:C64264",
+                        "label": "Imaging Biomarker Analysis"
                     }
                 }
             ],
@@ -194,12 +202,14 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64263"
+                        "id": "NCIT:C64263",
+                        "label": "Laboratory Biomarker Analysis"
                     }
                 },
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64264"
+                        "id": "NCIT:C64264",
+                        "label": "Imaging Biomarker Analysis"
                     }
                 }
             ],
@@ -230,7 +240,8 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C93025"
+                        "id": "NCIT:C93025",
+                        "label": "Serum Tumor Marker Test"
                     }
                 }
             ],
@@ -253,7 +264,8 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C79426"
+                        "id": "NCIT:C79426",
+                        "label": "Cancer Diagnostic or Therapeutic Procedure"
                     }
                 }
             ],
@@ -296,7 +308,8 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64263"
+                        "id": "NCIT:C64263",
+                        "label": "Laboratory Biomarker Analysis"
                     }
                 }
             ],
@@ -355,7 +368,8 @@
             "interventionsOrProcedures": [
                 {
                     "procedureCode": {
-                        "id": "NCIT:C64264"
+                        "id": "NCIT:C64264",
+                        "label": "Imaging Biomarker Analysis"
                     }
                 }
             ],

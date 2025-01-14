@@ -8,7 +8,7 @@ import requests
 from shared.dynamodb import Ontology, Descendants, Anscestors
 
 
-ENSEMBL_OLS = "https://www.ebi.ac.uk/ols/api/ontologies"
+ENSEMBL_OLS_V4 = "http://www.ebi.ac.uk/ols4/api/ontologies"
 ONTOSERVER = "https://r4.ontoserver.csiro.au/fhir/ValueSet/$expand"
 
 
@@ -68,16 +68,16 @@ def get_ontology_details(ontology) -> Ontology:
             details.save()
         else:
             # use ENSEMBL
-            if response := requests.get(f"{ENSEMBL_OLS}/{ontology}"):
+            if response := requests.get(f"{ENSEMBL_OLS_V4}/{ontology}"):
                 response_json = response.json()
-                # TODO this will likely fail until OLS fix their V4 API
+
                 try:
                     details = Ontology(response_json["ontologyId"].lower())
                     details.name = response_json["config"]["title"]
-                    details.url = response_json["config"]["id"]
-                    details.version = response_json["config"]["version"]
+                    details.url = response_json["config"]["versionIri"]
+                    details.version = response_json["version"]
                     details.namespacePrefix = response_json["config"]["preferredPrefix"]
-                    details.iriPrefix = response_json["config"]["baseUris"][0]
+                    details.iriPrefix = ""
                     details.save()
                 except:
                     return None
@@ -110,9 +110,11 @@ def request_ontoserver_hierarchy(term: str, fetch_ancestors=True):
                                         "filter": [
                                             {
                                                 "property": "concept",
-                                                "op": "generalizes"
-                                                if fetch_ancestors
-                                                else "descendent-of",
+                                                "op": (
+                                                    "generalizes"
+                                                    if fetch_ancestors
+                                                    else "descendent-of"
+                                                ),
                                                 "value": f"{term.replace('SNOMED:', '')}",
                                             }
                                         ],
@@ -141,18 +143,43 @@ def request_ontoserver_hierarchy(term: str, fetch_ancestors=True):
 
 
 @lru_cache()
+def request_ensembl_term_details(ontology: str, code: str):
+    url = f"{ENSEMBL_OLS_V4}/{ontology}/terms"
+    if response := requests.get(
+        url,
+        {
+            "short_form": f"{ontology}_{code}".upper(),
+        },
+    ):
+        response_json = response.json()
+        return response_json
+    return None
+
+
+@lru_cache()
 def request_ensembl_hierarchy(term: str, fetch_ancestors=True):
     ontology, code = term.split(":")
-    details = get_ontology_details(ontology)
+    ontology_details = get_ontology_details(ontology)
     # if no details available, it is probably not an ontology term
-    if not details:
+    if not ontology_details:
         return (term, set())
 
-    iri = details.iriPrefix + code
-    iri_double_encoded = urllib.parse.quote_plus(urllib.parse.quote_plus(iri))
-    url = f"{ENSEMBL_OLS}/{ontology}/terms/{iri_double_encoded}/{'hierarchicalAncestors' if fetch_ancestors else 'hierarchicalDescendants'}"
+    term_details = request_ensembl_term_details(ontology, code)
 
-    if response := requests.get(url):
+    # not available in esembl OLS
+    if not term_details or len(term_details["_embedded"]["terms"]) == 0:
+        return (term, set())
+
+    if fetch_ancestors:
+        url = term_details["_embedded"]["terms"][0]["_links"]["hierarchicalAncestors"][
+            "href"
+        ]
+    else:
+        url = term_details["_embedded"]["terms"][0]["_links"][
+            "hierarchicalDescendants"
+        ]["href"]
+
+    if response := requests.get(url, {"size": 100}):
         response_json = response.json()
         members = set()
         for response_term in response_json["_embedded"]["terms"]:

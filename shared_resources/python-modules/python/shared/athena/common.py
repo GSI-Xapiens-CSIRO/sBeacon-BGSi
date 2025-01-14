@@ -110,8 +110,9 @@ def get_projects_filter(tables, project_names):
     words = []
     execution_parameters = []
     for table in tables:
-        words.append(f"REGEXP_LIKE( {table}._projectname, ? )")
-        execution_parameters.append(f"'^{'|'.join(project_names)}$'")
+        projects_list = ",".join([f" ? "] * len(project_names))
+        words.append(f"{table}._projectname IN ({projects_list})")
+        execution_parameters += project_names
         words.append("AND")
     return words, execution_parameters
 
@@ -159,7 +160,9 @@ def add_project_names(query, execution_parameters, project_names, user_sub):
             try:
                 new_execution_parameters.append(next(execution_parameters_iter))
             except StopIteration:
-                raise ValueError("Not enough execution parameters to cover all the ? characters")
+                raise ValueError(
+                    "Not enough execution parameters to cover all the ? characters"
+                )
         elif upper_word in ("FROM", "JOIN"):
             possible_alias = False
             next_is_table = True

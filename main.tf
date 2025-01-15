@@ -717,6 +717,7 @@ module "lambda-data-portal" {
 
   environment_variables = merge(
     local.sbeacon_variables,
+    local.dynamodb_variables,
     {
       ATHENA_METADATA_BUCKET         = aws_s3_bucket.metadata-bucket.bucket
       DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,

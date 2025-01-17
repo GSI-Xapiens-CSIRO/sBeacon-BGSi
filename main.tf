@@ -621,6 +621,7 @@ module "lambda-admin" {
 
   environment_variables = merge(
     local.sbeacon_variables,
+    local.dynamodb_variables,
     { COGNITO_USER_POOL_ID = var.cognito-user-pool-id },
     { COGNITO_ADMIN_GROUP_NAME = var.cognito-admin-group-name },
     { SES_SOURCE_EMAIL = var.ses-source-email },

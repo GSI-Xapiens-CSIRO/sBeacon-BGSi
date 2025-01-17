@@ -182,12 +182,14 @@ def get_users(event, context):
     
     data = []
     for user in users:
-        user_sub = next(attr["Value"] for attr in user["User"]["Attributes"] if attr["Name"] == "sub")
+        user_sub = next(attr["Value"] for attr in ["Attributes"] if attr["Name"] == "sub")
         try:
             myQuota = Quota.get(user_sub)
             user["Usage"] = myQuota.to_dict().get("Usage", UsageMap().as_dict())
+            data.append(user)
         except Quota.DoesNotExist:
             user["Usage"] = UsageMap().as_dict()
+            data.append(user)
     next_pagination_token = response.get("PaginationToken", None)
 
     return {"users": data, "pagination_token": next_pagination_token}

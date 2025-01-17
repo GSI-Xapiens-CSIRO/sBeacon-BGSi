@@ -328,10 +328,7 @@ data "aws_iam_policy_document" "dynamodb-onto-write-access" {
 data "aws_iam_policy_document" "admin-lambda-access" {
   statement {
     actions = [
-      "cognito-idp:*",
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
+      "cognito-idp:*"
     ]
     resources = [
       var.cognito-user-pool-arn,
@@ -344,6 +341,16 @@ data "aws_iam_policy_document" "admin-lambda-access" {
     resources = [
       "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:identity/*",
       aws_ses_configuration_set.ses_feedback_config.arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+    resources = [
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
     ]
   }

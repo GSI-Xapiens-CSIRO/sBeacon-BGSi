@@ -182,8 +182,8 @@ def get_users(event, context):
     
     data = []
     for user in users:
-        user_sub = next(attr["Value"] for attr in ["Attributes"] if attr["Name"] == "sub")
         try:
+            user_sub = next(attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub")
             myQuota = Quota.get(user_sub)
             user["Usage"] = myQuota.to_dict().get("Usage", UsageMap().as_dict())
             data.append(user)

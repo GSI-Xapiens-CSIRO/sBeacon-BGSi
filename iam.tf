@@ -343,6 +343,18 @@ data "aws_iam_policy_document" "admin-lambda-access" {
       aws_ses_configuration_set.ses_feedback_config.arn,
     ]
   }
+
+  statement {
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:BatchGetItem",
+    ]
+    resources = [
+      aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
+    ]
+  }
 }
 
 # Athena Read-only Access

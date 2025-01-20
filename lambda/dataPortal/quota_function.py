@@ -1,7 +1,7 @@
 import json
 
 from shared.apiutils import PortalError, LambdaRouter
-from utils.models import Quota
+from shared.dynamodb import Quota
 
 router = LambdaRouter()
 

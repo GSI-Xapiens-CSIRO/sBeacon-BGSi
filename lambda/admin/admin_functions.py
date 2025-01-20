@@ -180,16 +180,22 @@ def get_users(event, context):
     # Extract users and next pagination token
     users = response.get("Users", [])
     
+    keys = []
+    for user in users:
+        user_id = next(attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub")
+        user['uid'] = user_id
+        keys.append(user_id)
+        
+    quota_data = Quota.batch_get(
+        items=keys
+    )
+    dynamo_quota_map = {quota.to_dict()['uid']: quota.to_dict()['Usage'] for quota in quota_data}
     data = []
     for user in users:
-        try:
-            user_sub = next(attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub")
-            myQuota = Quota.get(user_sub)
-            user["Usage"] = myQuota.to_dict().get("Usage", UsageMap().as_dict())
-            data.append(user)
-        except Quota.DoesNotExist:
-            user["Usage"] = UsageMap().as_dict()
-            data.append(user)
+        uid = user['uid']
+        usage_data = dynamo_quota_map.get(uid,UsageMap().as_dict())
+        user['Usage'] = usage_data
+        data.append(user)
     next_pagination_token = response.get("PaginationToken", None)
 
     return {"users": data, "pagination_token": next_pagination_token}

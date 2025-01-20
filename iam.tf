@@ -349,6 +349,7 @@ data "aws_iam_policy_document" "admin-lambda-access" {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:Scan",
+      "dynamodb:BatchGetItem",
     ]
     resources = [
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,

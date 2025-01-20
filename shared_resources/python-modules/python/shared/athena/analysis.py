@@ -77,11 +77,9 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
             + ",".join([f"{col.lower()}:string" for col in cls._table_columns])
             + ">"
         )
-        header_terms = (
-            "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
-        )
-        key = array[0]['id']
-        projectname = array[0]['projectName']
+        header_terms = "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
+        key = array[0]["datasetId"]
+        projectname = array[0]["projectName"]
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/analyses-cache/{key}", "wb"
@@ -110,7 +108,14 @@ class Analysis(jsons.JsonSerializable, AthenaModel):
                     )
                     writer_entity.write(row)
                     for term, label, typ in extract_terms([jsons.dump(analysis)]):
-                        row = ("analyses", analysis["id"], term, label, typ, projectname)
+                        row = (
+                            "analyses",
+                            analysis["id"],
+                            term,
+                            label,
+                            typ,
+                            projectname,
+                        )
                         writer_terms.write(row)
 
 

@@ -682,10 +682,10 @@ module "lambda-updateFiles" {
   tags               = var.common-tags
 
   environment_variables = {
-    DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
-    DYNAMO_PROJECTS_TABLE    = aws_dynamodb_table.projects.name
-    DYNAMO_VCFS_TABLE        = aws_dynamodb_table.vcfs.name
-    HTS_S3_HOST              = "s3.${var.region}.amazonaws.com"
+    DPORTAL_BUCKET        = aws_s3_bucket.dataportal-bucket.bucket
+    DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE     = aws_dynamodb_table.vcfs.name
+    HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
   }
 
   layers = [
@@ -726,6 +726,7 @@ module "lambda-data-portal" {
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
       DYNAMO_SAVED_QUERIES_TABLE     = aws_dynamodb_table.saved_queries.name
       JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
+      JUPYTER_LIFECYCLE_CONFIG_NAME  = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
       USER_POOL_ID                   = var.cognito-user-pool-id,
       DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,
       COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name

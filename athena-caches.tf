@@ -605,7 +605,7 @@ resource "aws_glue_catalog_table" "sbeacon-terms-cache" {
       name = "type"
       type = "string"
     }
-    
+
     columns {
       name = "_projectname"
       type = "string"

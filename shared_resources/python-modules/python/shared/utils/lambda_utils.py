@@ -264,6 +264,10 @@ class DynamoDBEnvironment:
     def DYNAMO_PROJECT_USERS_UID_INDEX(self):
         return os.environ["DYNAMO_PROJECT_USERS_UID_INDEX"]
 
+    @property
+    def DYNAMO_QUOTA_USER_TABLE(self):
+        return os.environ["DYNAMO_QUOTA_USER_TABLE"]
+
 
 # class SnsEnvironment:
 #     @property

@@ -56,7 +56,7 @@ def perform_query(payload: dict(), is_async: bool = False):
     sample_indices = set()
     all_sample_names = []
     sample_names = []
-    
+
     bcftools_query = QueryBuiler()
     bcftools_query = bcftools_query.set_samples(chosen_samples)
     bcftools_query = bcftools_query.set_region(region)
@@ -64,12 +64,12 @@ def perform_query(payload: dict(), is_async: bool = False):
 
     bcftools_query = bcftools_query.set_vcf(payload["vcf_location"])
     args = bcftools_query.build()
-    
+
     print("Iterating bcftools result")
     query_process = subprocess.Popen(
         args, stdout=subprocess.PIPE, cwd="/tmp", encoding="ascii"
     )
-    
+
     # iterate through bcftools output
     for line in query_process.stdout:
         try:

@@ -74,6 +74,7 @@ locals {
     DYNAMO_DESCENDANTS_TABLE       = aws_dynamodb_table.descendant_terms.name
     DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
+    DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"
@@ -620,6 +621,7 @@ module "lambda-admin" {
 
   environment_variables = merge(
     local.sbeacon_variables,
+    local.dynamodb_variables,
     { COGNITO_USER_POOL_ID = var.cognito-user-pool-id },
     { COGNITO_ADMIN_GROUP_NAME = var.cognito-admin-group-name },
     { SES_SOURCE_EMAIL = var.ses-source-email },
@@ -716,12 +718,12 @@ module "lambda-data-portal" {
 
   environment_variables = merge(
     local.sbeacon_variables,
+    local.dynamodb_variables,
     {
       ATHENA_METADATA_BUCKET         = aws_s3_bucket.metadata-bucket.bucket
       DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,
       DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
       DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
-      DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name,
       DYNAMO_SAVED_QUERIES_TABLE     = aws_dynamodb_table.saved_queries.name
       JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       JUPYTER_LIFECYCLE_CONFIG_NAME  = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,

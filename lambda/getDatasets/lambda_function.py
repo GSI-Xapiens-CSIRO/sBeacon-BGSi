@@ -12,7 +12,7 @@ from shared.apiutils import bundle_response, parse_request
 def lambda_handler(event, context):
     print("Event Received: {}".format(json.dumps(event)))
     request_params, errors, status = parse_request(event)
-    
+
     if errors:
         return bundle_response(status, errors)
 

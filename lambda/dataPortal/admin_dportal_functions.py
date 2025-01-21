@@ -220,13 +220,11 @@ def create_project(event, context):
 
 @router.attach("/dportal/admin/projects", "get", authenticate_manager)
 def list_projects(event, context):
-    query_params = event.get('queryStringParameters', {})
-    params = {
-        "limit": 10
-    }
+    query_params = event.get("queryStringParameters", {})
+    params = {"limit": 10}
     if query_params:
-        limit = query_params.get('limit', None)
-        last_evaluated_key = query_params.get('last_evaluated_key', None)
+        limit = query_params.get("limit", None)
+        last_evaluated_key = query_params.get("last_evaluated_key", None)
         if limit:
             params["limit"] = int(limit)
         if last_evaluated_key:
@@ -234,8 +232,12 @@ def list_projects(event, context):
 
     projects = Projects.scan(**params)
     data = [project.to_dict() for project in projects]
-    last_evaluated_key = json.dumps(projects.last_evaluated_key) if projects.last_evaluated_key else projects.last_evaluated_key
-    return {"success":True, "data": data, "last_evaluated_key": last_evaluated_key}
+    last_evaluated_key = (
+        json.dumps(projects.last_evaluated_key)
+        if projects.last_evaluated_key
+        else projects.last_evaluated_key
+    )
+    return {"success": True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 
 #

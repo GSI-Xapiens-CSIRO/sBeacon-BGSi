@@ -80,11 +80,9 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
             + ",".join([f"{col.lower()}:string" for col in cls._table_columns])
             + ">"
         )
-        header_terms = (
-            "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
-        )
-        key = array[0]['id']
-        projectname = array[0]['projectName']
+        header_terms = "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
+        key = array[0]["id"]
+        projectname = array[0]["projectName"]
 
         with sopen(
             f"s3://{ENV_ATHENA.ATHENA_METADATA_BUCKET}/datasets-cache/{key}", "wb"

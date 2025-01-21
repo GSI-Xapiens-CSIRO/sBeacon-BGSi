@@ -11,7 +11,7 @@ def lambda_handler(event, context):
         {
             "name": project.name,
             "description": project.description,
-            "total_samples": project.total_samples
+            "total_samples": project.total_samples,
         }
         for project in projects
     ]

@@ -44,7 +44,7 @@ def lambda_handler(event, context):
     except:
         print("using invoke event")
         is_async = False
-    
+
     # if gzipped
     if not isinstance(event, list):
         event = base64.b64decode(event.encode())

@@ -140,10 +140,14 @@ def add_user(event, context):
             ReturnPath=SES_SOURCE_EMAIL,
             ConfigurationSetName=SES_CONFIG_SET_NAME,
         )
-        user_sub = next(attr["Value"] for attr in congnito_user["User"]["Attributes"] if attr["Name"] == "sub")
+        user_sub = next(
+            attr["Value"]
+            for attr in congnito_user["User"]["Attributes"]
+            if attr["Name"] == "sub"
+        )
         if user_sub:
-            res['uid'] = user_sub
-        
+            res["uid"] = user_sub
+
     except:
         cognito_client.admin_delete_user(
             UserPoolId=USER_POOL_ID,
@@ -179,22 +183,24 @@ def get_users(event, context):
     response = cognito_client.list_users(**kwargs)
     # Extract users and next pagination token
     users = response.get("Users", [])
-    
+
     keys = []
     for user in users:
-        user_id = next(attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub")
-        user['uid'] = user_id
+        user_id = next(
+            attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub"
+        )
+        user["uid"] = user_id
         keys.append(user_id)
-        
-    quota_data = Quota.batch_get(
-        items=keys
-    )
-    dynamo_quota_map = {quota.to_dict()['uid']: quota.to_dict()['Usage'] for quota in quota_data}
+
+    quota_data = Quota.batch_get(items=keys)
+    dynamo_quota_map = {
+        quota.to_dict()["uid"]: quota.to_dict()["Usage"] for quota in quota_data
+    }
     data = []
     for user in users:
-        uid = user['uid']
-        usage_data = dynamo_quota_map.get(uid,UsageMap().as_dict())
-        user['Usage'] = usage_data
+        uid = user["uid"]
+        usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
+        user["Usage"] = usage_data
         data.append(user)
     next_pagination_token = response.get("PaginationToken", None)
 

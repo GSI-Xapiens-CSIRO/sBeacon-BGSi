@@ -20,28 +20,29 @@ def list_all_projects(event, context):
 
     return projects
 
+
 @router.attach("/dportal/my-projects", "get")
 def list_my_projects(event, context):
-    query_params = event.get('queryStringParameters', {})
+    query_params = event.get("queryStringParameters", {})
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    
-    params = {
-        "limit": 10
-    }
+
+    params = {"limit": 10}
     if query_params:
-        limit = query_params.get('limit', None)
-        last_evaluated_key = query_params.get('last_evaluated_key', None)
+        limit = query_params.get("limit", None)
+        last_evaluated_key = query_params.get("last_evaluated_key", None)
         if limit:
             params["limit"] = int(limit)
         if last_evaluated_key:
             params["last_evaluated_key"] = json.loads(last_evaluated_key)
 
-    user_projects = ProjectUsers.uid_index.query(sub,**params)
-    data = [
-        Projects.get(user_project.name).to_dict() for user_project in user_projects
-    ]
-    last_evaluated_key = json.dumps(user_projects.last_evaluated_key) if user_projects.last_evaluated_key else user_projects.last_evaluated_key
-    return {"success":True, "data": data, "last_evaluated_key": last_evaluated_key}
+    user_projects = ProjectUsers.uid_index.query(sub, **params)
+    data = [Projects.get(user_project.name).to_dict() for user_project in user_projects]
+    last_evaluated_key = (
+        json.dumps(user_projects.last_evaluated_key)
+        if user_projects.last_evaluated_key
+        else user_projects.last_evaluated_key
+    )
+    return {"success": True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 
 @router.attach("/dportal/projects/{name}/file", "get")

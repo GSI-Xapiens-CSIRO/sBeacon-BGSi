@@ -77,6 +77,7 @@ class JupyterInstances(Model):
     uid = UnicodeAttribute(hash_key=True)
     instanceName = UnicodeAttribute(range_key=True)
 
+
 class SavedQueries(Model):
     class Meta:
         table_name = os.environ.get("DYNAMO_SAVED_QUERIES_TABLE")

@@ -217,7 +217,8 @@ def beacon_map():
                 "openAPIEndpointsDefinition": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2-Models/main/BEACON-V2-Model/cohorts/endpoints.json",
                 "rootUrl": ENV_BEACON.BEACON_URI + "/cohorts",
                 "singleEntryUrl": ENV_BEACON.BEACON_URI + "/cohorts/{id}",
-                "filteringTermsUrl": ENV_BEACON.BEACON_URI + "/cohorts/{id}/filtering_terms",
+                "filteringTermsUrl": ENV_BEACON.BEACON_URI
+                + "/cohorts/{id}/filtering_terms",
                 "endpoints": {
                     "analysis": {
                         "returnedEntryType": "analysis",
@@ -238,7 +239,8 @@ def beacon_map():
                 "openAPIEndpointsDefinition": "https://raw.githubusercontent.com/ga4gh-beacon/beacon-v2-Models/main/BEACON-V2-Model/datasets/endpoints.json",
                 "rootUrl": ENV_BEACON.BEACON_URI + "/datasets",
                 "singleEntryUrl": ENV_BEACON.BEACON_URI + "/datasets/{id}",
-                "filteringTermsUrl": ENV_BEACON.BEACON_URI + "/datasets/{id}/filtering_terms",
+                "filteringTermsUrl": ENV_BEACON.BEACON_URI
+                + "/datasets/{id}/filtering_terms",
                 "endpoints": {
                     "analysis": {
                         "returnedEntryType": "analysis",

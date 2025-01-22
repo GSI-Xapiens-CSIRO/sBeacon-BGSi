@@ -8,7 +8,7 @@ import requests
 from shared.dynamodb import Ontology, Descendants, Anscestors
 
 
-ENSEMBL_OLS_V4 = "http://www.ebi.ac.uk/ols4/api/ontologies"
+ENSEMBL_OLS_V4 = "https://www.ebi.ac.uk/ols4/api/ontologies"
 ONTOSERVER = "https://r4.ontoserver.csiro.au/fhir/ValueSet/$expand"
 
 

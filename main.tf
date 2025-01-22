@@ -645,7 +645,7 @@ module "lambda-deidentifyFiles" {
   handler            = "lambda_function.lambda_handler"
   runtime            = "python3.12"
   memory_size        = 1769
-  timeout            = 30
+  timeout            = 900
   attach_policy_json = true
   policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
   source_path        = "${path.module}/lambda/deidentifyFiles"

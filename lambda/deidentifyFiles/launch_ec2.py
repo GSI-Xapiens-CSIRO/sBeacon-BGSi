@@ -131,6 +131,7 @@ sudo shutdown -h now
                             8 + 2 * size_gb
                         ),  # Allow twice the size of the input data
                         "VolumeType": "gp3",
+                        "Encrypted": True,
                     },
                 },
             ],

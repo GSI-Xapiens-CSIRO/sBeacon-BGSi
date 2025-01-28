@@ -90,9 +90,9 @@ module "lambda-submitDataset" {
 
   function_name       = "sbeacon-backend-submitDataset"
   description         = "Creates or updates a dataset and triggers summariseVcf."
-  handler             = "lambda_function.lambda_handler"
-  runtime             = "python3.12"
-  architectures       = ["x86_64"]
+  create_package      = false
+  image_uri           = module.docker_image_submitDataset_lambda.image_uri
+  package_type        = "Image"
   memory_size         = 1769
   timeout             = 60
   attach_policy_jsons = true
@@ -114,12 +114,6 @@ module "lambda-submitDataset" {
     local.athena_variables,
     local.dynamodb_variables
   )
-
-  layers = [
-    local.python_libraries_layer,
-    local.binaries_layer,
-    local.python_modules_layer
-  ]
 }
 
 #

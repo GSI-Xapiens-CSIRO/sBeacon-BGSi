@@ -2,6 +2,7 @@ import json
 import os
 from threading import Thread
 from datetime import datetime, timezone
+from pathlib import Path
 
 from jsonschema import Draft202012Validator, RefResolver
 from shared.athena import Analysis, Biosample, Dataset, Individual, Run
@@ -9,6 +10,7 @@ from shared.athena import Analysis, Biosample, Dataset, Individual, Run
 from shared.utils import clear_tmp
 from smart_open import open as sopen
 from util import get_vcf_chromosome_maps, get_vcfs_samples
+from tabular_to_json import transform_tabular_to_json
 
 # uncomment below for debugging
 # os.environ['LD_DEBUG'] = 'all'
@@ -102,9 +104,24 @@ def lambda_handler(event, context):
         return {"success": False, "message": "No body sent with request."}
     try:
         body_dict = dict()
-        # json submission entry
-        with sopen(event.get("s3Payload"), "r") as payload:
-            body_dict.update(json.loads(payload.read()))
+        # json/csv/tsv submission entry
+        s3payload = event.get("s3Payload")
+        if type(s3payload) == str:
+            if not s3payload.endswith(".json"):
+                raise ValueError
+            else:
+                with sopen(s3payload, "r") as payload:
+                    body_dict = json.loads(payload.read())
+        elif type(s3payload) == dict:
+            if not all(
+                [
+                    value.endswith(".tsv") or value.endswith(".csv")
+                    for value in s3payload.values()
+                ]
+            ):
+                raise ValueError
+            else:
+                body_dict = transform_tabular_to_json(s3payload)
         # vcf files attached to the request
         body_dict["vcfLocations"] = event.get("vcfLocations", [])
         project_name = event.get("projectName")  # This is a required field
@@ -129,7 +146,7 @@ def lambda_handler(event, context):
         body_dict["index"] = False
 
     except ValueError:
-        return {"success": False, "message": "Invalid JSON payload"}
+        return {"success": False, "message": "Invalid payload"}
 
     if validation_errors := validate_request(body_dict):
         print(", ".join(validation_errors))

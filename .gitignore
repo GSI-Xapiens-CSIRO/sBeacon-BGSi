@@ -31,5 +31,9 @@ tmpterms
 backend.tf
 .terraform.lock.hcl
 
+# docker related bundle images
+lambda/submitDataset/shared
+lambda/submitDataset/schemas
+
 # MAC
 .DS_Store

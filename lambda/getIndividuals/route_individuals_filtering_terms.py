@@ -18,13 +18,25 @@ def route(request: RequestParams):
     SELECT DISTINCT term, label, type 
     FROM "{ENV_ATHENA.ATHENA_TERMS_TABLE}"
     WHERE "kind"='individuals'
+    AND (REGEXP_LIKE(label, ?) OR REGEXP_LIKE(term, ?))
     ORDER BY term
     OFFSET {request.query.pagination.skip}
     LIMIT {request.query.pagination.limit};
     """
 
+    if request.query._search:
+        search_term = request.query._search
+        regex = f"(?i).*{search_term}.*"
+    else:
+        regex = ".*"
+
+    execution_parameters = [regex, regex]
     exec_id = run_custom_query(
-        query, return_id=True, projects=request.projects, sub=request.sub
+        query,
+        return_id=True,
+        projects=request.projects,
+        sub=request.sub,
+        execution_parameters=execution_parameters,
     )
     filteringTerms = []
     ontologies = set()

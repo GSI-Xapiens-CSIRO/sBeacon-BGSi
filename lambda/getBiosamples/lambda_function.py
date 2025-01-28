@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 
 from route_biosamples import route as route_biosamples
 from route_biosamples_id import route as route_biosamples_id
@@ -20,24 +21,20 @@ def lambda_handler(event, context):
         return route_biosamples(request_params)
 
     elif event["resource"] == "/biosamples/{id}":
-        return route_biosamples_id(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        biosample_id = unquote(event["pathParameters"]["id"])
+        return route_biosamples_id(request_params, biosample_id)
 
     elif event["resource"] == "/biosamples/{id}/g_variants":
-        return route_biosamples_id_g_variants(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        biosample_id = unquote(event["pathParameters"]["id"])
+        return route_biosamples_id_g_variants(request_params, biosample_id)
 
     elif event["resource"] == "/biosamples/{id}/analyses":
-        return route_biosamples_id_analyses(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        biosample_id = unquote(event["pathParameters"]["id"])
+        return route_biosamples_id_analyses(request_params, biosample_id)
 
     elif event["resource"] == "/biosamples/{id}/runs":
-        return route_biosamples_id_runs(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        biosample_id = unquote(event["pathParameters"]["id"])
+        return route_biosamples_id_runs(request_params, biosample_id)
 
     elif event["resource"] == "/biosamples/filtering_terms":
         return route_biosamples_filtering_terms(request_params)

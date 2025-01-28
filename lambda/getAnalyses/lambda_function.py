@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 
 from route_analyses import route as route_analyses
 from route_analyses_filtering_terms import route as route_analyses_filtering_terms
@@ -21,14 +22,12 @@ def lambda_handler(event, context):
         return route_analyses_filtering_terms(request_params)
 
     elif event["resource"] == "/analyses/{id}":
-        return route_analyses_id(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        analysis_id = unquote(event["pathParameters"]["id"])
+        return route_analyses_id(request_params, analysis_id)
 
     elif event["resource"] == "/analyses/{id}/g_variants":
-        return route_analyses_id_g_variants(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        analysis_id = unquote(event["pathParameters"]["id"])
+        return route_analyses_id_g_variants(request_params, analysis_id)
 
 
 if __name__ == "__main__":

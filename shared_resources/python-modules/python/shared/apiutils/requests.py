@@ -180,6 +180,7 @@ class RequestQuery(CamelModel):
     test_mode: bool = False
     requested_granularity: Granularity = Granularity(BEACON_DEFAULT_GRANULARITY)
     _filters: dict = PrivateAttr()
+    _search: str = PrivateAttr(default=None)
     projects: list[str] = []
 
     def __init__(self, **data):
@@ -221,6 +222,8 @@ class RequestParams(CamelModel):
             elif k == "projects":
                 projects = v.split(",")
                 self.projects = projects
+            elif k == "search":
+                self.query._search = v
             else:
                 req_params_dict[k] = v
         # query parameters related to variants

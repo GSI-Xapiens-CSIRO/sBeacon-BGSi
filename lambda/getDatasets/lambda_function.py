@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 
 from route_datasets import route as route_datasets
 from route_datasets_id import route as route_datasets_id
@@ -20,29 +21,24 @@ def lambda_handler(event, context):
         return route_datasets(request_params)
 
     elif event["resource"] == "/datasets/{id}":
-        return route_datasets_id(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        dataset_id = unquote(event["pathParameters"]["id"])
+        return route_datasets_id(request_params, dataset_id)
 
     elif event["resource"] == "/datasets/{id}/g_variants":
-        return route_datasets_id_g_variants(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        dataset_id = unquote(event["pathParameters"]["id"])
+        return route_datasets_id_g_variants(request_params, dataset_id)
 
     elif event["resource"] == "/datasets/{id}/biosamples":
-        return route_datasets_id_biosamples(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        dataset_id = unquote(event["pathParameters"]["id"])
+        return route_datasets_id_biosamples(request_params, dataset_id)
 
     elif event["resource"] == "/datasets/{id}/individuals":
-        return route_datasets_id_individuals(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        dataset_id = unquote(event["pathParameters"]["id"])
+        return route_datasets_id_individuals(request_params, dataset_id)
 
     elif event["resource"] == "/datasets/{id}/filtering_terms":
-        return route_datasets_id_filtering_terms(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        dataset_id = unquote(event["pathParameters"]["id"])
+        return route_datasets_id_filtering_terms(request_params, dataset_id)
 
 
 if __name__ == "__main__":

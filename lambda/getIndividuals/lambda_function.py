@@ -1,4 +1,5 @@
 import json
+from urllib.parse import unquote
 
 from shared.apiutils import parse_request, bundle_response
 from route_individuals import route as route_individuals
@@ -22,19 +23,16 @@ def lambda_handler(event, context):
         return route_individuals_filtering_terms(request_params)
 
     elif event["resource"] == "/individuals/{id}":
-        return route_individuals_id(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        individual_id = unquote(event["pathParameters"]["id"])
+        return route_individuals_id(request_params, individual_id)
 
     elif event["resource"] == "/individuals/{id}/g_variants":
-        return route_individuals_id_g_variants(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        individual_id = unquote(event["pathParameters"]["id"])
+        return route_individuals_id_g_variants(request_params, individual_id)
 
     elif event["resource"] == "/individuals/{id}/biosamples":
-        return route_individuals_id_biosamples(
-            request_params, event["pathParameters"].get("id", None)
-        )
+        individual_id = unquote(event["pathParameters"]["id"])
+        return route_individuals_id_biosamples(request_params, individual_id)
 
 
 if __name__ == "__main__":

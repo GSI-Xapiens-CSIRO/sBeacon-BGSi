@@ -46,4 +46,6 @@ module "docker_image_submitDataset_lambda" {
   triggers = {
     dir_sha = data.external.submitDataset_lambda_source_hash.result.hash
   }
+
+  platform = "linux/amd64"
 }

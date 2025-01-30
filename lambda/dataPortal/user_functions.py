@@ -71,13 +71,17 @@ def get_file_presigned_url(event, context):
 
 @router.attach("/dportal/queries", "get")
 def get_saved_queries(event, context):
-    entries = [entry.attribute_values for entry in SavedQueries.scan()]
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    entries = [
+        {
+            "name": entry.name,
+            "description": entry.description,
+            "query": json.loads(entry.savedQuery),
+        }
+        for entry in SavedQueries.query(sub)
+    ]
 
-    def to_json(entry):
-        entry["query"] = json.loads(entry["query"])
-        return entry
-
-    return list(map(to_json, entries))
+    return entries
 
 
 @router.attach("/dportal/queries", "post")
@@ -87,7 +91,9 @@ def save_query(event, context):
     name = body_dict.get("name")
     description = body_dict.get("description")
     query = body_dict.get("query")
-    entry = SavedQueries(sub, name, description=description, query=json.dumps(query))
+    entry = SavedQueries(
+        sub, name, description=description, savedQuery=json.dumps(query)
+    )
     entry.save()
 
     return {"success": True}

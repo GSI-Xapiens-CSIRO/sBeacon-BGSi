@@ -86,4 +86,4 @@ class SavedQueries(Model):
     uid = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute(range_key=True)
     description = UnicodeAttribute(default_for_new="")
-    query = UnicodeAttribute()
+    savedQuery = UnicodeAttribute(attr_name="query")

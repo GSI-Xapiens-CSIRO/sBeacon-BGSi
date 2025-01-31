@@ -24,13 +24,12 @@ def create_dataset(attributes):
         raise Exception(f"Error getting VCF chromosome maps: {errors}")
 
     datasetId = attributes.get("datasetId", None)
-    projectName = attributes.get("projectName", None)
     threads = []
 
     # dataset metadata entry information
     json_dataset = attributes.get("dataset", None)
     json_dataset["id"] = datasetId
-    json_dataset["projectName"] = projectName
+    json_dataset["projectName"] = attributes["projectName"]
     json_dataset["assemblyId"] = attributes["assemblyId"]
     json_dataset["vcfLocations"] = attributes["vcfLocations"]
     json_dataset["vcfChromosomeMap"] = [vcfm for vcfm in vcf_chromosome_maps]
@@ -97,6 +96,14 @@ def validate_request(parameters):
     return errors
 
 
+def format_info(project_name, dataset_name, additional_info):
+    return {
+        "projectName": project_name,
+        "datasetName": dataset_name,
+        "additionalInfo": additional_info,
+    }
+
+
 def lambda_handler(event, context):
     print("Event Received: {}".format(json.dumps(event)))
 
@@ -125,24 +132,36 @@ def lambda_handler(event, context):
         # vcf files attached to the request
         body_dict["vcfLocations"] = event.get("vcfLocations", [])
         project_name = event.get("projectName")  # This is a required field
+        dataset_name = event.get("datasetId")
+        dataset_id = f"{project_name}:{dataset_id}"
+
+        body_dict["datasetId"] = dataset_id
         body_dict["projectName"] = project_name
-        # set dataset id from project name
-        body_dict["datasetId"] = f'{project_name}:{event.get("datasetId")}'
-        body_dict["dataset"]["id"] = body_dict["datasetId"]
+        body_dict["dataset"]["datasetName"] = dataset_name
         body_dict["dataset"]["projectName"] = project_name
 
         for individual in body_dict.get("individuals", []):
             individual["datasetId"] = body_dict["datasetId"]
             individual["projectName"] = project_name
+            individual["info"] = format_info(
+                project_name, dataset_name, individual.get("info", "")
+            )
         for biosample in body_dict.get("biosamples", []):
             biosample["datasetId"] = body_dict["datasetId"]
             biosample["projectName"] = project_name
+            biosample["info"] = format_info(
+                project_name, dataset_name, biosample.get("info", "")
+            )
         for run in body_dict.get("runs", []):
             run["datasetId"] = body_dict["datasetId"]
             run["projectName"] = project_name
+            run["info"] = format_info(project_name, dataset_name, run.get("info", ""))
         for analysis in body_dict.get("analyses", []):
             analysis["datasetId"] = body_dict["datasetId"]
             analysis["projectName"] = project_name
+            analysis["info"] = format_info(
+                project_name, dataset_name, analysis.get("info", "")
+            )
         body_dict["index"] = False
 
     except ValueError:

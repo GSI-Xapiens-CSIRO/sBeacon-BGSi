@@ -24,6 +24,21 @@ def get_user_from_attribute(attribute, value):
         raise PortalError(500, str(e))
 
 
+def search_users_from_attribute(attribute, value):
+    try:
+        response = cognito_client.list_users(
+            UserPoolId=USER_POOL_ID, Filter=f'{attribute} ^= "{value}"', Limit=10
+        )
+        users = response.get("Users", [])
+        if not users:
+            raise PortalError(404, "User not found")
+        return users
+    except cognito_client.exceptions.UserNotFoundException:
+        raise PortalError(404, "User not found")
+    except Exception as e:
+        raise PortalError(500, str(e))
+
+
 def get_user_attribute(user, attribute_name):
     for attribute in user["Attributes"]:
         if attribute["Name"] == attribute_name:

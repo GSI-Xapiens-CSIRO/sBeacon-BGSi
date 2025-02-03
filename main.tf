@@ -810,4 +810,14 @@ module "lambda-userPasswordResetEmail" {
   source_path         = "${path.module}/lambda/forgotPassword"
 
   tags = var.common-tags
+
+  environment_variables = merge(
+    { SES_SOURCE_EMAIL = var.ses-source-email },
+    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name },
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer
+  ]
 }

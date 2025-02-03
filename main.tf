@@ -74,7 +74,7 @@ locals {
     DYNAMO_DESCENDANTS_TABLE       = aws_dynamodb_table.descendant_terms.name
     DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
-    DYNAMO_QUOTA_USER_TABLE = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
+    DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"
@@ -790,6 +790,24 @@ module "lambda-logEmailDelivery" {
   timeout             = 60
   attach_policy_jsons = true
   source_path         = "${path.module}/lambda/logEmailDelivery"
+
+  tags = var.common-tags
+}
+
+#
+# email notification Lambda forgot password
+#
+module "lambda-userPasswordResetEmail" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-userPasswordResetEmail"
+  description         = "Logging of user invite email delivery status."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 512
+  timeout             = 60
+  attach_policy_jsons = true
+  source_path         = "${path.module}/lambda/forgotPassword"
 
   tags = var.common-tags
 }

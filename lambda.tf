@@ -60,7 +60,7 @@ resource "aws_lambda_permission" "S3deidentifyFiles" {
 resource "aws_lambda_permission" "allow_cognito_invoke_trigger" {
   statement_id  = "AllowExecutionFromCognito"
   action        = "lambda:InvokeFunction"
-  function_name = module.lambda-userPasswordResetEmail.function_name
+  function_name = module.lambda-userPasswordResetEmail.lambda_function_arn
   principal     = "cognito-idp.amazonaws.com"
   source_arn    = var.cognito-user-pool-arn
 }

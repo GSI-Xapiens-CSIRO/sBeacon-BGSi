@@ -43,7 +43,7 @@ def lambda_handler(event, context):
                     </head>
                     <body>
                         <div class="container">
-                        <h1>Hello, {escape(email)} </h1>
+                        <h1>Hello, {escape(email)}, from TF </h1>
                         <p class="message">We received a request to reset your password. If you did not make this request, you can ignore this email. Otherwise, please input the verification code below:</p>
                         <h3>{verification_code}</h3>
                         <div style="max-width:80;">

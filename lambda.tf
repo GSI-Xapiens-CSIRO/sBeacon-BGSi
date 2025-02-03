@@ -55,37 +55,6 @@ resource "aws_lambda_permission" "S3deidentifyFiles" {
 }
 
 #
-# resetPassword Lambda Function
-#
-resource "aws_cognito_user_pool" "garden_tour_user_pool" {
-  name = "garden_tour_user_pool"
-
-  username_attributes      = ["email"]
-  auto_verified_attributes = ["email"]
-  password_policy {
-    minimum_length                   = 6
-    temporary_password_validity_days = 2
-  }
-
-  schema {
-    attribute_data_type      = "String"
-    developer_only_attribute = false
-    mutable                  = true
-    name                     = "email"
-    required                 = true
-
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 256
-    }
-  }
-
-  lambda_config {
-    custom_message = module.lambda-userPasswordResetEmail.function_name.arn
-  }
-}
-
-#
 # cognitoInvokeTrigger Lambda Function
 #
 resource "aws_lambda_permission" "allow_cognito_invoke_trigger" {
@@ -93,5 +62,5 @@ resource "aws_lambda_permission" "allow_cognito_invoke_trigger" {
   action        = "lambda:InvokeFunction"
   function_name = module.lambda-userPasswordResetEmail.function_name
   principal     = "cognito-idp.amazonaws.com"
-  source_arn    = aws_cognito_user_pool.garden_tour_user_pool.arn
+  source_arn    = var.cognito-user-pool-arn
 }

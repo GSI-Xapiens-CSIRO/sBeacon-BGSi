@@ -807,7 +807,11 @@ module "lambda-userPasswordResetEmail" {
   memory_size         = 256
   timeout             = 60
   attach_policy_jsons = true
-  source_path         = "${path.module}/lambda/forgotPassword"
+  policy_jsons = [
+    data.aws_iam_policy_document.resetpassword-lambda-access.json
+  ]
+  number_of_policy_jsons = 1
+  source_path            = "${path.module}/lambda/forgotPassword"
 
   tags = var.common-tags
 

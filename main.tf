@@ -804,7 +804,7 @@ module "lambda-userPasswordResetEmail" {
   description         = "Logging of user invite email delivery status."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
-  memory_size         = 512
+  memory_size         = 256
   timeout             = 60
   attach_policy_jsons = true
   source_path         = "${path.module}/lambda/forgotPassword"

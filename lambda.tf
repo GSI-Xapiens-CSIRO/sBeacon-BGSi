@@ -81,7 +81,7 @@ resource "aws_cognito_user_pool" "garden_tour_user_pool" {
   }
 
   lambda_config {
-    custom_message = module.lambda.lambda_arn
+    custom_message = module.lambda-userPasswordResetEmail.function_name.arn
   }
 }
 
@@ -91,7 +91,7 @@ resource "aws_cognito_user_pool" "garden_tour_user_pool" {
 resource "aws_lambda_permission" "allow_cognito_invoke_trigger" {
   statement_id  = "AllowExecutionFromCognito"
   action        = "lambda:InvokeFunction"
-  function_name = module.lambda.lambda_function_name
+  function_name = module.lambda-userPasswordResetEmail.function_name
   principal     = "cognito-idp.amazonaws.com"
   source_arn    = aws_cognito_user_pool.garden_tour_user_pool.arn
 }

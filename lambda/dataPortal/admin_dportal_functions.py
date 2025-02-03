@@ -109,12 +109,19 @@ def add_user_to_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
     emails = body_dict.get("emails")
-    users = [get_user_from_attribute("email", email) for email in emails]
+    users = []
+
+    for email in emails:
+        try:
+            user = get_user_from_attribute("email", email)
+            users.append(user)
+        except PortalError as e:
+            return {"success": False, "message": e.error_message}
 
     try:
         Projects.get(name)
     except DoesNotExist:
-        raise PortalError(404, "Project not found")
+        return {"success": False, "message": "Project not found"}
 
     with ProjectUsers.batch_write() as batch:
         for user in users:
@@ -122,7 +129,7 @@ def add_user_to_project(event, context):
             user_project = ProjectUsers(name, user_id)
             batch.save(user_project)
 
-    return {"success": True}
+    return {"success": True, "message": ""}
 
 
 #

@@ -133,7 +133,7 @@ def lambda_handler(event, context):
         body_dict["vcfLocations"] = event.get("vcfLocations", [])
         project_name = event.get("projectName")  # This is a required field
         dataset_name = event.get("datasetId")
-        dataset_id = f"{project_name}:{dataset_id}"
+        dataset_id = f"{project_name}:{dataset_name}"
 
         body_dict["datasetId"] = dataset_id
         body_dict["projectName"] = project_name

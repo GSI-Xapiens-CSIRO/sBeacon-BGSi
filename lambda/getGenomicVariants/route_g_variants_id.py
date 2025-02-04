@@ -88,6 +88,7 @@ def route(request: RequestParams, variant_id):
     # val=counts
     variant_call_counts = defaultdict(int)
     variant_allele_counts = defaultdict(int)
+    variant_info_mapping = defaultdict(lambda: {"projectName": "", "datasetName": ""})
 
     query_responses = perform_variant_search(
         datasets=datasets,
@@ -120,11 +121,16 @@ def route(request: RequestParams, variant_id):
                 variant_call_counts[idx] += query_response.call_count
                 variant_allele_counts[idx] += query_response.all_alleles_count
                 internal_id = f"{assembly_id}\t{chrom}\t{pos}\t{ref}\t{alt}"
+                project_name = query_response.project_name
+                dataset_name = query_response.dataset_name
 
                 if internal_id not in found:
+                    variant_internal_id = base64.b64encode(
+                        f"{internal_id}".encode()
+                    ).decode()
                     results.append(
                         get_variant_entry(
-                            base64.b64encode(f"{internal_id}".encode()).decode(),
+                            variant_internal_id,
                             assembly_id,
                             ref,
                             alt,
@@ -133,6 +139,10 @@ def route(request: RequestParams, variant_id):
                             typ,
                         )
                     )
+                    variant_info_mapping[variant_internal_id] = {
+                        "projectName": project_name,
+                        "datasetName": dataset_name,
+                    }
                     found.add(internal_id)
 
     if request.query.requested_granularity == Granularity.BOOLEAN:
@@ -151,7 +161,12 @@ def route(request: RequestParams, variant_id):
 
     if request.query.requested_granularity == Granularity.RECORD:
         response = build_beacon_resultset_response(
-            results, len(variants), request, {}, DefaultSchemas.GENOMICVARIATIONS
+            results,
+            len(variants),
+            request,
+            {},
+            DefaultSchemas.GENOMICVARIATIONS,
+            variant_info_mapping,
         )
         print("Returning Response: {}".format(json.dumps(response)))
         return bundle_response(200, response)

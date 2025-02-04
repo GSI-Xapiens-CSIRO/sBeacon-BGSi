@@ -81,8 +81,9 @@ def build_beacon_resultset_response(
     qparams: RequestParams,
     func_response_type,
     entity_schema: DefaultSchemas,
+    variant_info_mapping=None,
 ):
-    """ "
+    """
     Transform data into the Beacon response format.
     """
 
@@ -91,7 +92,6 @@ def build_beacon_resultset_response(
         "responseSummary": build_response_summary(
             num_total_results > 0, num_total_results
         ),
-        # TODO: 'extendedInfo': build_extended_info(),
         "response": {
             "resultSets": [
                 build_response(data, num_total_results, qparams, func_response_type)
@@ -99,6 +99,11 @@ def build_beacon_resultset_response(
         },
         # CHANGE: variables taken from terraform
         "beaconHandovers": json.loads(ENV_BEACON.BEACON_HANDOVERS),
+        "info": (
+            {"variantInfoMapping": variant_info_mapping}
+            if variant_info_mapping is not None
+            else {}
+        ),
     }
     return beacon_response
 

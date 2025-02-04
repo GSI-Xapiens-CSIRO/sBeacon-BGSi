@@ -24,6 +24,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
         "id",
         "_assemblyId",
         "_projectName",
+        "_datasetName",
         "_vcfLocations",
         "_vcfChromosomeMap",
         "createDateTime",
@@ -43,6 +44,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
         id="",
         assemblyId="",
         projectName="",
+        datasetName="",
         vcfLocations="",
         vcfChromosomeMap="",
         createDateTime="",
@@ -57,6 +59,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
         self.id = id
         self._assemblyId = assemblyId
         self._projectName = projectName
+        self._datasetName = datasetName
         self._vcfLocations = vcfLocations
         self._vcfChromosomeMap = vcfChromosomeMap
         self.createDateTime = createDateTime
@@ -80,7 +83,7 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
             + ",".join([f"{col.lower()}:string" for col in cls._table_columns])
             + ">"
         )
-        header_terms = "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string>"
+        header_terms = "struct<kind:string,id:string,term:string,label:string,type:string,_projectname:string,_datasetname:string>"
         key = array[0]["id"]
         projectname = array[0]["projectName"]
 
@@ -111,7 +114,15 @@ class Dataset(jsons.JsonSerializable, AthenaModel):
                     )
                     writer_entity.write(row)
                     for term, label, typ in extract_terms([dataset]):
-                        row = ("datasets", dataset["id"], term, label, typ, projectname)
+                        row = (
+                            "datasets",
+                            dataset["id"],
+                            term,
+                            label,
+                            typ,
+                            projectname,
+                            dataset["datasetName"],
+                        )
                         writer_terms.write(row)
 
 

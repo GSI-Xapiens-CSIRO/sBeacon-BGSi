@@ -41,6 +41,9 @@ def fan_out(payload: List[dict]):
     parsed = None
     try:
         parsed = json.loads(response["Payload"].read())
+        for item in parsed:
+            item["project_name"] = payload[0].get("project_name", "")
+            item["dataset_name"] = payload[0].get("dataset_name", "")
         parsed = jsons.default_list_deserializer(parsed, List[PerformQueryResponse])
     except Exception as e:
         print(parsed, e)
@@ -138,6 +141,8 @@ def perform_variant_search(
                 payload = {
                     "query_id": query_id,
                     "dataset_id": dataset.id,
+                    "project_name": dataset._projectName,
+                    "dataset_name": dataset._datasetName,
                     "vcf_location": vcf_location,
                     "samples": dataset_samples[n] if dataset_samples else [],
                     "reference_bases": reference_bases or "N",

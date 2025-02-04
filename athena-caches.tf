@@ -53,6 +53,11 @@ resource "aws_glue_catalog_table" "sbeacon-datasets-cache" {
     }
 
     columns {
+      name = "_datasetname"
+      type = "string"
+    }
+
+    columns {
       name = "_vcflocations"
       type = "string"
     }

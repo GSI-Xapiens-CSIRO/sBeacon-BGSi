@@ -14,6 +14,8 @@ class SplitQueryResponse:
 @dataclass
 class PerformQueryResponse(jsons.JsonSerializable):
     dataset_id: str
+    project_name: str
+    dataset_name: str
     exists: bool
     all_alleles_count: int
     variants: list

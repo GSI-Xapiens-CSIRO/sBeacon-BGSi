@@ -25,20 +25,20 @@ from shared.apiutils import (
 
 def datasets_query(conditions, assembly_id):
     query = f"""
-    SELECT D.id, D._vcflocations, D._vcfchromosomemap, ARRAY_AGG(A._vcfsampleid) as samples
+    SELECT D.id, D._projectname, D._datasetname, D._vcflocations, D._vcfchromosomemap, ARRAY_AGG(A._vcfsampleid) as samples
     FROM "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_ANALYSES_TABLE}" A
     JOIN "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_DATASETS_TABLE}" D
     ON A._datasetid = D.id
     {conditions} 
     AND D._assemblyid='{assembly_id}' 
-    GROUP BY D.id, D._vcflocations, D._vcfchromosomemap 
+    GROUP BY D.id, D._projectname, D._datasetname, D._vcflocations, D._vcfchromosomemap 
     """
     return query
 
 
 def datasets_query_fast(assembly_id):
     query = f"""
-    SELECT id, _vcflocations, _vcfchromosomemap
+    SELECT id, _projectname, _datasetname, _vcflocations, _vcfchromosomemap
     FROM "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_DATASETS_TABLE}"
     WHERE _assemblyid='{assembly_id}' 
     """
@@ -97,6 +97,7 @@ def route(request: RequestParams):
     # val=counts
     variant_call_counts = defaultdict(int)
     variant_allele_counts = defaultdict(int)
+    variant_info_mapping = defaultdict(lambda: {"projectName": "", "datasetName": ""})
     exists = False
 
     for query_response in query_responses:
@@ -116,11 +117,16 @@ def route(request: RequestParams):
                     internal_id = (
                         f"{query_params.assembly_id}\t{chrom}\t{pos}\t{ref}\t{alt}"
                     )
+                    project_name = query_response.project_name
+                    dataset_name = query_response.dataset_name
 
                     if internal_id not in found:
+                        variant_internal_id = base64.b64encode(
+                            f"{internal_id}".encode()
+                        ).decode()
                         results.append(
                             get_variant_entry(
-                                base64.b64encode(f"{internal_id}".encode()).decode(),
+                                variant_internal_id,
                                 query_params.assembly_id,
                                 ref,
                                 alt,
@@ -129,6 +135,10 @@ def route(request: RequestParams):
                                 typ,
                             )
                         )
+                        variant_info_mapping[variant_internal_id] = {
+                            "projectName": project_name,
+                            "datasetName": dataset_name,
+                        }
                         found.add(internal_id)
 
     if request.query.requested_granularity == Granularity.BOOLEAN:
@@ -147,7 +157,12 @@ def route(request: RequestParams):
 
     if request.query.requested_granularity == Granularity.RECORD:
         response = build_beacon_resultset_response(
-            results, len(variants), request, {}, DefaultSchemas.GENOMICVARIATIONS
+            results,
+            len(variants),
+            request,
+            {},
+            DefaultSchemas.GENOMICVARIATIONS,
+            variant_info_mapping,
         )
         print("Returning Response: {}".format(json.dumps(response)))
         return bundle_response(200, response)

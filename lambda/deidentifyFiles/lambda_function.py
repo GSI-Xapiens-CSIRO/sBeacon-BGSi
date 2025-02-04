@@ -25,6 +25,10 @@ SUFFIXES = [
     ".tsv",
     ".txt",
 ]
+INDEX_SUFFIXES = [
+    ".tbi",
+    ".csi",
+]
 
 
 def get_all_project_files(project_prefix):
@@ -162,11 +166,12 @@ def lambda_handler(event, context):
         print("Not a staging/projects/<project_name>/* file, skipping")
         return
     if event_name.startswith("ObjectCreated:"):
-        if not any(object_key.endswith(suffix) for suffix in SUFFIXES):
-            print(f"Not a genomic or metadata file: {object_key}")
+        if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
+            print(f"{object_key} is an index file, moving directly")
             move_file(object_key)
             return
-        else:
+        elif any(object_key.endswith(suffix) for suffix in SUFFIXES):
+            print(f"{object_key} is a genomic or metadata file, deidentifying")
             size = event["Records"][0]["s3"]["object"]["size"]
             if size <= MAX_SIZE_FOR_LAMBDA:
                 deidentify(
@@ -187,3 +192,7 @@ def lambda_handler(event, context):
                     object_key=object_key,
                     size_gb=size / 1024**3,
                 )
+            return
+        else:
+            print(f"{object_key} is not an acceptable filetype, leaving")
+            return 

@@ -1,13 +1,6 @@
 import json
 
-import boto3
 from markupsafe import escape
-
-from shared.utils import ENV_SES
-
-SES_SOURCE_EMAIL = ENV_SES.SES_SOURCE_EMAIL
-SES_CONFIG_SET_NAME = ENV_SES.SES_CONFIG_SET_NAME
-ses_client = boto3.client("ses")
 
 
 def lambda_handler(event, _):

@@ -771,6 +771,34 @@ module "lambda-getProjects" {
 }
 
 #
+# password reset email lambda function
+#
+module "lambda-passwordResetEmail" {
+  source = "terraform-aws-modules/lambda/aws"
+  
+  function_name = "sbeacon-backend-passwordResetEmail"
+  description = "Sends a custom password reset email to the user"
+  runtime = "python3.12"
+  handler = "lambda_function.lambda_handler"
+  memory_size = 512
+  timeout = 24
+  source_path = "${path.module}/lambda/passwordResetEmail"
+  
+  tags = var.common-tags
+  
+  environment_variables = merge(
+    local.sbeacon_variables,
+    { SES_SOURCE_EMAIL = var.ses-source-email },
+    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name },
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+  ]
+}
+
+#
 # email notification Lambda function
 #
 module "lambda-logEmailDelivery" {

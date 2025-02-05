@@ -9,6 +9,7 @@ from .lambda_utils import (
     ENV_DYNAMO,
     ENV_CONFIG,
     ENV_COGNITO,
+    ENV_SES,
     make_temp_file,
     clear_tmp,
 )

@@ -53,14 +53,3 @@ resource "aws_lambda_permission" "S3deidentifyFiles" {
   principal     = "s3.amazonaws.com"
   source_arn    = aws_s3_bucket.dataportal-bucket.arn
 }
-
-#
-# passwordResetEmail Lambda Function
-#
-resource "aws_lambda_permission" "cognitoPasswordResetEmail" {
-  statement_id = "SBeaconBackendAllowCognitoPasswordResetInvoke"
-  action = "lambda:InvokeFunction"
-  function_name = module.lambda-passwordResetEmail.lambda_function_arn
-  principal = "cognito-idp.amazonaws.com"
-  source_arn = var.cognito-user-pool-arn
-}

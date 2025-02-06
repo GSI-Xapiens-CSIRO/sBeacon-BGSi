@@ -47,6 +47,7 @@ cp ${SOURCE}/bcftools/bcftools ./layers/binaries/bin/
 
 # python libraries layer
 cd ${REPOSITORY_DIRECTORY}
+pip install ijson==3.3.0 --target layers/python_libraries/python
 pip install jsons==1.6.3 --target layers/python_libraries/python
 pip install jsonschema==4.18.0 --target layers/python_libraries/python
 pip install markupsafe==2.0.1 --target layers/python_libraries/python

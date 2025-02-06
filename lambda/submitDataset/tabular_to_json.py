@@ -235,7 +235,7 @@ def transform_tabular_to_json(s3payload) -> dict:
             SELECT * FROM read_csv(
                 '{file_key}',
                 ALL_VARCHAR=TRUE,
-                DELIM='{delim}',
+                DELIM='{delim}'
             )"""
         )
 

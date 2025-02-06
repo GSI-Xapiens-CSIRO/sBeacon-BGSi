@@ -54,8 +54,9 @@ yum install -y \
     curl-devel \
     openssl-devel
 
-# Install boto3
+# Install boto3 and ijson
 pip install boto3
+pip install ijson==3.3.0
 
 # Configure default region
 export AWS_DEFAULT_REGION={AWS_DEFAULT_REGION}

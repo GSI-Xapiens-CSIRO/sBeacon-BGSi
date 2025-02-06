@@ -654,6 +654,7 @@ module "lambda-deidentifyFiles" {
   }
 
   layers = [
+    local.python_libraries_layer,
     local.binaries_layer,
   ]
 }

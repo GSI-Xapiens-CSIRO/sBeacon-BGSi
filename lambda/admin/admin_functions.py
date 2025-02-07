@@ -197,11 +197,19 @@ def get_users(event, context):
         quota.to_dict()["uid"]: quota.to_dict()["Usage"] for quota in quota_data
     }
     data = []
+
     for user in users:
+        # get quota
         uid = user["uid"]
         usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
         user["Usage"] = usage_data
+        # get MFA
+        mfa = cognito_client.admin_get_user(
+            UserPoolId=USER_POOL_ID, Username=user["Username"]
+        ).get("UserMFASettingList", [])
+        user["MFA"] = mfa
         data.append(user)
+
     next_pagination_token = response.get("PaginationToken", None)
 
     return {"users": data, "pagination_token": next_pagination_token}
@@ -224,6 +232,31 @@ def delete_user(event, context):
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 
     print(f"User with email {email} removed successfully!")
+    return {"success": True}
+
+
+@router.attach("/admin/users/{email}/mfa", "delete", authenticate_admin)
+def clear_user_mfa(event, context):
+    email = event["pathParameters"]["email"]
+    authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
+
+    authorizer = get_username_by_email(authorizer_email)
+    username = get_username_by_email(email)
+
+    if username == authorizer:
+        print(
+            f"Unable to clear MFA for {email}. Administrators are unable to deactivate their MFA."
+        )
+        return {"success": False}
+
+    cognito_client.admin_set_user_mfa_preference(
+        UserPoolId=USER_POOL_ID,
+        Username=username,
+        SMSMfaSettings={"Enabled": False, "PreferredMfa": False},
+        SoftwareTokenMfaSettings={"Enabled": False, "PreferredMfa": False},
+    )
+
+    print(f"User with email {email} got their MFA deactivated successfully!")
     return {"success": True}
 
 

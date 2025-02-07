@@ -42,7 +42,7 @@ cd bcftools && autoreconf && ./configure && make
 cd ${REPOSITORY_DIRECTORY}
 mkdir -p layers/binaries/lib
 mkdir -p layers/binaries/bin
-ldd ${SOURCE}/bcftools | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
+ldd ${SOURCE}/bcftools/bcftools | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
 cp ${SOURCE}/bcftools/bcftools ./layers/binaries/bin/
 
 # python libraries layer

@@ -49,7 +49,7 @@ def list_all_projects(event, context):
     last_evaluated_key = (
         json.dumps(user_projects.last_evaluated_key)
         if limit or last_evaluated_key and user_projects.last_evaluated_key
-        else None
+        else user_projects.last_evaluated_key
     )
 
     return {"success": True, "data": projects, "last_evaluated_key": last_evaluated_key}

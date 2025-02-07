@@ -12,13 +12,47 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 @router.attach("/dportal/projects", "get")
 def list_all_projects(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    user_projects = ProjectUsers.uid_index.query(sub)
+    query_params = event.get("queryStringParameters") or {}
+
+    limit = query_params.get("limit")
+    last_evaluated_key = query_params.get("last_evaluated_key")
+
+    # Check if pagination parameters are provided
+    if limit or last_evaluated_key:
+        # Pagination, fetch projects with limit and last_evaluated_key
+        params = {"limit": 10}
+
+        if limit:
+            try:
+                params["limit"] = int(limit)
+            except ValueError:
+                return {"success": False, "message": "Invalid limit parameter"}
+
+        if last_evaluated_key:
+            try:
+                params["last_evaluated_key"] = json.loads(last_evaluated_key)
+            except json.JSONDecodeError:
+                return {
+                    "success": False,
+                    "message": "Invalid last_evaluated_key format",
+                }
+
+        user_projects = ProjectUsers.uid_index.query(sub, **params)
+    else:
+        # No pagination, fetch all projects
+        user_projects = ProjectUsers.uid_index.query(sub)
 
     projects = [
         Projects.get(user_project.name).to_dict() for user_project in user_projects
     ]
 
-    return projects
+    last_evaluated_key = (
+        json.dumps(user_projects.last_evaluated_key)
+        if limit or last_evaluated_key and user_projects.last_evaluated_key
+        else user_projects.last_evaluated_key
+    )
+
+    return {"success": True, "data": projects, "last_evaluated_key": last_evaluated_key}
 
 
 @router.attach("/dportal/my-projects", "get")

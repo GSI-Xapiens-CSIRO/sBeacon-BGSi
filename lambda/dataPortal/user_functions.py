@@ -18,24 +18,16 @@ def list_all_projects(event, context):
     last_evaluated_key = query_params.get("last_evaluated_key")
 
     # Check if pagination parameters are provided
+    # This validation is necessary to get list for dropdown without pagination
+    # and to get list with pagination
     if limit or last_evaluated_key:
         # Pagination, fetch projects with limit and last_evaluated_key
         params = {"limit": 10}
 
         if limit:
-            try:
-                params["limit"] = int(limit)
-            except ValueError:
-                return {"success": False, "message": "Invalid limit parameter"}
-
+            params["limit"] = int(limit)
         if last_evaluated_key:
-            try:
-                params["last_evaluated_key"] = json.loads(last_evaluated_key)
-            except json.JSONDecodeError:
-                return {
-                    "success": False,
-                    "message": "Invalid last_evaluated_key format",
-                }
+            params["last_evaluated_key"] = json.loads(last_evaluated_key)
 
         user_projects = ProjectUsers.uid_index.query(sub, **params)
     else:

@@ -173,12 +173,6 @@ Click on the `Remote Indicator (><)` icon on bottom left and press `Reopen in co
 
 You can simply deploy the cloned repository following the establishment of AWS keys in the development terminal. Alternatively, sBeacon can be used as a module in an existing terraform project.
 
-Do this only once or as you change core libraries or the python lambda layer.
-
-```bash
-$ ./init.sh
-```
-
 Now set the AWS access keys and token as needed. Since docker uses the same user permissions this may not be needed if you're using an authorised EC2 instance.
 
 ```bash
@@ -307,6 +301,8 @@ You'll also need to do this if lambda functions start to display "Error: Runtime
 ```bash
 ./init.sh -msse4.2 -O3
 ```
+
+You must to above change of execution argument in `init.tf` file.
 
 <!-- TOC --><a name="provider-produced-inconsistent-final-plan"></a>
 ### Provider produced inconsistent final plan

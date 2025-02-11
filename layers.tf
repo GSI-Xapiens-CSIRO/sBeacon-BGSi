@@ -13,6 +13,8 @@ resource "aws_lambda_layer_version" "binaries_layer" {
   source_code_hash = filebase64sha256("${data.archive_file.binaries_layer.output_path}")
 
   compatible_runtimes = ["python3.12"]
+
+  depends_on = [null_resource.init_script]
 }
 
 ### python thirdparty libraries layer 
@@ -30,6 +32,8 @@ module "python_libraries_layer" {
 
   store_on_s3 = true
   s3_bucket   = aws_s3_bucket.lambda-layers-bucket.bucket
+
+  depends_on = [null_resource.init_script]
 }
 
 ### python first party modules layer 

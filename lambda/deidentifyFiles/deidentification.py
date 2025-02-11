@@ -84,12 +84,65 @@ GENOMIC_SUFFIX_TYPES = {
     ".vcf.gz": "z",
 }
 
+SAM_SUFFIXES = {
+    ".bam",
+}
+
+QUIETLY_SKIP_SUFFIXES = {
+    # Because we'll be creating these ourselves
+    # from other files, and don't want the uploaded
+    # versions to squash the ones we create.
+    ".bai",
+}
+
 METADATA_SUFFIXES = [
     ".json",
     ".csv",
     ".tsv",
     ".txt",
 ]
+
+SAM_HEADERS_WHITELIST = {
+    "HD": {
+        "VN",
+        "SO",
+        "GO",
+        "SS",
+    },
+    "SQ": {
+        "SN",
+        "LN",
+        "AH",
+        "AN",
+        "AS",
+        "M5",
+        "SP",
+        "TP",
+        "UR",
+    },
+    "RG": {
+        "ID",
+        "BC",
+        "CN",
+        "DT",
+        "FO",
+        "KS",
+        "LB",
+        "PG",
+        "PI",
+        "PL",
+        "PM",
+        "PU",
+        "SM",
+    },
+    "PG": {
+        "ID",
+        "PN",
+        "CL",
+        "PP",
+        "VN",
+    },
+}
 
 # Check if the script is running in AWS Lambda.
 # EC2 instances don't have as much space in tmp
@@ -99,7 +152,7 @@ dynamodb = boto3.client("dynamodb")
 s3 = boto3.client("s3")
 
 
-class BcftoolsError(Exception):
+class ProcessError(Exception):
     def __init__(self, message, stdout, stderr, returncode, process_args):
         self.message = message
         self.stdout = stdout
@@ -136,42 +189,42 @@ class CheckedProcess:
         stdout, stderr = self.process.communicate()
         returncode = self.process.returncode
         if returncode != 0:
-            raise BcftoolsError(
+            raise ProcessError(
                 self.error_message, stdout, stderr, returncode, self.process.args
             )
 
 
 class Viewer:
-    def __init__(self, file_path):
+    def __init__(self, process_args, error_message):
         self.started = False
-        self.file_path = file_path
+        self.process_args = process_args
+        self.error_message = error_message
         self.view_process = None
+        self.lines = []
 
-    def _start(self):
-        self.view_process = CheckedProcess(
-            args=[
-                "bcftools",
-                "view",
-                "--no-version",
-                "--output-type",
-                "z",
-                "--output",
-                self.file_path,
-                "--write-index",
-            ],
-            stdin=subprocess.PIPE,
-            error_message="Creating deidentified records failed",
-        )
-        self.started = True
-
-    def ingest(self, lines):
+    def _print(self, lines):
         if not self.started:
             self._start()
         print("\n".join(lines), file=self.view_process.stdin)
 
+    def _start(self):
+        self.view_process = CheckedProcess(
+            args=self.process_args,
+            stdin=subprocess.PIPE,
+            error_message=self.error_message,
+        )
+        self.started = True
+
+    def ingest(self, new_lines):
+        self.lines.extend(new_lines)
+        if len(self.lines) > MAX_LINES_PER_PRINT:
+            self._print(self.lines)
+            self.lines.clear()
+
     def close(self):
+        if self.lines:
+            self._print(self.lines)
         if self.started:
-            # self.view_process.stdin.close()
             self.view_process.check()
 
 
@@ -315,23 +368,33 @@ def process_records(file_path, header_lines, info_whitelist):
         stdout=subprocess.PIPE,
         error_message="Reading records failed",
     )
-    changed_lines = header_lines.copy()
+    header_lines = header_lines.copy()
     # Remove sample columns from header
-    changed_lines[-1] = "\t".join(changed_lines[-1].split("\t", 8)[:8])
+    header_lines[-1] = "\t".join(header_lines[-1].split("\t", 8)[:8])
     num_records_changed = 0
-    viewer = Viewer(ANNOTATION_PATH)
+    viewer = Viewer(
+        [
+            "bcftools",
+            "view",
+            "--no-version",
+            "--output-type",
+            "z",
+            "--output",
+            ANNOTATION_PATH,
+            "--write-index",
+        ],
+        "Creating deidentified records failed",
+    )
     for line in view_process.stdout:
         line = line.rstrip("\r\n")
         new_line = anonymise_vcf_record(line, info_whitelist)
         if new_line is not None:
-            changed_lines.append(new_line)
+            if num_records_changed == 0:
+                viewer.ingest(header_lines + [new_line])
+            else:
+                viewer.ingest([new_line])
             num_records_changed += 1
-            if len(changed_lines) > MAX_LINES_PER_PRINT:
-                viewer.ingest(changed_lines)
-                changed_lines.clear()
     view_process.check()
-    if changed_lines:
-        viewer.ingest(changed_lines)
     viewer.close()
     if num_records_changed:
         print(
@@ -361,6 +424,95 @@ def prepare_for_annotate(file_path):
         error_message="Bgzipping and indexing original file failed",
     )
     view_process.check()
+
+
+def anonymise_sam_header_line(header_line):
+    assert header_line.startswith("@")
+    contains_pii = False
+    if (
+        header_tags_whitelist := SAM_HEADERS_WHITELIST.get(header_line[1:3])
+    ) is not None:
+        new_tags = []
+        for tag in header_line[4:].split("\t"):
+            key, value = tag.split(":", 1)
+            if key in header_tags_whitelist:
+                new_tags.append(f"{key}:{value}")
+            else:
+                if (new_value := anonymise(value)) != value:
+                    contains_pii = True
+                    new_tags.append(f"{key}:{new_value}")
+                else:
+                    new_tags.append(tag)
+        if not contains_pii:
+            return None
+        header_content = "\t".join(new_tags)
+    else:
+        # Should be a @CO header
+        header_content = anonymise(header_line[4:])
+        if header_content == header_line[4:]:
+            return None
+    return f"{header_line[:4]}{header_content}"
+
+
+def anonymise_sam_record(record):
+    all_fields = record.split("\t")
+    contains_pii = False
+    for idx, field in enumerate(all_fields):
+        if idx < 11:
+            continue
+        tag, tag_type, value = field.split(":", 2)
+        if tag_type == "Z":
+            if (new_value := anonymise(value)) != value:
+                contains_pii = True
+                all_fields[idx] = f"{tag}:{tag_type}:{new_value}"
+    return "\t".join(all_fields) if contains_pii else None
+
+
+def anonymise_bam(input_path, output_path):
+    header_lines = 0
+    header_pii = 0
+    record_lines = 0
+    record_pii = 0
+    # We need to write out the whole bam file as we go anyway,
+    # So we might as well always send the created files
+    output_index = f"{output_path}.bai"
+    in_samtools_process = CheckedProcess(
+        args=["samtools", "view", "--no-PG", "-h", input_path],
+        stdout=subprocess.PIPE,
+        error_message="Reading bam file failed",
+    )
+    out_samtools_viewer = Viewer(
+        [
+            "samtools",
+            "view",
+            "-h",
+            "-b",
+            "--no-PG",
+            "--write-index",
+            "-o",
+            f"{output_path}##idx##{output_index}",
+        ],
+        "Creating deidentified bam file failed",
+    )
+    for line in in_samtools_process.stdout:
+        line = line.rstrip("\r\n")
+        if not line:
+            continue
+        if line.startswith("@"):
+            header_lines += 1
+            if new_line := anonymise_sam_header_line(line):
+                header_pii += 1
+        else:
+            record_lines += 1
+            if new_line := anonymise_sam_record(line):
+                record_pii += 1
+        out_samtools_viewer.ingest([new_line or line])
+    print(
+        f"Anonymised {header_pii}/{header_lines} header lines and {record_pii}/{record_lines} records"
+    )
+    in_samtools_process.check()
+    out_samtools_viewer.close()
+    return [output_path, output_index]
 
 
 def anonymise_vcf(input_path, output_path):
@@ -620,14 +772,23 @@ def deidentify(
     local_output_path = f"{WORKING_DIR}/deidentified_{file_name}"
 
     s3.download_file(Bucket=input_bucket, Key=object_key, Filename=local_input_path)
-    if any(object_key.endswith(suffix) for suffix in GENOMIC_SUFFIX_TYPES.keys()):
+    if any(
+        object_key.endswith(suffix)
+        for suffix in set(GENOMIC_SUFFIX_TYPES.keys()) | SAM_SUFFIXES
+    ):
         try:
-            output_paths = anonymise_vcf(local_input_path, local_output_path)
-        except (BcftoolsError, ParsingError) as e:
+            if any(object_key.endswith(suffix) for suffix in SAM_SUFFIXES):
+                output_paths = anonymise_bam(local_input_path, local_output_path)
+            else:
+                output_paths = anonymise_vcf(local_input_path, local_output_path)
+        except (ProcessError, ParsingError) as e:
             print(f"An error occurred while deidentifying {object_key}: {e}")
             log_error(files_table, f"{project}/{file_name}", str(e))
             print("Exiting")
             return
+    elif any(object_key.endswith(suffix) for suffix in QUIETLY_SKIP_SUFFIXES):
+        print("We'd rather create this file again from the source file, skipping")
+        return
     elif any(object_key.endswith(suffix) for suffix in METADATA_SUFFIXES):
         deidentify_metadata(local_input_path, local_output_path)
         output_paths = [local_output_path]

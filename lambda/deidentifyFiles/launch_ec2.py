@@ -64,6 +64,7 @@ export AWS_DEFAULT_REGION={AWS_DEFAULT_REGION}
 # Install bcftools and htslib
 BCFTOOLS_VERSION="1.21"
 HTSLIB_VERSION="1.21"
+SAMTOOLS_VERSION="1.21"
 curl -L https://github.com/samtools/htslib/releases/download/$HTSLIB_VERSION/htslib-$HTSLIB_VERSION.tar.bz2 | tar -xjf -
 cd htslib-$HTSLIB_VERSION
 ./configure
@@ -76,10 +77,18 @@ cd bcftools-$BCFTOOLS_VERSION
 make
 make install
 cd ..
+curl -L https://github.com/samtools/samtools/releases/download/$SAMTOOLS_VERSION/samtools-$SAMTOOLS_VERSION.tar.bz2 | tar -xjf -
+cd samtools-$SAMTOOLS_VERSION
+./configure --without-curses
+make
+make install
+cd ..
+
 
 # Verify installations
 bcftools --version
 htsfile --version
+samtools --version
 
 # Create project directory
 mkdir -p /opt/deidentification/

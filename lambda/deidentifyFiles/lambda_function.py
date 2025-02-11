@@ -16,6 +16,7 @@ PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 FILES_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
 MAX_SIZE_FOR_LAMBDA = 200 * 1024**2  # 200 MB
 SUFFIXES = [
+    ".bam",
     ".bcf",
     ".bcf.gz",
     ".vcf",
@@ -195,4 +196,4 @@ def lambda_handler(event, context):
             return
         else:
             print(f"{object_key} is not an acceptable filetype, leaving")
-            return 
+            return

@@ -4,6 +4,8 @@ data "archive_file" "binaries_layer" {
   type        = "zip"
   source_dir  = "${path.module}/layers/binaries/"
   output_path = "${path.module}/binaries.zip"
+  
+  depends_on = [null_resource.init_script]
 }
 
 # binaries layer definition
@@ -13,8 +15,6 @@ resource "aws_lambda_layer_version" "binaries_layer" {
   source_code_hash = filebase64sha256("${data.archive_file.binaries_layer.output_path}")
 
   compatible_runtimes = ["python3.12"]
-
-  depends_on = [null_resource.init_script]
 }
 
 ### python thirdparty libraries layer 

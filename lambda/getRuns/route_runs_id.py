@@ -14,10 +14,10 @@ from shared.apiutils import (
 )
 
 
-def get_record_query(id):
+def get_record_query():
     query = f"""
     SELECT * FROM "{{database}}"."{{table}}"
-    WHERE "id"='{id}'
+    WHERE "id"= ?
     LIMIT 1;
     """
 
@@ -26,11 +26,14 @@ def get_record_query(id):
 
 def route(request: RequestParams, run_id):
     if request.query.requested_granularity == "boolean":
-        query = get_record_query(run_id)
+        query = get_record_query()
         count = (
             1
             if Run.get_existence_by_query(
-                query, projects=request.projects, sub=request.sub
+                query,
+                projects=request.projects,
+                sub=request.sub,
+                execution_parameters=[f"'{run_id}'"],
             )
             else 0
         )
@@ -41,11 +44,14 @@ def route(request: RequestParams, run_id):
         return bundle_response(200, response)
 
     if request.query.requested_granularity == "count":
-        query = get_record_query(run_id)
+        query = get_record_query()
         count = (
             1
             if Run.get_existence_by_query(
-                query, projects=request.projects, sub=request.sub
+                query,
+                projects=request.projects,
+                sub=request.sub,
+                execution_parameters=[f"'{run_id}'"],
             )
             else 0
         )
@@ -56,8 +62,13 @@ def route(request: RequestParams, run_id):
         return bundle_response(200, response)
 
     if request.query.requested_granularity == Granularity.RECORD:
-        query = get_record_query(run_id)
-        runs = Run.get_by_query(query, projects=request.projects, sub=request.sub)
+        query = get_record_query()
+        runs = Run.get_by_query(
+            query,
+            projects=request.projects,
+            sub=request.sub,
+            execution_parameters=[f"'{run_id}'"],
+        )
         response = build_beacon_resultset_response(
             jsons.dump(runs, strip_privates=True),
             len(runs),

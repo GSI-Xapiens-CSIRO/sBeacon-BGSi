@@ -22,14 +22,14 @@ from shared.apiutils import (
 )
 
 
-def datasets_query(conditions, assembly_id, individual_id):
+def datasets_query(conditions):
     query = f"""
     SELECT D.id, D._projectname, D._datasetname, D._vcflocations, D._vcfchromosomemap, ARRAY_AGG(A._vcfsampleid) as samples
     FROM "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_ANALYSES_TABLE}" A
     JOIN "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_DATASETS_TABLE}" D
     ON A._datasetid = D.id
-    WHERE A.individualid='{individual_id}'
-    AND D._assemblyid='{assembly_id}'
+    WHERE A.individualid= ?
+    AND D._assemblyid= ?
     {(' AND ' + conditions) if len(conditions) > 0 else ''} 
     GROUP BY D.id, D._projectname, D._datasetname, D._vcflocations, D._vcfchromosomemap 
     """
@@ -45,7 +45,19 @@ def route(request: RequestParams, individual_id):
         with_where=False,
     )
     query_params = request.query.request_parameters
-    query = datasets_query(conditions, query_params.assembly_id, individual_id)
+
+    query = datasets_query(conditions)
+    if execution_parameters:
+        execution_parameters = [
+            f"'{individual_id}'",
+            f"'{query_params.assembly_id}'",
+        ] + execution_parameters
+    else:
+        execution_parameters = [
+            f"'{individual_id}'",
+            f"'{query_params.assembly_id}'",
+        ]
+
     exec_id = run_custom_query(
         query,
         return_id=True,

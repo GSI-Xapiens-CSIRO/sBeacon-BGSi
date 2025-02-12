@@ -32,7 +32,7 @@ def route(request: RequestParams, analysis_id):
                 query,
                 projects=request.projects,
                 sub=request.sub,
-                execution_parameters=[analysis_id],
+                execution_parameters=[f"'{analysis_id}'"],
             )
             else 0
         )
@@ -50,7 +50,7 @@ def route(request: RequestParams, analysis_id):
                 query,
                 projects=request.projects,
                 sub=request.sub,
-                execution_parameters=[analysis_id],
+                execution_parameters=[f"'{analysis_id}'"],
             )
             else 0
         )
@@ -66,7 +66,7 @@ def route(request: RequestParams, analysis_id):
             query,
             projects=request.projects,
             sub=request.sub,
-            execution_parameters=[analysis_id],
+            execution_parameters=[f"'{analysis_id}'"],
         )
         response = build_beacon_resultset_response(
             jsons.dump(analyses, strip_privates=True),

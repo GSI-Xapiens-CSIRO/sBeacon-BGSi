@@ -18,10 +18,10 @@ from shared.apiutils import (
 )
 
 
-def get_bool_query(id, conditions=""):
+def get_bool_query(conditions=""):
     query = f"""
     SELECT 1 FROM "{{database}}"."{{table}}"
-    WHERE "biosampleid"='{id}'
+    WHERE "biosampleid"= ?
     {('AND ' + conditions) if len(conditions) > 0 else ''}
     LIMIT 1;
     """
@@ -29,20 +29,20 @@ def get_bool_query(id, conditions=""):
     return query
 
 
-def get_count_query(id, conditions=""):
+def get_count_query(conditions=""):
     query = f"""
     SELECT COUNT(*) FROM "{{database}}"."{{table}}"
-    WHERE "biosampleid"='{id}'
+    WHERE "biosampleid"= ?
     {('AND ' + conditions) if len(conditions) > 0 else ''}
     """
 
     return query
 
 
-def get_record_query(id, skip, limit, conditions=""):
+def get_record_query(skip, limit, conditions=""):
     query = f"""
     SELECT * FROM "{{database}}"."{{table}}"
-    WHERE "biosampleid"='{id}'
+    WHERE "biosampleid"= ?
     {('AND ' + conditions) if len(conditions) > 0 else ''}
     ORDER BY id
     OFFSET {skip}
@@ -57,8 +57,13 @@ def route(request: RequestParams, biosample_id):
         request.query.filters, "runs", "biosamples", with_where=False
     )
 
+    if execution_parameters:
+        execution_parameters = [f"'{biosample_id}'"] + execution_parameters
+    else:
+        execution_parameters = [f"'{biosample_id}'"]
+
     if request.query.requested_granularity == Granularity.BOOLEAN:
-        query = get_bool_query(biosample_id, conditions)
+        query = get_bool_query(conditions)
         count = (
             1
             if Run.get_existence_by_query(
@@ -76,7 +81,7 @@ def route(request: RequestParams, biosample_id):
         return bundle_response(200, response)
 
     if request.query.requested_granularity == Granularity.COUNT:
-        query = get_count_query(biosample_id, conditions)
+        query = get_count_query(conditions)
         count = Run.get_count_by_query(
             query,
             execution_parameters=execution_parameters,
@@ -93,7 +98,6 @@ def route(request: RequestParams, biosample_id):
         executor = ThreadPoolExecutor(2)
         # records fetching
         record_query = get_record_query(
-            biosample_id,
             request.query.pagination.skip,
             request.query.pagination.limit,
             conditions,
@@ -106,7 +110,7 @@ def route(request: RequestParams, biosample_id):
             sub=request.sub,
         )
         # counts fetching
-        count_query = get_count_query(biosample_id, conditions)
+        count_query = get_count_query(conditions)
         count_future = executor.submit(
             Run.get_count_by_query,
             count_query,

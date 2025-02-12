@@ -49,9 +49,12 @@ def route(request: RequestParams, analysis_id):
     query = datasets_query(conditions)
 
     if execution_parameters:
-        execution_parameters += [analysis_id, query_params.assembly_id]
+        execution_parameters = [
+            f"'{analysis_id}'",
+            f"'{query_params.assembly_id}'",
+        ] + execution_parameters
     else:
-        execution_parameters = [analysis_id, query_params.assembly_id]
+        execution_parameters = [f"'{analysis_id}'", f"'{query_params.assembly_id}'"]
 
     exec_id = run_custom_query(
         query,

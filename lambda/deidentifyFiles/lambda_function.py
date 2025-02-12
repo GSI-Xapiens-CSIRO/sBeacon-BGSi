@@ -17,6 +17,7 @@ FILES_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
 MAX_SIZE_FOR_LAMBDA = 200 * 1024**2  # 200 MB
 SUFFIXES = [
     ".bam",
+    ".sam",
     ".bcf",
     ".bcf.gz",
     ".vcf",

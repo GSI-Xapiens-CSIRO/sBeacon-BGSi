@@ -22,10 +22,18 @@ class Projects(Model):
         region = REGION
 
     name = UnicodeAttribute(hash_key=True)
+    name_lower = UnicodeAttribute()
     description = UnicodeAttribute()
+    description_lower = UnicodeAttribute()
     files = UnicodeSetAttribute(default=tuple())
     total_samples = NumberAttribute(default=0)
     ingested_datasets = UnicodeSetAttribute(default=tuple())
+
+    def save(self, *args, **kwargs):
+        """Override save() to ensure lowercase fields are stored."""
+        self.name_lower = self.name.lower()
+        self.description_lower = self.description.lower()
+        super().save(*args, **kwargs)
 
     def to_dict(self):
         return {

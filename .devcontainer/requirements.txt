@@ -9,3 +9,5 @@ requests==2.31.0
 smart_open==6.3.0
 strenum==0.4.15
 markupsafe==2.0.1
+black==24.10.0
+ijson==3.3.0

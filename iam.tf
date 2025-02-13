@@ -336,16 +336,6 @@ data "aws_iam_policy_document" "admin-lambda-access" {
   }
   statement {
     actions = [
-      "ses:SendEmail"
-    ]
-    resources = [
-      "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:identity/*",
-      aws_ses_configuration_set.ses_feedback_config.arn,
-    ]
-  }
-
-  statement {
-    actions = [
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:Scan",
@@ -353,6 +343,14 @@ data "aws_iam_policy_document" "admin-lambda-access" {
     ]
     resources = [
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
+    ]
+  }
+  statement {
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+    resources = [
+      var.registration-email-lambda-function-arn,
     ]
   }
 }
@@ -638,28 +636,5 @@ data "aws_iam_policy_document" "lambda-getProjects" {
     resources = [
       aws_dynamodb_table.projects.arn,
     ]
-  }
-}
-
-# SES Email Notification Logging
-data "aws_iam_policy_document" "ses-sns-access" {
-  statement {
-    sid    = "AllowSESToPublishToSNS"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["ses.amazonaws.com"]
-    }
-
-    actions   = ["sns:Publish"]
-    resources = [aws_sns_topic.sesDeliveryLogger.arn]
-
-    # Removing specific conditions to see if that fixes the permission issue
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [data.aws_caller_identity.this.account_id]
-    }
   }
 }

@@ -7,15 +7,13 @@ from markupsafe import escape
 
 from shared.cognitoutils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
-from shared.utils.lambda_utils import ENV_COGNITO, ENV_BEACON, ENV_SES
+from shared.utils.lambda_utils import ENV_COGNITO
 from shared.dynamodb import Quota, UsageMap
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
-BEACON_UI_URL = ENV_BEACON.BEACON_UI_URL
-SES_SOURCE_EMAIL = ENV_SES.SES_SOURCE_EMAIL
-SES_CONFIG_SET_NAME = ENV_SES.SES_CONFIG_SET_NAME
+COGNITO_REGISTRATION_EMAIL_LAMBDA = ENV_COGNITO.COGNITO_REGISTRATION_EMAIL_LAMBDA
 cognito_client = boto3.client("cognito-idp")
-ses_client = boto3.client("ses")
+lambda_client = boto3.client("lambda")
 router = LambdaRouter()
 
 
@@ -53,7 +51,7 @@ def add_user(event, context):
     temp_password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
 
     try:
-        congnito_user = cognito_client.admin_create_user(
+        cognito_user = cognito_client.admin_create_user(
             UserPoolId=USER_POOL_ID,
             Username=email,
             TemporaryPassword=temp_password,
@@ -71,78 +69,29 @@ def add_user(event, context):
             error_message="Error creating user.",
         )
 
-    beacon_ui_url = f"{BEACON_UI_URL}/login"
-    beacon_img_url = f"{BEACON_UI_URL}/assets/images/sbeacon.png"  # There are likely better ways of doing this, but email template is not important for now
-
-    subject = "sBeacon Registration"
-    body_html = f"""
-    <html>
-      <head>
-        <style>
-          body {{
-            font-family: Arial, sans-serif;
-            color: #333;
-          }}
-          .container {{
-            max-width: 600px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-          }}
-          h1 {{
-            color: #33548e;
-          }}
-          p {{
-            line-height: 1.6;
-          }}
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Hello {escape(first_name)} {escape(last_name)},</h1>
-          <p>Welcome to sBeacon - your sign-in credentials are as follows:</p>
-          <p>Email: <strong>{escape(email)}</strong></p>
-          <p>Temporary Password: <strong>{temp_password}</strong></p>
-          <p><a href="{beacon_ui_url}">Access your account</a></p>
-          <div style="max-width:80;">
-            <img src="{beacon_img_url}" alt="sBeacon Logo" style="max-width:80%; width:80%; margin-top:20px;">
-          </div>
-        </div>
-      </body>
-    </html>
-    """
-
     res = {"success": True}
     try:
-        response = ses_client.send_email(
-            Destination={
-                "ToAddresses": [email],
-            },
-            Message={
-                "Body": {
-                    "Html": {
-                        "Charset": "UTF-8",
-                        "Data": body_html,
-                    },
-                    "Text": {
-                        "Charset": "UTF-8",
-                        "Data": f"Hello {first_name} {last_name},\n\nWelcome to sBeacon - your sign-in credentials are as follows:\n\nEmail: {email}\n\nPassword: {temp_password}\n\nVerify: {beacon_ui_url}",
-                    },
-                },
-                "Subject": {
-                    "Charset": "UTF-8",
-                    "Data": subject,
-                },
-            },
-            Source=SES_SOURCE_EMAIL,
-            ReturnPath=SES_SOURCE_EMAIL,
-            ConfigurationSetName=SES_CONFIG_SET_NAME,
+        payload = {
+            "body": {
+                "email": email,
+                "temporary_password": temp_password,
+                "first_name": first_name,
+                "last_name": last_name,
+            }
+        }
+        response = lambda_client.invoke(
+            FunctionName=COGNITO_REGISTRATION_EMAIL_LAMBDA,
+            InvocationType="RequestResponse",
+            Payload=json.dumps(payload),
         )
+        if not (payload_stream := response.get("Payload")):
+            raise Exception("Error invoking email Lambda: No response payload")
+        body = json.loads(payload_stream.read().decode("utf-8"))
+        if not body.get("success", False):
+            raise Exception(f"Error invoking email Lambda: {body.get('message')}")
         user_sub = next(
             attr["Value"]
-            for attr in congnito_user["User"]["Attributes"]
+            for attr in cognito_user["User"]["Attributes"]
             if attr["Name"] == "sub"
         )
         if user_sub:
@@ -159,7 +108,6 @@ def add_user(event, context):
         )
 
     print(f"User {email} created successfully!")
-    print(f"Email sent with message ID: {response["MessageId"]}")
     return res
 
 

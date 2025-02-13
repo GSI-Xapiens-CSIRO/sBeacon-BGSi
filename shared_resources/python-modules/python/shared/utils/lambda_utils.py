@@ -152,10 +152,6 @@ class BeaconEnvironment:
     def BEACON_SERVICE_TYPE_VERSION(self):
         return os.environ["BEACON_SERVICE_TYPE_VERSION"]
 
-    @property
-    def BEACON_UI_URL(self):
-        return os.environ["BEACON_UI_URL"]
-
 
 class AthenaEnvironment:
     @property
@@ -287,6 +283,10 @@ class CognitoEnvironment:
     @property
     def COGNITO_MANAGER_GROUP_NAME(self):
         return os.environ["COGNITO_MANAGER_GROUP_NAME"]
+
+    @property
+    def COGNITO_REGISTRATION_EMAIL_LAMBDA(self):
+        return os.environ["COGNITO_REGISTRATION_EMAIL_LAMBDA"]
 
 
 class SesEnvironment:

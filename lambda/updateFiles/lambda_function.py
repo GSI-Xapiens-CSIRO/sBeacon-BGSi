@@ -112,6 +112,7 @@ def get_all_counts(project, all_files):
 
 
 def get_all_project_files(project_prefix):
+    # TODO verify that this operation is absolutely necesarry on staging files
     prefixes = [project_prefix, f"staging/{project_prefix}"]
     all_files = set()
     for prefix in prefixes:

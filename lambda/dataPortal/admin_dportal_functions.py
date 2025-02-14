@@ -198,6 +198,17 @@ def update_project(event, context):
     return project.to_dict()
 
 
+@router.attach("/dportal/admin/projects/{name}/errors", "delete", authenticate_manager)
+def delete_project_errors(event, context):
+    name = event["pathParameters"]["name"]
+
+    project = Projects.get(name)
+    project.error_messages = []
+    project.save()
+
+    return {"success": True}
+
+
 @router.attach("/dportal/admin/projects", "post", authenticate_manager)
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))

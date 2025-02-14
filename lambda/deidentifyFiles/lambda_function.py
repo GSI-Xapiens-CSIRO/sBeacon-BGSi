@@ -179,6 +179,7 @@ def lambda_handler(event, context):
                 deidentify(
                     input_bucket=DPORTAL_BUCKET,
                     output_bucket=DPORTAL_BUCKET,
+                    projects_table=PROJECTS_TABLE,
                     files_table=FILES_TABLE,
                     project=project,
                     file_name=file_name,
@@ -188,6 +189,7 @@ def lambda_handler(event, context):
                 launch_deidentification_ec2(
                     input_bucket=DPORTAL_BUCKET,
                     output_bucket=DPORTAL_BUCKET,
+                    projects_table=PROJECTS_TABLE,
                     files_table=FILES_TABLE,
                     project=project,
                     file_name=file_name,

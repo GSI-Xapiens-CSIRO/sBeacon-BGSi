@@ -88,7 +88,13 @@ def get_all_counts(project, all_files):
         response = dynamodb.batch_get_item(**kwargs)
         print(f"Received response: {json.dumps(response, default=str)}")
         items = response.get("Responses", {}).get(VCFS_TABLE, [])
-        total_samples += sum(int(item["num_samples"]["N"]) for item in items)
+
+        # handling error when the num_samples is absent
+        try:
+            total_samples += sum(int(item["num_samples"]["N"]) for item in items)
+        except KeyError:
+            total_samples += 0
+
         locations_to_check -= {item["vcfLocation"]["S"] for item in items}
         vcf_locations = [
             location["vcfLocation"]["S"]
@@ -163,6 +169,7 @@ def refresh_project(project_name):
 
 
 def remove_vcf(vcf_location):
+    # TODO also remove file from projects table
     kwargs = {
         "TableName": VCFS_TABLE,
         "Key": {

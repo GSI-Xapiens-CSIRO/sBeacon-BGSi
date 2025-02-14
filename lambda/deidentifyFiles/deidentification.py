@@ -778,6 +778,39 @@ def log_error(files_table, location, error_message):
     dynamodb_update_item(files_table, location, update_fields)
 
 
+def log_projects_error(
+    projects_table: str, project_name: str, file_name: str, error_message: str
+):
+    update_expression = """
+    SET error_messages = list_append(if_not_exists(error_messages, :empty_list), :error_message)
+    DELETE files :file_name
+    """
+    kwargs = {
+        "TableName": projects_table,
+        "Key": {
+            "name": {"S": project_name},
+        },
+        "UpdateExpression": update_expression,
+        "ExpressionAttributeValues": {
+            ":error_message": {
+                "L": [
+                    {
+                        "M": {
+                            "file": {"S": file_name},
+                            "error": {"S": error_message},
+                        }
+                    }
+                ]
+            },
+            ":empty_list": {"L": []},
+            ":file_name": {"SS": [file_name]},
+        },
+    }
+    print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
+    response = dynamodb.update_item(**kwargs)
+    print(f"Received response: {json.dumps(response, default=str)}")
+
+
 def s3_download(**kwargs: dict):
     print(f"Calling s3.download_file with kwargs: {json.dumps(kwargs)}")
     response = s3.download_file(**kwargs)
@@ -791,7 +824,13 @@ def s3_upload(**kwargs: dict):
 
 
 def deidentify(
-    input_bucket, output_bucket, files_table, project, file_name, object_key
+    input_bucket,
+    output_bucket,
+    projects_table,
+    files_table,
+    project,
+    file_name,
+    object_key,
 ):
     update_deidentification_status(files_table, f"{project}/{file_name}", "Pending")
 
@@ -816,6 +855,8 @@ def deidentify(
         except (ProcessError, ParsingError) as e:
             print(f"An error occurred while deidentifying {object_key}: {e}")
             log_error(files_table, f"{project}/{file_name}", str(e))
+            log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+            s3.delete_object(Bucket=input_bucket, Key=object_key)
             print("Exiting")
             return
     elif any(object_key.endswith(suffix) for suffix in QUIETLY_SKIP_SUFFIXES):
@@ -848,6 +889,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-bucket", required=True)
     parser.add_argument("--output-bucket", required=True)
+    parser.add_argument("--projects-table", required=True)
     parser.add_argument("--files-table", required=True)
     parser.add_argument("--project", required=True)
     parser.add_argument("--file-name", required=True)
@@ -856,6 +898,7 @@ if __name__ == "__main__":
     deidentify(
         args.input_bucket,
         args.output_bucket,
+        args.projects_table,
         args.files_table,
         args.project,
         args.file_name,

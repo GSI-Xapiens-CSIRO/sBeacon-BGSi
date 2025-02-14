@@ -20,6 +20,7 @@ REGION_AMI_MAP = {
 def launch_deidentification_ec2(
     input_bucket,
     output_bucket,
+    projects_table,
     files_table,
     project,
     file_name,
@@ -113,6 +114,7 @@ python3 decompresser.py
 sudo -E python3 deidentification.py \
     --input-bucket '{input_bucket.replace("'", "\\'")}' \
     --output-bucket '{output_bucket.replace("'", "\\'")}' \
+    --projects-table '{projects_table.replace("'", "\\'")}' \
     --files-table '{files_table.replace("'", "\\'")}' \
     --project '{project.replace("'", "\\'")}' \
     --file-name '{file_name.replace("'", "\\'")}' \

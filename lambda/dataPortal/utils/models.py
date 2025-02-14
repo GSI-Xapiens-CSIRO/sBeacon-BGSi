@@ -9,11 +9,17 @@ from pynamodb.attributes import (
     UnicodeAttribute,
     UnicodeSetAttribute,
     MapAttribute,
+    ListAttribute,
 )
 
 
 SESSION = boto3.session.Session()
 REGION = SESSION.region_name
+
+
+class ProjectErrorMessages(MapAttribute):
+    error = UnicodeAttribute()
+    file = UnicodeAttribute()
 
 
 class Projects(Model):
@@ -28,6 +34,7 @@ class Projects(Model):
     files = UnicodeSetAttribute(default=tuple())
     total_samples = NumberAttribute(default=0)
     ingested_datasets = UnicodeSetAttribute(default=tuple())
+    error_messages = ListAttribute(default=tuple(), of=ProjectErrorMessages)
 
     def save(self, *args, **kwargs):
         """Override save() to ensure lowercase fields are stored."""
@@ -44,6 +51,9 @@ class Projects(Model):
             "ingested_datasets": (
                 list(self.ingested_datasets) if self.ingested_datasets else []
             ),
+            "error_messages": [
+                message.attribute_values for message in self.error_messages
+            ],
             "total_samples": self.total_samples,
         }
 

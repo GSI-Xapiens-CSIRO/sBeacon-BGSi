@@ -41,8 +41,9 @@ def add_user(event, context):
     email = body_dict.get("email")
     first_name = body_dict.get("first_name")
     last_name = body_dict.get("last_name")
+    groups = body_dict.get("groups")
 
-    if not all([email, first_name, last_name]):
+    if not all([email, first_name, last_name, groups]):
         raise BeaconError(
             error_code="BeaconAddUserMissingAttribute",
             error_message="Missing required attributes!",
@@ -69,7 +70,22 @@ def add_user(event, context):
             error_message="Error creating user.",
         )
 
-    res = {"success": True}
+    try:
+        for group_name, chosen in groups.items():
+            if chosen:
+                cognito_client.admin_add_user_to_group(
+                    UserPoolId=USER_POOL_ID, Username=email, GroupName=group_name
+                )
+    except:
+        cognito_client.admin_delete_user(
+            UserPoolId=USER_POOL_ID,
+            Username=email,
+        )
+        raise BeaconError(
+            error_code="BeaconErrorAddingUserToGroups",
+            error_message="Error adding user to the requested groups.",
+        )
+
     try:
         payload = {
             "body": {
@@ -89,14 +105,6 @@ def add_user(event, context):
         body = json.loads(payload_stream.read().decode("utf-8"))
         if not body.get("success", False):
             raise Exception(f"Error invoking email Lambda: {body.get('message')}")
-        user_sub = next(
-            attr["Value"]
-            for attr in cognito_user["User"]["Attributes"]
-            if attr["Name"] == "sub"
-        )
-        if user_sub:
-            res["uid"] = user_sub
-
     except:
         cognito_client.admin_delete_user(
             UserPoolId=USER_POOL_ID,
@@ -106,6 +114,16 @@ def add_user(event, context):
             error_code="BeaconRegistrationEmailFailed",
             error_message="The registration email failed to send.",
         )
+
+    res = {"success": True}
+
+    user_sub = next(
+        attr["Value"]
+        for attr in cognito_user["User"]["Attributes"]
+        if attr["Name"] == "sub"
+    )
+    if user_sub:
+        res["uid"] = user_sub
 
     print(f"User {email} created successfully!")
     return res

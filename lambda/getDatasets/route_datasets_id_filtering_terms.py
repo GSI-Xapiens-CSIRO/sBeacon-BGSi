@@ -21,7 +21,7 @@ def route(request: RequestParams, dataset_id):
         (
             SELECT DISTINCT TI.term
             FROM "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI
-            WHERE TI.id = '{dataset_id}' and TI.kind = 'datasets'
+            WHERE TI.id = ? and TI.kind = 'datasets'
 
             UNION
 
@@ -30,7 +30,7 @@ def route(request: RequestParams, dataset_id):
             JOIN 
             "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI
             ON TI.id = I.id and TI.kind = 'individuals'
-            WHERE I._datasetid = '{dataset_id}'
+            WHERE I._datasetid = ?
 
             UNION
 
@@ -39,7 +39,7 @@ def route(request: RequestParams, dataset_id):
             JOIN 
             "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI
             ON TI.id = B.id and TI.kind = 'biosamples'
-            WHERE B._datasetid = '{dataset_id}'
+            WHERE B._datasetid = ?
 
             UNION
 
@@ -48,7 +48,7 @@ def route(request: RequestParams, dataset_id):
             JOIN 
             "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI
             ON TI.id = R.id and TI.kind = 'runs'
-            WHERE R._datasetid = '{dataset_id}'
+            WHERE R._datasetid = ?
 
             UNION
 
@@ -57,7 +57,7 @@ def route(request: RequestParams, dataset_id):
             JOIN 
             "{ENV_ATHENA.ATHENA_TERMS_INDEX_TABLE}" TI
             ON TI.id = A.id and TI.kind = 'analyses'
-            WHERE A._datasetid = '{dataset_id}'
+            WHERE A._datasetid = ?
         )
         AND (REGEXP_LIKE(label, ?) OR REGEXP_LIKE(term, ?))
         ORDER BY term
@@ -73,7 +73,7 @@ def route(request: RequestParams, dataset_id):
     else:
         regex = ".*"
 
-    execution_parameters = [regex, regex]
+    execution_parameters = [f"'{dataset_id}'"] * 5 + [regex, regex]
     exec_id = run_custom_query(
         query,
         return_id=True,

@@ -64,7 +64,10 @@ def entity_search_conditions(
             # karyotypicSex = "XX" for default scope (Individuals)
             if f.scope is None or f.scope == default_scope:
                 operator = _get_comparison_operator(f)
-                outer_constraints.append(" {} {} ? ".format(f.id, operator))
+                # named id modifier implies that the default table scope has been aliased
+                # so we must use alias to avoid ambiguity
+                id_name = id_modifier.split(".")[0] + "." if "." in id_modifier else ""
+                outer_constraints.append(" {}{} {} ? ".format(id_name, f.id, operator))
                 outer_execution_parameters.append(f"'{str(f.value)}'")
             # otherwise, we have to use the relations table
             # eg: scope = "cohorts", cohortType = "beacon-defined"

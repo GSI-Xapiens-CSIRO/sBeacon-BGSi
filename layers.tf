@@ -4,6 +4,8 @@ data "archive_file" "binaries_layer" {
   type        = "zip"
   source_dir  = "${path.module}/layers/binaries/"
   output_path = "${path.module}/binaries.zip"
+  
+  depends_on = [null_resource.init_script]
 }
 
 # binaries layer definition
@@ -30,6 +32,8 @@ module "python_libraries_layer" {
 
   store_on_s3 = true
   s3_bucket   = aws_s3_bucket.lambda-layers-bucket.bucket
+
+  depends_on = [null_resource.init_script]
 }
 
 ### python first party modules layer 

@@ -86,6 +86,7 @@ GENOMIC_SUFFIX_TYPES = {
 
 SAM_SUFFIXES = {
     ".bam",
+    ".sam",
 }
 
 QUIETLY_SKIP_SUFFIXES = {
@@ -226,6 +227,37 @@ class Viewer:
             self._print(self.lines)
         if self.started:
             self.view_process.check()
+
+
+class SamReader:
+    """Anonymises sam file line by line, and counts changes."""
+
+    def __init__(self):
+        self.header_lines = 0
+        self.header_pii = 0
+        self.record_lines = 0
+        self.record_pii = 0
+
+    def anonymise_lines(self, line_iterator):
+        for line in line_iterator:
+            line = line.rstrip("\r\n")
+            if not line:
+                continue
+            if line.startswith("@"):
+                self.header_lines += 1
+                if new_line := anonymise_sam_header_line(line):
+                    self.header_pii += 1
+            else:
+                self.record_lines += 1
+                if new_line := anonymise_sam_record(line):
+                    self.record_pii += 1
+            yield new_line or line
+
+    def get_summary_string(self):
+        return (
+            f"Anonymised {self.header_pii}/{self.header_lines} header lines"
+            f" and {self.record_pii}/{self.record_lines} records"
+        )
 
 
 def anonymise(input_string):
@@ -469,10 +501,6 @@ def anonymise_sam_record(record):
 
 
 def anonymise_bam(input_path, output_path):
-    header_lines = 0
-    header_pii = 0
-    record_lines = 0
-    record_pii = 0
     # We need to write out the whole bam file as we go anyway,
     # So we might as well always send the created files
     output_index = f"{output_path}.bai"
@@ -494,25 +522,24 @@ def anonymise_bam(input_path, output_path):
         ],
         "Creating deidentified bam file failed",
     )
-    for line in in_samtools_process.stdout:
-        line = line.rstrip("\r\n")
-        if not line:
-            continue
-        if line.startswith("@"):
-            header_lines += 1
-            if new_line := anonymise_sam_header_line(line):
-                header_pii += 1
-        else:
-            record_lines += 1
-            if new_line := anonymise_sam_record(line):
-                record_pii += 1
-        out_samtools_viewer.ingest([new_line or line])
-    print(
-        f"Anonymised {header_pii}/{header_lines} header lines and {record_pii}/{record_lines} records"
-    )
+    reader = SamReader()
+    for line in reader.anonymise_lines(in_samtools_process.stdout):
+        out_samtools_viewer.ingest([line])
+    print(reader.get_summary_string())
     in_samtools_process.check()
     out_samtools_viewer.close()
     return [output_path, output_index]
+
+
+def anonymise_sam(input_path, output_path):
+    # In this case we can just read it as a flat file
+    # With special handling of the relevant parts.
+    with open(input_path, "r") as infile, open(output_path, "w") as outfile:
+        reader = SamReader()
+        for line in reader.anonymise_lines(infile):
+            print(line, file=outfile)
+    print(reader.get_summary_string())
+    return [output_path]
 
 
 def anonymise_vcf(input_path, output_path):
@@ -751,6 +778,39 @@ def log_error(files_table, location, error_message):
     dynamodb_update_item(files_table, location, update_fields)
 
 
+def log_projects_error(
+    projects_table: str, project_name: str, file_name: str, error_message: str
+):
+    update_expression = """
+    SET error_messages = list_append(if_not_exists(error_messages, :empty_list), :error_message)
+    DELETE files :file_name
+    """
+    kwargs = {
+        "TableName": projects_table,
+        "Key": {
+            "name": {"S": project_name},
+        },
+        "UpdateExpression": update_expression,
+        "ExpressionAttributeValues": {
+            ":error_message": {
+                "L": [
+                    {
+                        "M": {
+                            "file": {"S": file_name},
+                            "error": {"S": error_message},
+                        }
+                    }
+                ]
+            },
+            ":empty_list": {"L": []},
+            ":file_name": {"SS": [file_name]},
+        },
+    }
+    print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
+    response = dynamodb.update_item(**kwargs)
+    print(f"Received response: {json.dumps(response, default=str)}")
+
+
 def s3_download(**kwargs: dict):
     print(f"Calling s3.download_file with kwargs: {json.dumps(kwargs)}")
     response = s3.download_file(**kwargs)
@@ -764,7 +824,13 @@ def s3_upload(**kwargs: dict):
 
 
 def deidentify(
-    input_bucket, output_bucket, files_table, project, file_name, object_key
+    input_bucket,
+    output_bucket,
+    projects_table,
+    files_table,
+    project,
+    file_name,
+    object_key,
 ):
     update_deidentification_status(files_table, f"{project}/{file_name}", "Pending")
 
@@ -778,12 +844,19 @@ def deidentify(
     ):
         try:
             if any(object_key.endswith(suffix) for suffix in SAM_SUFFIXES):
-                output_paths = anonymise_bam(local_input_path, local_output_path)
+                if object_key.endswith(".bam"):
+                    output_paths = anonymise_bam(local_input_path, local_output_path)
+                elif object_key.endswith(".sam"):
+                    output_paths = anonymise_sam(local_input_path, local_output_path)
+                else:
+                    raise (Exception("Unexpected SAM file suffix"))
             else:
                 output_paths = anonymise_vcf(local_input_path, local_output_path)
         except (ProcessError, ParsingError) as e:
             print(f"An error occurred while deidentifying {object_key}: {e}")
             log_error(files_table, f"{project}/{file_name}", str(e))
+            log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+            s3.delete_object(Bucket=input_bucket, Key=object_key)
             print("Exiting")
             return
     elif any(object_key.endswith(suffix) for suffix in QUIETLY_SKIP_SUFFIXES):
@@ -816,6 +889,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-bucket", required=True)
     parser.add_argument("--output-bucket", required=True)
+    parser.add_argument("--projects-table", required=True)
     parser.add_argument("--files-table", required=True)
     parser.add_argument("--project", required=True)
     parser.add_argument("--file-name", required=True)
@@ -824,6 +898,7 @@ if __name__ == "__main__":
     deidentify(
         args.input_bucket,
         args.output_bucket,
+        args.projects_table,
         args.files_table,
         args.project,
         args.file_name,

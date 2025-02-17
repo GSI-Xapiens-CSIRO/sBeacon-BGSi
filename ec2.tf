@@ -69,6 +69,7 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
     ]
     resources = [
       aws_dynamodb_table.vcfs.arn,
+      aws_dynamodb_table.projects.arn,
     ]
   }
 }

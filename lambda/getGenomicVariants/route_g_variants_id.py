@@ -22,24 +22,24 @@ from shared.apiutils import (
 )
 
 
-def datasets_query(conditions, assembly_id):
+def datasets_query(conditions):
     query = f"""
     SELECT D.id, D._vcflocations, D._vcfchromosomemap, ARRAY_AGG(A._vcfsampleid) as samples
     FROM "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_ANALYSES_TABLE}" A
     JOIN "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_DATASETS_TABLE}" D
     ON A._datasetid = D.id
     {conditions} 
-    AND D._assemblyid='{assembly_id}' 
+    AND D._assemblyid= ? 
     GROUP BY D.id, D._vcflocations, D._vcfchromosomemap 
     """
     return query
 
 
-def datasets_query_fast(assembly_id):
+def datasets_query_fast():
     query = f"""
     SELECT id, _vcflocations, _vcfchromosomemap
     FROM "{ENV_ATHENA.ATHENA_METADATA_DATABASE}"."{ENV_ATHENA.ATHENA_DATASETS_TABLE}"
-    WHERE _assemblyid='{assembly_id}' 
+    WHERE _assemblyid= ?
     """
     return query
 
@@ -62,7 +62,8 @@ def route(request: RequestParams, variant_id):
     )
 
     if conditions:
-        query = datasets_query(conditions, assembly_id)
+        execution_parameters.append(assembly_id)
+        query = datasets_query(conditions)
         exec_id = run_custom_query(
             query,
             return_id=True,
@@ -72,10 +73,10 @@ def route(request: RequestParams, variant_id):
         )
         datasets, samples = parse_datasets_with_samples(exec_id)
     else:
-        query = datasets_query_fast(assembly_id)
+        query = datasets_query_fast()
         datasets = Dataset.get_by_query(
             query,
-            execution_parameters=execution_parameters,
+            execution_parameters=[assembly_id],
             projects=request.projects,
             sub=request.sub,
         )

@@ -168,7 +168,7 @@ def delete_project(event, context):
         delete_s3_objects(ATHENA_METADATA_BUCKET, cache_prefixes)
 
     with ProjectUsers.batch_write() as batch:
-        for entry in ProjectUsers.scan():
+        for entry in ProjectUsers.query(hash_key=name):
             batch.delete(entry)
 
     project.delete()

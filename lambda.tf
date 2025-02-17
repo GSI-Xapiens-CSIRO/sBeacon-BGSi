@@ -21,16 +21,6 @@ resource "aws_lambda_permission" "SNSperformQuery" {
   source_arn    = aws_sns_topic.performQuery.arn
 }
 
-#
-# admin Lambda Function
-#
-resource "aws_lambda_permission" "SNSemailNotification" {
-  statement_id  = "SBeaconBackendAllowSNSemailNotificationInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = module.lambda-logEmailDelivery.lambda_function_arn
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.sesDeliveryLogger.arn
-}
 
 #
 # updateFiles Lambda Function

@@ -189,17 +189,6 @@ variable "config-max-variant-search-base-range" {
   default     = 5000
 }
 
-variable "beacon-ui-url" {
-  type        = string
-  description = "CloudFront URL for the sBeacon frontend"
-}
-
-variable "ses-source-email" {
-  type        = string
-  description = "Address from which to send SES emails"
-  default     = "no.reply.gaspi.notifications@gmail.com"
-}
-
 # bucket prefixes
 variable "variants-bucket-prefix" {
   type        = string
@@ -240,4 +229,9 @@ variable "cognito-admin-group-name" {
 variable "cognito-manager-group-name" {
   type        = string
   description = "Cognito manager group name."
+}
+
+variable "registration-email-lambda-function-arn" {
+  type        = string
+  description = "Lambda function ARN for sending registration emails"
 }

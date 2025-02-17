@@ -34,6 +34,8 @@ mkdir -p layers/binaries/bin
 # TODO check what libraries are missing and add only those
 ldd ${SOURCE}/htslib/tabix | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
 cp ${SOURCE}/htslib/tabix ./layers/binaries/bin/
+ldd ${SOURCE}/htslib/htsfile | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
+cp ${SOURCE}/htslib/htsfile ./layers/binaries/bin/
 
 # bcftools
 cd ${SOURCE}
@@ -55,6 +57,14 @@ mkdir -p layers/binaries/bin
 ldd ${SOURCE}/samtools/samtools | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
 cp ${SOURCE}/samtools/samtools ./layers/binaries/bin/
 
+# libmagic 
+cd ${SOURCE}
+git clone --depth 1 https://github.com/file/file.git
+cd file && autoreconf -i && ./configure && make
+cd ${REPOSITORY_DIRECTORY}
+mkdir -p layers/binaries/lib
+cp ${SOURCE}/file/src/.libs/libmagic.so.1 ./layers/binaries/lib/
+
 # python libraries layer
 cd ${REPOSITORY_DIRECTORY}
 pip install ijson==3.3.0 --target layers/python_libraries/python
@@ -68,3 +78,4 @@ pip install pyorc==0.9.0 --target layers/python_libraries/python
 pip install requests==2.31.0 --target layers/python_libraries/python
 pip install smart_open==7.0.4 --target layers/python_libraries/python
 pip install strenum==0.4.15 --target layers/python_libraries/python
+pip install python-magic==0.4.27 --target layers/python_libraries/python

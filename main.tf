@@ -42,10 +42,6 @@ locals {
     BEACON_SERVICE_TYPE_VERSION  = var.beacon-service-type-version
     # configurations
     CONFIG_MAX_VARIANT_SEARCH_BASE_RANGE = var.config-max-variant-search-base-range
-    # sbeacon cloudfront url
-    BEACON_UI_URL = var.beacon-ui-url
-    # ses variables
-    SES_SOURCE_EMAIL = var.ses-source-email
   }
   # athena related variables
   athena_variables = {
@@ -618,8 +614,7 @@ module "lambda-admin" {
     local.dynamodb_variables,
     { COGNITO_USER_POOL_ID = var.cognito-user-pool-id },
     { COGNITO_ADMIN_GROUP_NAME = var.cognito-admin-group-name },
-    { SES_SOURCE_EMAIL = var.ses-source-email },
-    { SES_CONFIG_SET_NAME = aws_ses_configuration_set.ses_feedback_config.name },
+    { COGNITO_REGISTRATION_EMAIL_LAMBDA = var.registration-email-lambda-function-arn },
   )
 
   layers = [
@@ -769,22 +764,4 @@ module "lambda-getProjects" {
     local.python_libraries_layer,
     local.python_modules_layer,
   ]
-}
-
-#
-# email notification Lambda function
-#
-module "lambda-logEmailDelivery" {
-  source = "terraform-aws-modules/lambda/aws"
-
-  function_name       = "sbeacon-backend-logEmailDelivery"
-  description         = "Logging of user invite email delivery status."
-  runtime             = "python3.12"
-  handler             = "lambda_function.lambda_handler"
-  memory_size         = 512
-  timeout             = 60
-  attach_policy_jsons = true
-  source_path         = "${path.module}/lambda/logEmailDelivery"
-
-  tags = var.common-tags
 }

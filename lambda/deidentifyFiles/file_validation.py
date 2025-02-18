@@ -55,45 +55,46 @@ def get_full_extension(local_input_path):
 
 
 def validate_genomic_file(local_input_path, extension):
-    try:
-        result = subprocess.run(
-            ["htsfile", local_input_path], capture_output=True, text=True, check=True
+    result = subprocess.run(
+        ["htsfile", local_input_path], capture_output=True, text=True, check=True
+    )
+    output = result.stdout.strip()
+
+    format_details = output.split("\t")[1] if "\t" in output else output
+
+    expected = HTSFILE_MAPPING.get(extension)
+
+    if not expected:
+        raise Exception(
+            f"File's extension is not in the list of allowed genomic files.\nAllowed file types: {', '.join(HTSFILE_MAPPING.keys())}"
         )
-        output = result.stdout.strip()
-
-        expected = HTSFILE_MAPPING.get(extension)
-
-        if not expected:
-            return False
-        if expected["format"] not in output:
-            return False
-        if expected.get("compressed"):
-            return any(
-                term in output for term in ["BGZF-compressed", "gzip-compressed"]
+    if expected["format"] not in output:
+        raise Exception(
+            f"File's expected format did not match the format identified by htsfile.\n: {expected['format']}\nFormat identified by htsfile: {format_details}"
+        )
+    if expected.get("compressed"):
+        if not any(term in output for term in ["BGZF-compressed", "gzip-compressed"]):
+            raise Exception(
+                f"File's extension indicates that the file is compressed, but htsfile found an uncompressed format.\nFormat identified by htsfile: {format_details}"
             )
 
-        return True
-
-    except subprocess.CalledProcessError as e:
-        print(f"Error running htsfile: {e}")
-        return False
+    return True
 
 
 def validate_file(local_input_path):
     extension = get_full_extension(local_input_path)
     if extension not in MIME_MAPPING:
-        raise Exception("File's extension is not in the list of allowed files")
+        raise Exception(
+            f"File's extension is not in the list of allowed files.\nAllowed file types: {', '.join(MIME_MAPPING.keys())}"
+        )
     expected_mime = MIME_MAPPING[extension]
 
     detected_mime = Magic(mime=True).from_file(local_input_path)
 
     if detected_mime in expected_mime:
         if extension in GENOMIC_SUFFIXES:
-            if not validate_genomic_file(local_input_path, extension):
-                raise Exception(
-                    f"File's extension does not match the detected format, or htsfile failed to read it"
-                )
+            validate_genomic_file(local_input_path, extension)
         return
     raise Exception(
-        f"File's extension did not match the corresponding file signature.\nExpected signatures: {expected_mime}\nReceived: {detected_mime}"
+        f"File's expected format did not match the result of MIME type checking.\nExpected format(s): {', '.join(expected_mime)}\nFormat identified by MIME type checking: {detected_mime}"
     )

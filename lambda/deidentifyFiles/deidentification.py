@@ -81,8 +81,10 @@ METADATA_KEY_PII_PATTERN = [
 GENOMIC_SUFFIX_TYPES = {
     ".bcf": "u",
     ".bcf.gz": "b",
+    ".bcf.bgz": "b",
     ".vcf": "v",
     ".vcf.gz": "z",
+    ".vcf.bgz": "z",
 }
 
 SAM_SUFFIXES = {

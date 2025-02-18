@@ -1,6 +1,9 @@
 import boto3
 
-s3 = boto3.client("s3")
+SESSION = boto3.session.Session()
+REGION = SESSION.region_name
+
+s3 = boto3.client("s3", region_name=REGION, config=boto3.session.Config(signature_version="s3v4", s3={"addressing_style": "virtual"}))
 
 
 def list_s3_prefix(bucket, prefix):

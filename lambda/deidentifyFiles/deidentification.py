@@ -848,6 +848,7 @@ def deidentify(
     except Exception as e:
         print(f"An error occurred when validating {object_key}: {e}")
         log_error(files_table, f"{project}/{file_name}", str(e))
+        log_projects_error(projects_table, project, file_name, anonymise(str(e)))
         print("Exiting")
         return
     if any(

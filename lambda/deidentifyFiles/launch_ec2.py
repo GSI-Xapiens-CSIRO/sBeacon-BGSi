@@ -38,6 +38,11 @@ def launch_deidentification_ec2(
             bz2.compress(file.read())
         ).decode()
 
+    with open("file_validation.py", "rb") as file:
+        compressed_file_validation_script = base64.b64encode(
+            bz2.compress(file.read())
+        ).decode()
+
     ec2_startup = f"""#!/bin/bash
 set -x
 # Install dependencies
@@ -96,16 +101,24 @@ mkdir -p /opt/deidentification/
 cd /opt/deidentification/
 
 # Copy contents of deidentification script
-cat > ./compressed << 'EOF'
+cat > ./compressed_deidentification << 'EOF'
 {compressed_deidentification_script}
+EOF
+
+# Copy contents of file validation script
+cat > ./compressed_file_validation << 'EOF'
+{compressed_file_validation_script}
 EOF
 
 cat > ./decompresser.py << 'EOF'
 import base64
 import bz2
 
-with open("compressed", "rb") as cfile:
+with open("compressed_deidentification", "rb") as cfile:
     with open("deidentification.py", "wb") as output:
+        output.write(bz2.decompress(base64.b64decode(cfile.read())))
+with open ("compressed_file_validation", "rb") as cfile:
+    with open("file_validation.py", "wb") as output:
         output.write(bz2.decompress(base64.b64decode(cfile.read())))
 EOF
 python3 decompresser.py

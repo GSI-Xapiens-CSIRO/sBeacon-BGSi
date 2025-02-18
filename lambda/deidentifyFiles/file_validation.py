@@ -26,7 +26,7 @@ MIME_MAPPING = {
     ".bcf.bgz": ["application/x-gzip"],
     ".tbi": ["application/x-gzip"],
     ".csi": ["application/x-gzip"],
-    ".bam": ["application/x-gzip"],
+    ".bam": ["application/x-gzip", "application/octet-stream"],
     ".bai": ["application/octet-stream"],
     ".sam": ["text/plain"],
     ".json": ["application/json", "text/plain"],

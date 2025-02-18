@@ -5,9 +5,10 @@ import os
 import re
 import subprocess
 
-import ijson
 import boto3
+import ijson
 
+from file_validation import validate_file
 
 ANNOTATION_PATH = "annotation.vcf.gz"
 BGZIPPED_PATH = "bgzipped.bcf.gz"
@@ -80,8 +81,10 @@ METADATA_KEY_PII_PATTERN = [
 GENOMIC_SUFFIX_TYPES = {
     ".bcf": "u",
     ".bcf.gz": "b",
+    ".bcf.bgz": "b",
     ".vcf": "v",
     ".vcf.gz": "z",
+    ".vcf.bgz": "z",
 }
 
 SAM_SUFFIXES = {
@@ -838,6 +841,16 @@ def deidentify(
     local_output_path = f"{WORKING_DIR}/deidentified_{file_name}"
 
     s3.download_file(Bucket=input_bucket, Key=object_key, Filename=local_input_path)
+
+    try:
+        validate_file(local_input_path)
+        print(f"Validation passed for {local_input_path}")
+    except Exception as e:
+        print(f"An error occurred when validating {object_key}: {e}")
+        log_error(files_table, f"{project}/{file_name}", str(e))
+        log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+        print("Exiting")
+        return
     if any(
         object_key.endswith(suffix)
         for suffix in set(GENOMIC_SUFFIX_TYPES.keys()) | SAM_SUFFIXES

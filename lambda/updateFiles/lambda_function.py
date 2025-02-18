@@ -12,8 +12,10 @@ VCFS_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
 VCF_SUFFIXES = [
     ".bcf",
     ".bcf.gz",
+    ".bcf.bgz",
     ".vcf",
     ".vcf.gz",
+    ".vcf.bgz",
 ]
 
 dynamodb = boto3.client("dynamodb")

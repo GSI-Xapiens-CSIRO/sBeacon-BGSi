@@ -8,10 +8,16 @@ This documentation specifically outlines the complexities associated with the im
 
 ## Entity Relationships
 
-Entities are related in the following form.
+Entities are related in the following form in terms of the Beacon component.
 
 <div align="center">
 <img src="./images/erd.webp" alt="Entity Relationships" width="800" style="background-color: white;">
+</div>
+
+The complete ERD for the dataportal accompanied by Users, Projects and other dataportal aspects is as follows.
+
+<div align="center">
+<img src="./images/erd-dp.webp" alt="Entity Relationships" width="800" style="background-color: white;">
 </div>
 
 ## Querying Module

@@ -174,7 +174,7 @@ def lambda_handler(event, context):
             print(f"{object_key} is an index file, moving directly")
             move_file(object_key)
             return
-        elif any(object_key.endswith(suffix) for suffix in SUFFIXES):
+        else:
             print(f"{object_key} is a genomic or metadata file, deidentifying")
             size = event["Records"][0]["s3"]["object"]["size"]
             if size <= MAX_SIZE_FOR_LAMBDA:
@@ -198,7 +198,4 @@ def lambda_handler(event, context):
                     object_key=object_key,
                     size_gb=size / 1024**3,
                 )
-            return
-        else:
-            print(f"{object_key} is not an acceptable filetype, leaving")
             return

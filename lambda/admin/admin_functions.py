@@ -49,7 +49,14 @@ def add_user(event, context):
             error_message="Missing required attributes!",
         )
 
-    temp_password = "".join(random.choices(string.ascii_letters + string.digits, k=12))
+    lower_case = random.choices(string.ascii_lowercase, k=2)
+    upper_case = random.choices(string.ascii_uppercase, k=2)
+    digits = random.choices(string.digits, k=2)
+    special = random.choices(string.punctuation, k=2)
+
+    characters = lower_case + upper_case + digits + special
+    random.shuffle(characters)
+    temp_password = "".join(characters)
 
     try:
         cognito_user = cognito_client.admin_create_user(

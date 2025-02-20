@@ -50,10 +50,6 @@ HTSFILE_MAPPING = {
 }
 
 
-def get_full_extension(local_input_path):
-    return "".join(Path(local_input_path).suffixes)
-
-
 def validate_genomic_file(local_input_path, extension):
     result = subprocess.run(
         ["htsfile", local_input_path], capture_output=True, text=True, check=True
@@ -82,11 +78,16 @@ def validate_genomic_file(local_input_path, extension):
 
 
 def validate_file(local_input_path):
-    extension = get_full_extension(local_input_path)
-    if extension not in MIME_MAPPING:
+    extension = None
+    for ext in MIME_MAPPING.keys():
+        if local_input_path.endswith(ext):
+            extension = ext
+            break
+    if not extension:
         raise Exception(
             f"File's extension is not in the list of allowed files.\nAllowed file types: {', '.join(MIME_MAPPING.keys())}"
         )
+
     expected_mime = MIME_MAPPING[extension]
 
     detected_mime = Magic(mime=True).from_file(local_input_path)

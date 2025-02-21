@@ -53,8 +53,10 @@ A examples are available at [../examples/minimum/](../examples/minimum/) and  [.
 
 Upon successful `terraform apply` you'll be prompted with an output similar to below.
 ```bash 
-api_url = "https://XXXXX.execute-api.us-east-1.amazonaws.com/"
+api_url = "https://dXXXXXXXXXXXXX.cloudfront.net/prod/"
+beacon_ui_url = "https://dXXXXXXXXXXXXX.cloudfront.net"
 cognito_client_id = "XXXXX"
+cognito_user_pool_id = "XXXXXXXXXX"
 admin_login_command = "aws cognito-idp admin-initiate-auth --user-pool-id us-east-1_A89RD07je --region us-east-1 --client-id 100n0tno0e0sql96mcgciaa8to --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=admin@gmail.com,PASSWORD=XXXXX --output json --query AuthenticationResult.IdToken"
 guest_login_command = "aws cognito-idp admin-initiate-auth --user-pool-id us-east-1_A89RD07je --region us-east-1 --client-id XXXXX --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters USERNAME=guest@gmail.com,PASSWORD=XXXXX --output json --query AuthenticationResult.IdToken"
 ```

@@ -1,11 +1,6 @@
 output "api_url" {
-  value       = aws_api_gateway_deployment.BeaconApi.invoke_url
+  value       = "https://${aws_cloudfront_distribution.api_distribution.domain_name}/${aws_api_gateway_stage.BeaconApi.stage_name}/"
   description = "URL used to invoke the API."
-}
-
-output "api_stage" {
-  value       = aws_api_gateway_stage.BeaconApi.stage_name
-  description = "API stage."
 }
 
 output "data-portal-bucket" {

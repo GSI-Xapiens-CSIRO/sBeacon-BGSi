@@ -235,3 +235,16 @@ variable "registration-email-lambda-function-arn" {
   type        = string
   description = "Lambda function ARN for sending registration emails"
 }
+
+# Throttling variables
+variable "method-max-request-rate" {
+  type        = number
+  description = "Number of requests allowed per second per method."
+  default     = 100
+}
+
+variable "method-queue-size" {
+  type        = number
+  description = "Number of requests allowed to be queued per method."
+  default     = 1000
+}

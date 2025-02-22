@@ -358,3 +358,14 @@ resource "aws_api_gateway_stage" "BeaconApi" {
   rest_api_id   = aws_api_gateway_rest_api.BeaconApi.id
   stage_name    = "prod"
 }
+
+resource "aws_api_gateway_method_settings" "BeaconApi" {
+  rest_api_id = aws_api_gateway_rest_api.BeaconApi.id
+  stage_name  = aws_api_gateway_stage.BeaconApi.stage_name
+  method_path = "*/*"
+
+  settings {
+    throttling_burst_limit = var.method-queue-size
+    throttling_rate_limit  = var.method-max-request-rate
+  }
+}

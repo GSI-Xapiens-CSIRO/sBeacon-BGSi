@@ -91,7 +91,7 @@ def get_file_presigned_url(event, context):
     if prefix not in project.files:
         raise PortalError(404, "File not found in project")
 
-    return get_presigned_url(DPORTAL_BUCKET, f"projects/{name}/{prefix}")
+    return get_presigned_url(DPORTAL_BUCKET, f"projects/{name}/project-files/{prefix}")
 
 
 @router.attach("/dportal/queries", "get")

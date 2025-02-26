@@ -64,6 +64,7 @@ def get_all_project_files(project_prefix):
 
 def get_project(object_key):
     path_parts = object_key.split("/")
+    # Ensure the path starts with "staging/projects/"
     if path_parts[0:2] != ["staging", "projects"]:
         error = (
             "Not triggered by a staging/projects/* file. This shouldn't happen."
@@ -71,20 +72,31 @@ def get_project(object_key):
         )
         print(error)
         raise ValueError(error)
-    if len(path_parts) < 4:
-        # This is a staging/projects/* file, not a staging/projects/*/* file
-        # Therefore it isn't in a project directory
-        return None, None, None
-    if path_parts[-1] == "":
-        # This is a directory, not a file
-        return None, None, None
-    return path_parts[2], f"{path_parts[1]}/{path_parts[2]}/", "/".join(path_parts[3:])
+    # Ensure the path has at least 5 parts: "staging/projects/{project}/project-files/{filename}"
+    if len(path_parts) < 5:
+        return None, None, None  # Not in a project directory
+    # Ensure the third part (project name) is present
+    project_name = path_parts[2]
+    if not project_name:
+        return None, None, None  # Invalid project name
+    # Ensure the fourth part is exactly "project-files"
+    if path_parts[3] != "project-files":
+        return None, None, None  # Not inside the "project-files" directory
+    # Ensure this is a file (not a directory)
+    if object_key.endswith("/"):
+        return None, None, None  # It's a directory, not a file
+    # Return project name, the base project path, and the filename
+    return (
+        project_name,
+        f"{path_parts[1]}/{path_parts[2]}/{path_parts[3]}/",
+        "/".join(path_parts[4:]),
+    )
 
 
 def refresh_project(project_name):
     """This should only be needed if something has gone wrong"""
     print(f"Refreshing project: {project_name}")
-    all_project_files = get_all_project_files(f"projects/{project_name}/")
+    all_project_files = get_all_project_files(f"projects/{project_name}/project-files/")
     update_project(project_name, all_project_files)
 
 
@@ -164,11 +176,12 @@ def lambda_handler(event, context):
     object_key = unquote_plus(event["Records"][0]["s3"]["object"]["key"])
     event_name = event["Records"][0]["eventName"]
     project, project_prefix, file_name = get_project(object_key)
-    all_project_files = get_all_project_files(project_prefix)
-    update_project(project, all_project_files)
     if project is None:
         print("Not a staging/projects/<project_name>/* file, skipping")
         return
+    all_project_files = get_all_project_files(project_prefix)
+    print(all_project_files)
+    update_project(project, all_project_files)
     if event_name.startswith("ObjectCreated:"):
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
             print(f"{object_key} is an index file, moving directly")

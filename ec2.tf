@@ -37,8 +37,8 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
       test     = "StringLike"
       variable = "s3:prefix"
       values = [
-        "projects/*/",
-        "staging/projects/*/",
+        "projects/*/project-files/*",
+        "staging/projects/*/project-files/*",
       ]
     }
   }
@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*/project-files/*",
     ]
   }
 
@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
       "s3:PutObject",
     ]
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/project-files/*",
     ]
   }
 

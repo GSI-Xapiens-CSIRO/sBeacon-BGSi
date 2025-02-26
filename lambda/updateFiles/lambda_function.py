@@ -22,8 +22,7 @@ dynamodb = boto3.client("dynamodb")
 s3 = boto3.client("s3")
 
 
-def count_samples_and_update_vcf(project, file_name):
-    vcf_location = f"{project}/{file_name}"
+def count_samples_and_update_vcf(vcf_location):
     try:
         num_samples = count_samples(f"s3://{DPORTAL_BUCKET}/projects/{vcf_location}")
         update_fields = {
@@ -61,7 +60,7 @@ def count_samples(s3_location):
 
 def get_all_counts(project, all_files):
     vcf_locations = [
-        f"{project}/{file_name}"
+        f"{project}/project-files/{file_name}"
         for file_name in all_files
         if any(file_name.endswith(suffix) for suffix in VCF_SUFFIXES)
     ]
@@ -143,6 +142,7 @@ def get_all_project_files(project_prefix):
 
 def get_project(object_key):
     path_parts = object_key.split("/")
+    # Ensure the path starts with "projects/"
     if path_parts[0] != "projects":
         error = (
             "Not triggered by a projects/* file. This shouldn't happen."
@@ -150,20 +150,31 @@ def get_project(object_key):
         )
         print(error)
         raise ValueError(error)
-    if len(path_parts) < 3:
-        # This is a projects/* file, not a projects/*/* file
-        # Therefore it isn't in a project directory
-        return None, None, None
-    if path_parts[-1] == "":
-        # This is a directory, not a file
-        return None, None, None
-    return path_parts[1], f"{path_parts[0]}/{path_parts[1]}/", "/".join(path_parts[2:])
+    # Ensure the path has at least 4 parts: "projects/{project}/project-files/{filename}"
+    if len(path_parts) < 4:
+        return None, None, None  # Not in a project directory
+    # Ensure the second part (project name) is present
+    project_name = path_parts[1]
+    if not project_name:
+        return None, None, None  # Invalid project name
+    # Ensure the third part is exactly "project-files"
+    if path_parts[2] != "project-files":
+        return None, None, None  # Not inside the "project-files" directory
+    # Ensure this is a file (not a directory)
+    if object_key.endswith("/"):
+        return None, None, None  # It's a directory, not a file
+    # Return project name, the base project path, and the filename
+    return (
+        project_name,
+        f"projects/{project_name}/project-files/",
+        "/".join(path_parts[3:]),
+    )
 
 
 def refresh_project(project_name):
     """This should only be needed if something has gone wrong"""
     print(f"Refreshing project: {project_name}")
-    all_project_files = get_all_project_files(f"projects/{project_name}/")
+    all_project_files = get_all_project_files(f"projects/{project_name}/project-files/")
     total_samples = 0
     for file_name in all_project_files:
         if any(file_name.endswith(suffix) for suffix in VCF_SUFFIXES):
@@ -172,7 +183,6 @@ def refresh_project(project_name):
 
 
 def remove_vcf(vcf_location):
-    # TODO also remove file from projects table
     kwargs = {
         "TableName": VCFS_TABLE,
         "Key": {
@@ -258,13 +268,14 @@ def lambda_handler(event, context):
     event_name = event["Records"][0]["eventName"]
     project, project_prefix, file_name = get_project(object_key)
     if project is None:
-        print("Not a projects/<project_name>/* file, skipping")
+        print("Not a projects/<project_name>/project-files/* file, skipping")
         return
     if any(object_key.endswith(suffix) for suffix in VCF_SUFFIXES):
+        vcf_location = f"{project}/project-files/{file_name}"
         if event_name.startswith("ObjectCreated:"):
-            count_samples_and_update_vcf(project, file_name)
+            count_samples_and_update_vcf(vcf_location)
         elif event_name.startswith("ObjectRemoved:"):
-            remove_vcf(f"{project}/{file_name}")
+            remove_vcf(vcf_location)
         else:
             print(f"Unexpected event name: {event_name}")
             raise ValueError(f"Unexpected event name: {event_name}")

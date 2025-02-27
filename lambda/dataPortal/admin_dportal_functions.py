@@ -192,7 +192,7 @@ def update_project(event, context):
     # delete file diff
     delete_s3_objects(
         DPORTAL_BUCKET,
-        [f"projects/{name}/{file}" for file in deleted_files],
+        [f"projects/{name}/project-files/{file}" for file in deleted_files],
     )
 
     return project.to_dict()

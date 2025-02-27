@@ -398,7 +398,7 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
     ]
 
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*"
+      "${aws_s3_bucket.dataportal-bucket.arn}/staging/projects/*/project-files/*"
     ]
   }
 
@@ -407,7 +407,7 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
       "s3:PutObject",
     ]
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/project-files/*",
     ]
   }
 
@@ -458,8 +458,8 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       test     = "StringLike"
       variable = "s3:prefix"
       values = [
-        "projects/*/",
-        "staging/projects/*/",
+        "projects/*/project-files/*",
+        "staging/projects/*/project-files/*",
       ]
     }
   }
@@ -470,7 +470,7 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       "s3:GetObject",
     ]
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/project-files/*",
     ]
   }
 

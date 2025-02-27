@@ -851,6 +851,7 @@ def deidentify(
         print(f"An error occurred when validating {object_key}: {e}")
         log_error(files_table, f"{project}/project-files/{file_name}", str(e))
         log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+        s3.delete_object(Bucket=input_bucket, Key=object_key)
         print("Exiting")
         return
     if any(
@@ -878,7 +879,15 @@ def deidentify(
         print("We'd rather create this file again from the source file, skipping")
         return
     elif any(object_key.endswith(suffix) for suffix in METADATA_SUFFIXES):
-        deidentify_metadata(local_input_path, local_output_path)
+        try:
+            deidentify_metadata(local_input_path, local_output_path)
+        except Exception as e:
+            print(f"An error occurred while deidentifying {object_key}: {e}")
+            log_error(files_table, f"{project}/project-files/{file_name}", str(e))
+            log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+            s3.delete_object(Bucket=input_bucket, Key=object_key)
+            print("Exiting")
+            return
         output_paths = [local_output_path]
     else:
         raise ValueError(f"File {object_key} does not have a recognised suffix")

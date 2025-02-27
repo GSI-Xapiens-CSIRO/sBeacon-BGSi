@@ -180,7 +180,6 @@ def lambda_handler(event, context):
         print("Not a staging/projects/<project_name>/* file, skipping")
         return
     all_project_files = get_all_project_files(project_prefix)
-    print(all_project_files)
     update_project(project, all_project_files)
     if event_name.startswith("ObjectCreated:"):
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):

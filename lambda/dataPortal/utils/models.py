@@ -77,6 +77,17 @@ class ProjectUsers(Model):
     uid_index = ProjectUsersIndex()
 
 
+class ClinicalAnnotations(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_CLINICAL_ANNOTATIONS_TABLE")
+        region = REGION
+
+    project_job = UnicodeAttribute(hash_key=True)
+    annotation_name = UnicodeAttribute(range_key=True)
+    annotation = UnicodeAttribute(default="")
+    variants = UnicodeAttribute(default="")
+
+
 class InstanceStatus(Enum):
     PENDING = "Pending"
     IN_SERVICE = "InService"

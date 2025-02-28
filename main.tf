@@ -714,19 +714,20 @@ module "lambda-data-portal" {
     local.sbeacon_variables,
     local.dynamodb_variables,
     {
-      ATHENA_METADATA_BUCKET         = aws_s3_bucket.metadata-bucket.bucket
-      DYNAMO_PROJECTS_TABLE          = aws_dynamodb_table.projects.name,
-      DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name,
-      DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name,
-      DYNAMO_SAVED_QUERIES_TABLE     = aws_dynamodb_table.saved_queries.name
-      JUPYTER_INSTACE_ROLE_ARN       = aws_iam_role.sagemaker_jupyter_instance_role.arn,
-      JUPYTER_LIFECYCLE_CONFIG_NAME  = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
-      USER_POOL_ID                   = var.cognito-user-pool-id,
-      DPORTAL_BUCKET                 = aws_s3_bucket.dataportal-bucket.bucket,
-      COGNITO_ADMIN_GROUP_NAME       = var.cognito-admin-group-name
-      COGNITO_MANAGER_GROUP_NAME     = var.cognito-manager-group-name
-      SUBMIT_LAMBDA                  = module.lambda-submitDataset.lambda_function_name
-      INDEXER_LAMBDA                 = module.lambda-indexer.lambda_function_name
+      ATHENA_METADATA_BUCKET            = aws_s3_bucket.metadata-bucket.bucket
+      DYNAMO_PROJECTS_TABLE             = aws_dynamodb_table.projects.name,
+      DYNAMO_PROJECT_USERS_TABLE        = aws_dynamodb_table.project_users.name,
+      DYNAMO_JUPYTER_INSTANCES_TABLE    = aws_dynamodb_table.juptyer_notebooks.name,
+      DYNAMO_SAVED_QUERIES_TABLE        = aws_dynamodb_table.saved_queries.name
+      DYNAMO_CLINICAL_ANNOTATIONS_TABLE = aws_dynamodb_table.clinical_annotations.name
+      JUPYTER_INSTACE_ROLE_ARN          = aws_iam_role.sagemaker_jupyter_instance_role.arn,
+      JUPYTER_LIFECYCLE_CONFIG_NAME     = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
+      USER_POOL_ID                      = var.cognito-user-pool-id,
+      DPORTAL_BUCKET                    = aws_s3_bucket.dataportal-bucket.bucket,
+      COGNITO_ADMIN_GROUP_NAME          = var.cognito-admin-group-name
+      COGNITO_MANAGER_GROUP_NAME        = var.cognito-manager-group-name
+      SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
+      INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
     },
   )
 

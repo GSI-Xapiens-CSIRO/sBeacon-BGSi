@@ -103,6 +103,24 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
   }
 }
 
+# clinical annotations table
+resource "aws_dynamodb_table" "clinical_annotations" {
+  name         = "sbeacon-dataportal-clinical-annotations"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "project_job"
+  range_key    = "annotation_name"
+
+  attribute {
+    name = "project_job"
+    type = "S"
+  }
+
+  attribute {
+    name = "annotation_name"
+    type = "S"
+  }
+}
+
 # VCFs  Table
 # So we can keep track of the number of samples in each vcf
 resource "aws_dynamodb_table" "vcfs" {

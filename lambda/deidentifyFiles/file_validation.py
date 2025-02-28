@@ -1,5 +1,6 @@
 from pathlib import Path
 import subprocess
+import re
 
 from magic import Magic
 
@@ -69,7 +70,7 @@ def validate_genomic_file(local_input_path, extension):
             f"File's expected format did not match the format identified by htsfile.\n: {expected['format']}\nFormat identified by htsfile: {format_details}"
         )
     if expected.get("compressed"):
-        if not any(term in output for term in ["BGZF-compressed", "gzip-compressed"]):
+        if not re.search(r"\b(BGZF-compressed|gzip-compressed|compressed)\b", output):
             raise Exception(
                 f"File's extension indicates that the file is compressed, but htsfile found an uncompressed format.\nFormat identified by htsfile: {format_details}"
             )

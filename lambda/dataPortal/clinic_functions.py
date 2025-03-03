@@ -3,7 +3,6 @@ import json
 
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers, ClinicalAnnotations
-from utils.s3_util import get_presigned_url
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")

@@ -12,3 +12,13 @@ output "data-portal-bucket-arn" {
   value       = aws_s3_bucket.dataportal-bucket.arn
   description = "S3 bucket arn for the data portal."
 }
+
+output "dynamo-project-users-table" {
+  value       = aws_dynamodb_table.project_users.name
+  description = "Dynamo project users table"
+}
+
+output "dynamo-project-users-table-arn" {
+  value       = aws_dynamodb_table.project_users.arn
+  description = "Dynamo project users table"
+}

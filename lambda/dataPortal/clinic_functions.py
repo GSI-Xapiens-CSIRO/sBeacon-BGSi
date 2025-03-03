@@ -106,7 +106,7 @@ def delete_annotations(event, context):
         ProjectUsers.get(project, sub)
         # get project
         Projects.get(project)
-        annot = ClinicalAnnotations(project, name)
+        annot = ClinicalAnnotations(f"{project}:{job_id}", name)
         annot.delete()
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")

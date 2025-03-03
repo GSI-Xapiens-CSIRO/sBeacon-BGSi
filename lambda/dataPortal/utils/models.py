@@ -86,6 +86,7 @@ class ClinicalAnnotations(Model):
     annotation_name = UnicodeAttribute(range_key=True)
     annotation = UnicodeAttribute(default="")
     variants = UnicodeAttribute(default="")
+    uid = UnicodeAttribute(default="")
 
 
 class InstanceStatus(Enum):

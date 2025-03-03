@@ -23,7 +23,7 @@ def save_annotations(event, context):
         # get project
         Projects.get(project)
         # get annotation name, annotation and variants
-        annotation_name = body["name"]
+        annotation_name = event["requestContext"]["requestId"]
         annotation = body["annotation"]
         variants = body["variants"]
     except ProjectUsers.DoesNotExist:
@@ -38,6 +38,7 @@ def save_annotations(event, context):
         annotation_name,
         annotation=annotation,
         variants=json.dumps(variants),
+        uid = sub
     )
     annot.save()
 

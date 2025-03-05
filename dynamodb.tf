@@ -103,6 +103,22 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
   }
 }
 
+# clinic jobs table
+resource "aws_dynamodb_table" "clinic-jobs" {
+  name         = "sbeacon-dataportal-clinic-jobs"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key = "job_id"
+  tags = var.common-tags
+  
+  attribute {
+    name = "job_id"
+    type = "S"
+  }
+  
+  stream_enabled = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+}
+
 # clinical annotations table
 resource "aws_dynamodb_table" "clinical_annotations" {
   name         = "sbeacon-dataportal-clinical-annotations"

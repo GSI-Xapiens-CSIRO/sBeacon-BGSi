@@ -676,10 +676,12 @@ module "lambda-updateFiles" {
   tags               = var.common-tags
 
   environment_variables = {
-    DPORTAL_BUCKET        = aws_s3_bucket.dataportal-bucket.bucket
-    DYNAMO_PROJECTS_TABLE = aws_dynamodb_table.projects.name
-    DYNAMO_VCFS_TABLE     = aws_dynamodb_table.vcfs.name
-    HTS_S3_HOST           = "s3.${var.region}.amazonaws.com"
+    DPORTAL_BUCKET                        = aws_s3_bucket.dataportal-bucket.bucket
+    DYNAMO_PROJECTS_TABLE                 = aws_dynamodb_table.projects.name
+    DYNAMO_VCFS_TABLE                     = aws_dynamodb_table.vcfs.name
+    DYNAMO_CLINIC_JOBS_TABLE              = aws_dynamodb_table.clinic_jobs.name
+    DYNAMO_CLINIC_JOBS_PROJECT_NAME_INDEX = local.clinic_jobs_project_name_index
+    HTS_S3_HOST                           = "s3.${var.region}.amazonaws.com"
   }
 
   layers = [

@@ -9,6 +9,8 @@ from botocore.exceptions import ClientError
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 VCFS_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
+JOBS_TABLE = os.environ["DYNAMO_CLINIC_JOBS_TABLE"]
+JOBS_TABLE_PROJECT_NAME_INDEX = os.environ["DYNAMO_CLINIC_JOBS_PROJECT_NAME_INDEX"]
 VCF_SUFFIXES = [
     ".bcf",
     ".bcf.gz",
@@ -237,6 +239,62 @@ def update_project(project_name, total_samples, all_project_files):
     print(f"Received response: {json.dumps(response, default=str)}")
 
 
+def expire_clinic_jobs(project, file_name):
+    print(f"Attempting to delete all jobs associated with project {project} and file {file_name}")
+    kwargs = {
+        "TableName": JOBS_TABLE,
+        "IndexName": JOBS_TABLE_PROJECT_NAME_INDEX,
+        "KeyConditionExpression": "project_name = :project_name",
+        "ExpressionAttributeValues": {
+            ":project_name": {
+                "S": project,
+            },
+        },
+    } 
+    print(f"Calling dynamodb.query with kwargs: {json.dumps(kwargs)}")
+    response = dynamodb.query(**kwargs)
+    print(f"Received response: {json.dumps(response)}")
+    if "Items" not in response:
+        print(f"No associated jobs found, aborting")
+        return
+    jobs_to_delete = [
+        job for job in response["Items"] if job.get("input_vcf", {}).get("S") == file_name
+    ]
+    
+    updated_count = 0
+    error_count = 0
+    for job in jobs_to_delete:
+        job_id = job.get("job_id", {}).get("S")
+        if job_id:
+            kwargs = {
+                "TableName": JOBS_TABLE,
+                "Key": {
+                    "job_id": {
+                        "S": job_id
+                    },
+                },
+                "UpdateExpression": "SET job_status = :job_status",
+                "ExpressionAttributeValues": {
+                    ":job_status": {
+                        "S": "expired",
+                    },
+                },
+                "ConditionExpression": "attribute_exists(job_id)",
+            }
+            print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
+            try:
+                response = dynamodb.update_item(**kwargs)
+                print(f"Received response: {json.dumps(response)}")
+                updated_count += 1
+            except ClientError as e:
+                print(f"Error updating job {job_id}: {e}")
+                error_count += 1
+        else:
+            print(f"Missing job_id for a job, skipping")
+    
+    print(f"Job expiration complete. Updated: {updated_count}, Errors: {error_count}, Skipped: {len(jobs_to_delete) - updated_count - error_count}")
+
+
 def update_file(location, update_fields):
     update_expression = "SET " + ", ".join(f"{k} = :{k}" for k in update_fields.keys())
     expression_attribute_values = {f":{k}": v for k, v in update_fields.items()}
@@ -276,6 +334,7 @@ def lambda_handler(event, context):
             count_samples_and_update_vcf(vcf_location)
         elif event_name.startswith("ObjectRemoved:"):
             remove_vcf(vcf_location)
+            expire_clinic_jobs(project, file_name)
         else:
             print(f"Unexpected event name: {event_name}")
             raise ValueError(f"Unexpected event name: {event_name}")

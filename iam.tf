@@ -480,6 +480,7 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
     ]
     resources = [
       aws_dynamodb_table.projects.arn,
+      aws_dynamodb_table.clinic_jobs.arn,
     ]
   }
 
@@ -491,6 +492,16 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
     ]
     resources = [
       aws_dynamodb_table.vcfs.arn,
+    ]
+  }
+  
+  statement {
+    actions = [
+      "dynamodb:Query",
+    ]
+    resources = [
+      aws_dynamodb_table.clinic_jobs.arn,
+      "${aws_dynamodb_table.clinic_jobs.arn}/index/${local.clinic_jobs_project_name_index}",
     ]
   }
 }

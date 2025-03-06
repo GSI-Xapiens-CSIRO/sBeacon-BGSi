@@ -24,16 +24,16 @@ output "dynamo-project-users-table-arn" {
 }
 
 output "dynamo-clinic-jobs-table" {
-  value       = aws_dynamodb_table.clinic-jobs.name
+  value       = aws_dynamodb_table.clinic_jobs.name
   description = "Dynamo clinic jobs table"
 }
 
 output "dynamo-clinic-jobs-table-arn" {
-  value       = aws_dynamodb_table.clinic-jobs.arn
+  value       = aws_dynamodb_table.clinic_jobs.arn
   description = "Dynamo clinic jobs table"
 }
 
 output "dynamo-clinic-jobs-stream-arn" {
-  value       = aws_dynamodb_table.clinic-jobs.stream_arn
+  value       = aws_dynamodb_table.clinic_jobs.stream_arn
   description = "Dynammo clinic jobs table"
 }

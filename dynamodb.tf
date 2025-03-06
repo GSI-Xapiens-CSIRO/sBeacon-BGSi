@@ -57,6 +57,7 @@ resource "aws_dynamodb_table" "projects" {
 
 locals {
   project_users_uid_index = "uid-index"
+  clinic_jobs_project_name_index = "project-name-index"
 }
 # User Projects Table
 resource "aws_dynamodb_table" "project_users" {
@@ -104,7 +105,7 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
 }
 
 # clinic jobs table
-resource "aws_dynamodb_table" "clinic-jobs" {
+resource "aws_dynamodb_table" "clinic_jobs" {
   name         = "sbeacon-dataportal-clinic-jobs"
   billing_mode = "PAY_PER_REQUEST"
   hash_key = "job_id"
@@ -113,6 +114,17 @@ resource "aws_dynamodb_table" "clinic-jobs" {
   attribute {
     name = "job_id"
     type = "S"
+  }
+  
+  attribute {
+    name = "project_name"
+    type = "S"
+  }
+  
+  global_secondary_index {
+    name            = local.clinic_jobs_project_name_index 
+    hash_key        = "project_name" 
+    projection_type = "ALL" 
   }
   
   stream_enabled = true

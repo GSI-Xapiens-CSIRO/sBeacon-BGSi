@@ -516,6 +516,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
       aws_dynamodb_table.saved_queries.arn,
       aws_dynamodb_table.clinical_annotations.arn,
+      aws_dynamodb_table.clinic_jobs.arn,
     ]
   }
 
@@ -525,6 +526,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
     resources = [
       "${aws_dynamodb_table.project_users.arn}/index/${local.project_users_uid_index}",
+      "${aws_dynamodb_table.clinic_jobs.arn}/index/${local.clinic_jobs_project_name_index}"
     ]
   }
 

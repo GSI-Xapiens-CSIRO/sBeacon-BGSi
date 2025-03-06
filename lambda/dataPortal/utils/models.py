@@ -3,7 +3,7 @@ from enum import Enum
 from datetime import datetime, timezone
 
 import boto3
-from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
+from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection, AllProjection
 from pynamodb.models import Model
 from pynamodb.attributes import (
     NumberAttribute,
@@ -81,6 +81,28 @@ class ProjectUsers(Model):
     name = UnicodeAttribute(hash_key=True)
     uid = UnicodeAttribute(range_key=True)
     uid_index = ProjectUsersIndex()
+
+
+class ClinicJobsProjectNameIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "project-name-index"
+        projection = AllProjection()
+
+    project_name = UnicodeAttribute(hash_key=True)
+
+
+class ClinicJobs(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_CLINIC_JOBS_TABLE")
+        region = REGION
+
+    job_id = UnicodeAttribute(hash_key=True)
+    project_name = UnicodeAttribute(default="")
+    input_vcf = UnicodeAttribute(default="")
+    job_status = UnicodeAttribute(default="")
+    error_message = UnicodeAttribute(default="")
+    uid = UnicodeAttribute(default="")
+    project_index = ClinicJobsProjectNameIndex()
 
 
 class ClinicalAnnotations(Model):

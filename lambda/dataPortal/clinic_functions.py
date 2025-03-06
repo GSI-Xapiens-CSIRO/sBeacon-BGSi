@@ -3,6 +3,7 @@ import json
 
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers, ClinicalAnnotations
+from utils.cognito import get_user_from_attribute, get_user_attribute
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
@@ -38,7 +39,7 @@ def save_annotations(event, context):
         annotation_name,
         annotation=annotation,
         variants=json.dumps(variants),
-        uid = sub
+        uid=sub,
     )
     annot.save()
 
@@ -74,21 +75,35 @@ def get_annotations(event, context):
     except ClinicalAnnotations.DoesNotExist:
         raise PortalError(404, "Annotations not found")
 
-    return {
-        "annotations": [
-            {
-                "name": annot.annotation_name,
-                "annotation": annot.annotation,
-                "variants": json.loads(annot.variants),
-            }
-            for annot in annotations
-        ],
+    response = {
+        "annotations": [],
         "last_evaluated_key": (
             json.dumps(annotations.last_evaluated_key)
             if annotations.last_evaluated_key
             else None
         ),
     }
+
+    for annot in annotations:
+        entry = {
+            "name": annot.annotation_name,
+            "annotation": annot.annotation,
+            "createdAt": annot.created_at,
+            "variants": json.loads(annot.variants),
+        }
+        try:
+            user = get_user_from_attribute("sub", annot.uid)
+            entry["user"] = {
+                "firstName": get_user_attribute(user, "given_name"),
+                "lastName": get_user_attribute(user, "family_name"),
+                "email": get_user_attribute(user, "email"),
+            }
+        except PortalError:
+            user = None
+        finally:
+            response["annotations"].append(entry)
+
+    return response
 
 
 @router.attach(

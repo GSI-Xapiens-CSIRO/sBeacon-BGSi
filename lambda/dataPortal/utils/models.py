@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from datetime import datetime, timezone
 
 import boto3
 from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
@@ -10,11 +11,16 @@ from pynamodb.attributes import (
     UnicodeSetAttribute,
     MapAttribute,
     ListAttribute,
+    UTCDateTimeAttribute,
 )
 
 
 SESSION = boto3.session.Session()
 REGION = SESSION.region_name
+
+
+def get_current_time_utc():
+    return datetime.now(timezone.utc)
 
 
 class ProjectErrorMessages(MapAttribute):
@@ -87,6 +93,7 @@ class ClinicalAnnotations(Model):
     annotation = UnicodeAttribute(default="")
     variants = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
+    created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
 
 
 class InstanceStatus(Enum):

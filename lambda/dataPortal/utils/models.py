@@ -100,6 +100,7 @@ class ClinicJobs(Model):
     project_name = UnicodeAttribute(default="")
     input_vcf = UnicodeAttribute(default="")
     job_status = UnicodeAttribute(default="")
+    failed_step = UnicodeAttribute(default="")
     error_message = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
     project_index = ClinicJobsProjectNameIndex()

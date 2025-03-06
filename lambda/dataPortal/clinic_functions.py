@@ -43,6 +43,7 @@ def list_jobs(event, context):
                 "job_id": job.job_id,
                 "input_vcf": job.input_vcf,
                 "job_status": job.job_status,
+                "failed_step": job.failed_step,
                 "error_message": job.error_message,
             }
             for job in jobs

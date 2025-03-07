@@ -9,7 +9,7 @@ router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 
 
-@router.attach("/dportal/projects/{project}/clinical-workflows/jobs", "get")
+@router.attach("/dportal/projects/{project}/clinical-workflows", "get")
 def list_jobs(event, context):
     print(f"Event received: {json.dumps(event)}")
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -52,38 +52,6 @@ def list_jobs(event, context):
             json.dumps(jobs.last_evaluated_key) if jobs.last_evaluated_key else None
         ),
     }
-
-
-@router.attach("/dportal/projects/{project}/clinical-workflows/jobs/{job_id}", "delete")
-def delete_job(event, context):
-    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    project = event["pathParameters"]["project"]
-    job_id = event["pathParameters"]["job_id"]
-
-    try:
-        # Ensure user has access to project
-        ProjectUsers.get(project, sub)
-        # Get project
-        Projects.get(project)
-        # Delete all annotations for the job first
-        annotations = ClinicalAnnotations.query(f"{project}:{job_id}")
-        for annot in annotations:
-            annot.delete()
-        # Now delete the job itself
-        job = ClinicJobs.get(job_id)
-        job.delete()
-    except ProjectUsers.DoesNotExist:
-        raise PortalError(404, "User not found in project")
-    except Projects.DoesNotExist:
-        raise PortalError(404, "Project not found")
-    except ClinicalAnnotations.DoesNotExist:
-        raise PortalError(404, "Annotation not found")
-    except ClinicJobs.DoesNotExist:
-        raise PortalError(404, "Job not found")
-    except KeyError:
-        raise PortalError(400, "Missing required field")
-
-    return {"success": True, "message": "Job and associated annotations deleted"}
 
 
 @router.attach(

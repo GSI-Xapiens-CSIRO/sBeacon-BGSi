@@ -528,6 +528,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.saved_queries.arn,
       aws_dynamodb_table.clinical_annotations.arn,
       aws_dynamodb_table.clinic_jobs.arn,
+      aws_dynamodb_table.clinical_variants.arn,
     ]
   }
 

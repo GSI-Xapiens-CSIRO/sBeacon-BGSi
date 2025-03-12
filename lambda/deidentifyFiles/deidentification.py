@@ -59,8 +59,8 @@ META_STRUCTURED_WHITELIST = {
 
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"(?<!\.)\(?(?:\+62\)?[- ]?|\b0)(?:\d\)?[- ]?){1,3}\d{3,4}[- ]?\d{3,4}\b",  # Phone number
-    r"(?<=:)\s?\d{16}\b",  # NIK
+    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
+    r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
 CASE_INSENSITIVE_PII_PATTERNS = [

@@ -32,3 +32,9 @@ class Quota(Model):
             "CostEstimation": self.CostEstimation,
             "Usage": self.Usage.as_dict(),
         }
+    
+    def increment_quota(self):
+        self.update(actions=[Quota.Usage.usageCount.add(1)])
+
+    def user_has_quota(self):
+        return self.Usage.usageCount < self.Usage.quotaQueryCount

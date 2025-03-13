@@ -278,9 +278,10 @@ module "lambda-getAnalyses" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getAnalyses.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getAnalyses"
 
   tags = var.common-tags
@@ -317,9 +318,10 @@ module "lambda-getGenomicVariants" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getGenomicVariants.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getGenomicVariants"
 
   tags = var.common-tags
@@ -356,9 +358,10 @@ module "lambda-getIndividuals" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getIndividuals.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getIndividuals"
 
   tags = var.common-tags
@@ -395,9 +398,10 @@ module "lambda-getBiosamples" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getBiosamples.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getBiosamples"
 
   tags = var.common-tags
@@ -434,9 +438,10 @@ module "lambda-getDatasets" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getDatasets.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getDatasets"
 
   tags = var.common-tags
@@ -473,9 +478,10 @@ module "lambda-getRuns" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getRuns.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getRuns"
 
   tags = var.common-tags

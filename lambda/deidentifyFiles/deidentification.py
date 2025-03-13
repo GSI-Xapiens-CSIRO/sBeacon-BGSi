@@ -75,7 +75,8 @@ ANY_PII_PATTERN = re.compile(
     )
 )
 METADATA_KEY_PII_PATTERN = [
-    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|name|nama|surname)\b"
+    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|name|nama|surname)\b",
+    r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number)\b",
 ]
 
 GENOMIC_SUFFIX_TYPES = {

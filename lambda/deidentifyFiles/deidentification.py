@@ -74,7 +74,7 @@ ANY_PII_PATTERN = re.compile(
         + [f"(?i:{pattern})" for pattern in CASE_INSENSITIVE_PII_PATTERNS]
     )
 )
-METADATA_KEY_PII_PATTERN = [
+METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|name|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b"
 ]
@@ -626,7 +626,7 @@ def process_tabular(input_path, output_path, delimiter):
             idx
             for idx, col_name in enumerate(header)
             if not any(
-                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERN
+                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS
             )
         ]
         with open(output_path, "w", newline="", encoding="utf-8") as outfile:
@@ -691,7 +691,7 @@ def process_json(input_path, output_path):
             elif event == "map_key":
                 # If the key matches a PII pattern, set the keybuffer to skip its subtree.
                 if any(
-                    re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERN
+                    re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
                     keybuffer = f"{prefix}.{value}"
                     continue

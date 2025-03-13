@@ -75,7 +75,7 @@ ANY_PII_PATTERN = re.compile(
     )
 )
 METADATA_KEY_PII_PATTERN = [
-    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?)\b"
+    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|name|nama|surname)\b"
 ]
 
 GENOMIC_SUFFIX_TYPES = {

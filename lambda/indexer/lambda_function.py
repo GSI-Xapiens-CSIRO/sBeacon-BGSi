@@ -297,6 +297,7 @@ def clean_onto_index_tables():
 
 
 def lambda_handler(event, context):
+    print("Backend Event Received: {}".format(json.dumps(event)))
     re_index_tables = event.get("reIndexTables", True)
     re_index_ontology_tables = event.get("reIndexOntologyTerms", False)
 

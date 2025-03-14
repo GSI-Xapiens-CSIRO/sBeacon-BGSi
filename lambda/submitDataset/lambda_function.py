@@ -105,7 +105,7 @@ def format_info(project_name, dataset_name, additional_info):
 
 
 def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
+    print("Backend Event Received: {}".format(json.dumps(event)))
 
     if not event:
         return {"success": False, "message": "No body sent with request."}

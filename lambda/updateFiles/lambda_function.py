@@ -318,7 +318,7 @@ def update_file(location, update_fields):
 
 
 def lambda_handler(event, context):
-    print(f"Event Received: {json.dumps(event)}")
+    print(f"Backend Event Received: {json.dumps(event)}")
     if project_name := event.get("project"):
         refresh_project(project_name)
         return

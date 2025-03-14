@@ -98,6 +98,7 @@ QUIETLY_SKIP_SUFFIXES = {
     # from other files, and don't want the uploaded
     # versions to squash the ones we create.
     ".bai",
+    ".csi",
 }
 
 METADATA_SUFFIXES = [
@@ -614,6 +615,13 @@ def anonymise_vcf(input_path, output_path):
     else:
         print("No PII detected in VCF file, copying verbatim")
         files_to_move = [input_path]
+        if output_type in "zb":
+            index_process = CheckedProcess(
+                args=["bcftools", "index", input_path],
+                error_message="Indexing original file failed",
+            )
+            index_process.check()
+            files_to_move.append(f"{input_path}.csi")
     return files_to_move
 
 

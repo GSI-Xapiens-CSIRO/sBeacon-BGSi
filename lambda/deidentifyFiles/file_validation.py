@@ -31,7 +31,7 @@ MIME_MAPPING = {
     ".bai": ["application/octet-stream"],
     ".sam": ["text/plain"],
     ".json": ["application/json", "text/plain"],
-    ".csv": ["text/csv", "application/csv"],
+    ".csv": ["text/csv", "application/csv", "text/plain"],
     ".tsv": ["text/tab-separated-values", "text/plain"],
     ".txt": ["text/plain"],
 }

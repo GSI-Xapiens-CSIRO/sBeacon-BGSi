@@ -107,6 +107,7 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
+      REGION      = var.region
       HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
     },
     local.sbeacon_variables,

@@ -10,9 +10,11 @@ from utils.models import (
     ClinicalVariants,
 )
 from utils.cognito import get_user_from_attribute, get_user_attribute
+from utils.lambda_util import invoke_lambda_function
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
+REPORTS_LAMBDA = os.environ.get("REPORTS_LAMBDA")
 
 
 @router.attach("/dportal/projects/{project}/clinical-workflows", "get")
@@ -320,3 +322,44 @@ def delete_variants(event, context):
         raise PortalError(400, "Missing required field")
 
     return {"success": True, "message": "Variants collection deleted"}
+
+
+@router.attach("/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post")
+def generate_report(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    project = event["pathParameters"]["project"]
+    job_id = event["pathParameters"]["job_id"]
+    body = json.loads(event["body"])
+
+    try:
+        # ensure user has access to project
+        ProjectUsers.get(project, sub)
+        # get project
+        Projects.get(project)
+        # get variants
+        variants = [
+            variant
+            for entry in ClinicalVariants.query(f"{project}:{job_id}")
+            for variant in json.loads(entry.variants)
+        ]
+    except ProjectUsers.DoesNotExist:
+        raise PortalError(404, "User not found in project")
+    except Projects.DoesNotExist:
+        raise PortalError(404, "Project not found")
+    except ClinicalVariants.DoesNotExist:
+        raise PortalError(404, "Variants collection not found")
+
+    if not variants:
+        payload = {
+            "lab": body["lab"],
+            "kind": "neg",
+        }
+    else:
+        payload = {
+            "lab": body["lab"],
+            "kind": "pos",
+            "variants": variants,
+        }
+    response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+
+    return {"success": True, "content": response["body"]}

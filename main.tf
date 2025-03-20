@@ -739,6 +739,7 @@ module "lambda-data-portal" {
       COGNITO_MANAGER_GROUP_NAME        = var.cognito-manager-group-name
       SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
+      REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
     },
   )
 
@@ -780,4 +781,28 @@ module "lambda-getProjects" {
     local.python_libraries_layer,
     local.python_modules_layer,
   ]
+}
+
+#
+# getProjects Function
+#
+module "lambda-generateReports" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "sbeacon-backend-generateReports"
+  description   = "Backend function to generate reports."
+  runtime       = "python3.12"
+  handler       = "lambda_function.lambda_handler"
+  memory_size   = 512
+  timeout       = 60
+  # attach_policy_jsons = true
+  # policy_jsons = []  
+  # number_of_policy_jsons = 0
+  source_path = "${path.module}/lambda/generateReports"
+
+  tags = var.common-tags
+
+  # environment_variables = {
+  #   LAB = "RSCM"
+  # }
 }

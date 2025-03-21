@@ -351,7 +351,7 @@ def generate_report(event, context):
         raise PortalError(404, "Variants collection not found")
 
     try:
-        if HUB_NAME not in ["RSCM"]:
+        if HUB_NAME not in ["RSCM", "RSPON"]:
             response = {
                 "success": False,
                 "message": "Lab not configured. Please contact administrator.",

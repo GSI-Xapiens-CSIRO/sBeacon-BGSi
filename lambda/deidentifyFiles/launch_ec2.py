@@ -63,6 +63,7 @@ yum install -y \
 # Install boto3 and ijson
 pip install boto3
 pip install ijson==3.3.0
+pip install python-magic==0.4.27
 
 # Configure default region
 export AWS_DEFAULT_REGION={AWS_DEFAULT_REGION}
@@ -90,6 +91,14 @@ make
 make install
 cd ..
 
+# Install file
+FILE_VERSION="5.46"
+curl -L https://astron.com/pub/file/file-$FILE_VERSION.tar.gz | tar -xjf -
+cd file-$FILE_VERSION
+./configure
+make
+make install
+cd ..
 
 # Verify installations
 bcftools --version

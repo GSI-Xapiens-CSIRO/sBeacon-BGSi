@@ -15,6 +15,7 @@ from utils.lambda_util import invoke_lambda_function
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 REPORTS_LAMBDA = os.environ.get("REPORTS_LAMBDA")
+HUB_NAME = os.environ.get("HUB_NAME")
 
 
 @router.attach("/dportal/projects/{project}/clinical-workflows", "get")
@@ -349,17 +350,40 @@ def generate_report(event, context):
     except ClinicalVariants.DoesNotExist:
         raise PortalError(404, "Variants collection not found")
 
-    if not variants:
-        payload = {
-            "lab": body["lab"],
-            "kind": "neg",
+    try:
+        if HUB_NAME not in ["RSCM"]:
+            response = {
+                "success": False,
+                "message": "Lab not configured. Please contact administrator.",
+            }
+            raise KeyError("Lab not configured")
+        if not variants:
+            payload = {
+                "lab": HUB_NAME,
+                "kind": "neg",
+            }
+        else:
+            payload = {
+                "lab": HUB_NAME,
+                "kind": "pos",
+                "variants": variants,
+            }
+        response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+        response = {
+            "success": True,
+            "content": response["body"],
         }
-    else:
-        payload = {
-            "lab": body["lab"],
-            "kind": "pos",
-            "variants": variants,
+    except KeyError:
+        print("Error invoking lambda function: missing key")
+        response = {
+            "success": False,
+            "message": "Lab not configured. Please contact administrator.",
         }
-    response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-
-    return {"success": True, "content": response["body"]}
+    except Exception as e:
+        print(f"Error invoking lambda function: {e}")
+        response = {
+            "success": False,
+            "message": "Error generating report",
+        }
+    finally:
+        return response

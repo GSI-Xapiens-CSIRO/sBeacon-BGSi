@@ -740,6 +740,7 @@ module "lambda-data-portal" {
       SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
+      HUB_NAME                          = var.hub_name
     },
   )
 
@@ -795,14 +796,7 @@ module "lambda-generateReports" {
   handler       = "lambda_function.lambda_handler"
   memory_size   = 512
   timeout       = 60
-  # attach_policy_jsons = true
-  # policy_jsons = []  
-  # number_of_policy_jsons = 0
-  source_path = "${path.module}/lambda/generateReports"
+  source_path   = "${path.module}/lambda/generateReports"
 
   tags = var.common-tags
-
-  # environment_variables = {
-  #   LAB = "RSCM"
-  # }
 }

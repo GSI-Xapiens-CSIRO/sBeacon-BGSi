@@ -306,6 +306,22 @@ data "aws_iam_policy_document" "dynamodb-onto-access" {
   }
 }
 
+# DynamoDB Quota Related Access
+data "aws_iam_policy_document" "dynamodb-quota-access" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:BatchGetItem",
+      "dynamodb:Scan",
+      "dynamodb:UpdateItem",
+    ]
+    resources = [
+      aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
+    ]
+  }
+}
+
 # DynamoDB Ontology Related Write Access
 data "aws_iam_policy_document" "dynamodb-onto-write-access" {
   statement {
@@ -528,6 +544,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.saved_queries.arn,
       aws_dynamodb_table.clinical_annotations.arn,
       aws_dynamodb_table.clinic_jobs.arn,
+      aws_dynamodb_table.clinical_variants.arn,
     ]
   }
 
@@ -634,6 +651,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     resources = [
       module.lambda-indexer.lambda_function_arn,
       module.lambda-submitDataset.lambda_function_arn,
+      module.lambda-generateReports.lambda_function_arn,
     ]
   }
 }

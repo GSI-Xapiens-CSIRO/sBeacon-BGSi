@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         event = base64.b64decode(event.encode())
         event = gzip.decompress(event)
         event = json.loads(event)
-    print("Event Received: {}".format(json.dumps(event)))
+    print("Backend Event Received: {}".format(json.dumps(event)))
     response = split_query(event, is_async)
     return response
 

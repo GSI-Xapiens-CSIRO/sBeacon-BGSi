@@ -240,7 +240,9 @@ def update_project(project_name, total_samples, all_project_files):
 
 
 def expire_clinic_jobs(project, file_name):
-    print(f"Attempting to delete all jobs associated with project {project} and file {file_name}")
+    print(
+        f"Attempting to delete all jobs associated with project {project} and file {file_name}"
+    )
     kwargs = {
         "TableName": JOBS_TABLE,
         "IndexName": JOBS_TABLE_PROJECT_NAME_INDEX,
@@ -250,28 +252,28 @@ def expire_clinic_jobs(project, file_name):
                 "S": project,
             },
         },
-    } 
+    }
     print(f"Calling dynamodb.query with kwargs: {json.dumps(kwargs)}")
     response = dynamodb.query(**kwargs)
     print(f"Received response: {json.dumps(response)}")
     if "Items" not in response:
         print(f"No associated jobs found, aborting")
         return
-    jobs_to_delete = [
-        job for job in response["Items"] if job.get("input_vcf", {}).get("S") == file_name
+    jobs_to_expire = [
+        job
+        for job in response["Items"]
+        if job.get("input_vcf", {}).get("S") == file_name
     ]
-    
+
     updated_count = 0
     error_count = 0
-    for job in jobs_to_delete:
+    for job in jobs_to_expire:
         job_id = job.get("job_id", {}).get("S")
         if job_id:
             kwargs = {
                 "TableName": JOBS_TABLE,
                 "Key": {
-                    "job_id": {
-                        "S": job_id
-                    },
+                    "job_id": {"S": job_id},
                 },
                 "UpdateExpression": "SET job_status = :job_status",
                 "ExpressionAttributeValues": {
@@ -291,8 +293,10 @@ def expire_clinic_jobs(project, file_name):
                 error_count += 1
         else:
             print(f"Missing job_id for a job, skipping")
-    
-    print(f"Job expiration complete. Updated: {updated_count}, Errors: {error_count}, Skipped: {len(jobs_to_delete) - updated_count - error_count}")
+
+    print(
+        f"Job expiration complete. Updated: {updated_count}, Errors: {error_count}, Skipped: {len(jobs_to_expire) - updated_count - error_count}"
+    )
 
 
 def update_file(location, update_fields):
@@ -314,7 +318,7 @@ def update_file(location, update_fields):
 
 
 def lambda_handler(event, context):
-    print(f"Event Received: {json.dumps(event)}")
+    print(f"Backend Event Received: {json.dumps(event)}")
     if project_name := event.get("project"):
         refresh_project(project_name)
         return

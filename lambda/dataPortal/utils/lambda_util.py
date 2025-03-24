@@ -9,5 +9,5 @@ def invoke_lambda_function(function_name, payload, event=False):
         InvocationType="Event" if event else "RequestResponse",
         Payload=json.dumps(payload),
     )
-
+    print(f'Invoked lambda function: "{function_name}" with requestID: "{response['ResponseMetadata']['RequestId']}" as {"event" if event else "request"}')
     return response if event else json.loads(response["Payload"].read())

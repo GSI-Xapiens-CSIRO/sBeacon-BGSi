@@ -105,7 +105,7 @@ def format_info(project_name, dataset_name, additional_info):
 
 
 def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
+    print("Backend Event Received: {}".format(json.dumps(event)))
 
     if not event:
         return {"success": False, "message": "No body sent with request."}
@@ -166,6 +166,10 @@ def lambda_handler(event, context):
 
     except ValueError:
         return {"success": False, "message": "Invalid payload"}
+    except KeyError:
+        return {"success": False, "message": "Invalid payload. Required fields are missing"}
+    except Exception:
+        return {"success": False, "message": str(e)}
 
     if validation_errors := validate_request(body_dict):
         print(", ".join(validation_errors))

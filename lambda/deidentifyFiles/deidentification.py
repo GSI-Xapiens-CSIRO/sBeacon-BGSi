@@ -59,8 +59,8 @@ META_STRUCTURED_WHITELIST = {
 
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"(?<!\.)\(?(?:\+62\)?[- ]?|\b0)(?:\d\)?[- ]?){1,3}\d{3,4}[- ]?\d{3,4}\b",  # Phone number
-    r"(?<=:)\s?\d{16}\b",  # NIK
+    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
+    r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
 CASE_INSENSITIVE_PII_PATTERNS = [
@@ -74,8 +74,9 @@ ANY_PII_PATTERN = re.compile(
         + [f"(?i:{pattern})" for pattern in CASE_INSENSITIVE_PII_PATTERNS]
     )
 )
-METADATA_KEY_PII_PATTERN = [
-    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?)\b"
+METADATA_KEY_PII_PATTERNS = [
+    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
+    r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
 ]
 
 GENOMIC_SUFFIX_TYPES = {
@@ -97,6 +98,7 @@ QUIETLY_SKIP_SUFFIXES = {
     # from other files, and don't want the uploaded
     # versions to squash the ones we create.
     ".bai",
+    ".csi",
 }
 
 METADATA_SUFFIXES = [
@@ -613,6 +615,13 @@ def anonymise_vcf(input_path, output_path):
     else:
         print("No PII detected in VCF file, copying verbatim")
         files_to_move = [input_path]
+        if output_type in "zb":
+            index_process = CheckedProcess(
+                args=["bcftools", "index", input_path],
+                error_message="Indexing original file failed",
+            )
+            index_process.check()
+            files_to_move.append(f"{input_path}.csi")
     return files_to_move
 
 
@@ -625,7 +634,7 @@ def process_tabular(input_path, output_path, delimiter):
             idx
             for idx, col_name in enumerate(header)
             if not any(
-                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERN
+                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS
             )
         ]
         with open(output_path, "w", newline="", encoding="utf-8") as outfile:
@@ -690,7 +699,7 @@ def process_json(input_path, output_path):
             elif event == "map_key":
                 # If the key matches a PII pattern, set the keybuffer to skip its subtree.
                 if any(
-                    re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERN
+                    re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
                     keybuffer = f"{prefix}.{value}"
                     continue

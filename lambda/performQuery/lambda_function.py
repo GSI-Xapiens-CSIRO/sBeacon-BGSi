@@ -5,7 +5,7 @@ from query_engine import perform_query
 
 
 def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
+    print("Backend Event Received: {}".format(json.dumps(event)))
     try:
         event = json.loads(event["Records"][0]["Sns"]["Message"])
         is_async = True

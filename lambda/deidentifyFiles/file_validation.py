@@ -31,7 +31,7 @@ MIME_MAPPING = {
     ".bai": ["application/octet-stream"],
     ".sam": ["text/plain"],
     ".json": ["application/json", "text/plain"],
-    ".csv": ["text/csv", "application/csv"],
+    ".csv": ["text/csv", "application/csv", "text/plain"],
     ".tsv": ["text/tab-separated-values", "text/plain"],
     ".txt": ["text/plain"],
 }
@@ -52,27 +52,30 @@ HTSFILE_MAPPING = {
 
 
 def validate_genomic_file(local_input_path, extension):
+    expected = HTSFILE_MAPPING.get(extension)
+
     result = subprocess.run(
         ["htsfile", local_input_path], capture_output=True, text=True, check=True
     )
     output = result.stdout.strip()
-
     format_details = output.split("\t")[1] if "\t" in output else output
-
-    expected = HTSFILE_MAPPING.get(extension)
 
     if not expected:
         raise Exception(
-            f"File's extension is not in the list of allowed genomic files.\nAllowed file types: {', '.join(HTSFILE_MAPPING.keys())}"
+            f"File's extension is not in the list of allowed genomic files.\n"
+            f"Allowed file types: {', '.join(HTSFILE_MAPPING.keys())}"
         )
     if expected["format"] not in output:
         raise Exception(
-            f"File's expected format did not match the format identified by htsfile.\n: {expected['format']}\nFormat identified by htsfile: {format_details}"
+            f"File's expected format did not match the format identified by htsfile."
+            f"\nExpected format: {expected['format']}"
+            f"\nFormat identified by htsfile: {format_details}"
         )
     if expected.get("compressed"):
         if not re.search(r"\b(BGZF-compressed|gzip-compressed|compressed)\b", output):
             raise Exception(
-                f"File's extension indicates that the file is compressed, but htsfile found an uncompressed format.\nFormat identified by htsfile: {format_details}"
+                f"File's extension indicates that the file is compressed, but htsfile found an uncompressed format"
+                f"\nFormat identified by htsfile: {format_details}"
             )
 
     return True

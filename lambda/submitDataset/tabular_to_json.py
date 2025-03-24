@@ -1,8 +1,11 @@
 from functools import lru_cache
 from itertools import chain
 import json
+import os
 
 import duckdb
+
+REGION = os.environ["REGION"]
 
 
 @lru_cache(maxsize=1000)
@@ -226,6 +229,8 @@ def transform_tabular_to_json(s3payload) -> dict:
     con = duckdb.connect("/tmp/metadata.db")
     con.execute("SET home_directory='/tmp';")
     con.execute("INSTALL httpfs; LOAD httpfs;")
+    con.execute(f"SET s3_region='{REGION}';") 
+    con.execute(f"SET s3_endpoint='s3.{REGION}.amazonaws.com';")
     for table, file_key in s3payload.items():
         file_extension = file_key.split(".")[-1]
         delim = "," if file_extension == "csv" else "\t"

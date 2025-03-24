@@ -119,6 +119,20 @@ class ClinicalAnnotations(Model):
     created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
 
 
+class ClinicalVariants(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_CLINICAL_VARIANTS_TABLE")
+        region = REGION
+
+    project_job = UnicodeAttribute(hash_key=True)
+    collection_name = UnicodeAttribute(range_key=True)
+    comment = UnicodeAttribute(default="")
+    variants = UnicodeAttribute(default="")
+    variants_annotations = UnicodeAttribute(default="")
+    uid = UnicodeAttribute(default="")
+    created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
+
+
 class InstanceStatus(Enum):
     PENDING = "Pending"
     IN_SERVICE = "InService"

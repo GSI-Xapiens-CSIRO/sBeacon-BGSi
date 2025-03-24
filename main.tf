@@ -107,6 +107,7 @@ module "lambda-submitDataset" {
 
   environment_variables = merge(
     {
+      REGION      = var.region
       HTS_S3_HOST = "s3.${var.region}.amazonaws.com"
     },
     local.sbeacon_variables,
@@ -278,9 +279,10 @@ module "lambda-getAnalyses" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getAnalyses.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getAnalyses"
 
   tags = var.common-tags
@@ -317,9 +319,10 @@ module "lambda-getGenomicVariants" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getGenomicVariants.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getGenomicVariants"
 
   tags = var.common-tags
@@ -356,9 +359,10 @@ module "lambda-getIndividuals" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getIndividuals.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getIndividuals"
 
   tags = var.common-tags
@@ -395,9 +399,10 @@ module "lambda-getBiosamples" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getBiosamples.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getBiosamples"
 
   tags = var.common-tags
@@ -434,9 +439,10 @@ module "lambda-getDatasets" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getDatasets.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getDatasets"
 
   tags = var.common-tags
@@ -473,9 +479,10 @@ module "lambda-getRuns" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-getRuns.json,
     data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.dynamodb-onto-access.json,
+    data.aws_iam_policy_document.dynamodb-quota-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/getRuns"
 
   tags = var.common-tags
@@ -723,6 +730,7 @@ module "lambda-data-portal" {
       DYNAMO_SAVED_QUERIES_TABLE        = aws_dynamodb_table.saved_queries.name
       DYNAMO_CLINIC_JOBS_TABLE          = aws_dynamodb_table.clinic_jobs.name
       DYNAMO_CLINICAL_ANNOTATIONS_TABLE = aws_dynamodb_table.clinical_annotations.name
+      DYNAMO_CLINICAL_VARIANTS_TABLE    = aws_dynamodb_table.clinical_variants.name
       JUPYTER_INSTACE_ROLE_ARN          = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       JUPYTER_LIFECYCLE_CONFIG_NAME     = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
       USER_POOL_ID                      = var.cognito-user-pool-id,
@@ -731,6 +739,8 @@ module "lambda-data-portal" {
       COGNITO_MANAGER_GROUP_NAME        = var.cognito-manager-group-name
       SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
+      REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
+      HUB_NAME                          = var.hub_name
     },
   )
 
@@ -772,4 +782,21 @@ module "lambda-getProjects" {
     local.python_libraries_layer,
     local.python_modules_layer,
   ]
+}
+
+#
+# getProjects Function
+#
+module "lambda-generateReports" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "sbeacon-backend-generateReports"
+  description   = "Backend function to generate reports."
+  runtime       = "python3.12"
+  handler       = "lambda_function.lambda_handler"
+  memory_size   = 512
+  timeout       = 60
+  source_path   = "${path.module}/lambda/generateReports"
+
+  tags = var.common-tags
 }

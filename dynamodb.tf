@@ -149,6 +149,24 @@ resource "aws_dynamodb_table" "clinical_annotations" {
   }
 }
 
+# clinical variants table
+resource "aws_dynamodb_table" "clinical_variants" {
+  name         = "sbeacon-dataportal-clinical-variants"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "project_job"
+  range_key    = "collection_name"
+
+  attribute {
+    name = "project_job"
+    type = "S"
+  }
+
+  attribute {
+    name = "collection_name"
+    type = "S"
+  }
+}
+
 # VCFs  Table
 # So we can keep track of the number of samples in each vcf
 resource "aws_dynamodb_table" "vcfs" {

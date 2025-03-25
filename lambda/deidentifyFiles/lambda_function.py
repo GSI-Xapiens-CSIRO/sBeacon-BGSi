@@ -177,7 +177,7 @@ def lambda_handler(event, context):
     event_name = event["Records"][0]["eventName"]
     project, project_prefix, file_name = get_project(object_key)
     if project is None:
-        print("Not a staging/projects/<project_name>/* file, skipping")
+        print("Not a staging/projects/<project_name>/project-files/* file, skipping")
         return
     all_project_files = get_all_project_files(project_prefix)
     update_project(project, all_project_files)

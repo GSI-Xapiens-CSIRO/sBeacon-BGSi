@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Dict
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -102,23 +103,42 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def _get_details(variants):
-    # TODO update this logic
-    match len(variants):
-        case 1:
-            return "NM", "Test Diplotype", "Test Phenotype", "PK V1", "PGKB DB VX"
-        case 2:
-            return "IM", "Test Diplotype", "Test Phenotype", "PK V1", "PGKB DB VX"
-        case 3:
-            return "PoorM", "Test Diplotype", "Test Phenotype", "PK V1", "PGKB DB VX"
-        case _:
-            return "RapidM", "Test Diplotype", "Test Phenotype", "PK V1", "PGKB DB VX"
+def _get_details(data: Dict):
+    """
+    The genotype-phenotype associations are as follows:
+        NM: *1/*1
+        RM: *1/*17
+        IM: any combinations of either *1/*2, *1/*3, *2/*17, or *3/*17
+        PM: any of *2/*2, *3/*3, or *2/*3.
+    Note:
+        NM = Normal metabolizer
+        RM = Rapid Metabolizer
+        IM = Intermediate Metabolizer
+        PM = Poor Metabolizer.
+    """
+    alleles = data["alleles"]
+    phenotypes = data["phenotypes"]
+
+    if all([a == "*1" for a in alleles]):
+        return "NM", "*1/*1", "Normal metabolizer", "PK V1", "PGKB DB VX"
+    elif "Intermediate Metabolizer" in phenotypes:
+        return (
+            "IM",
+            "/".join(alleles),
+            "Intermediate Metabolizer",
+            "PK V1",
+            "PGKB DB VX",
+        )
+    elif "Rapid Metabolizer" in phenotypes:
+        return "RapidM", "/".join(alleles), "Rapid Metabolizer", "PK V1", "PGKB DB VX"
+    elif "Poor Metabolizer" in phenotypes:
+        return "PoorM", "/".join(alleles), "Poor Metabolizer", "PK V1", "PGKB DB VX"
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
+def generate(*, pii_name=None, pii_dob=None, pii_gender=None, data=None):
     assert all([pii_name, pii_dob, pii_gender]), "Missing required fields"
     module_dir = Path(__file__).parent
-    kind, diplotype, phenotype, pk_v, pkdb_v = _get_details(variants)
+    kind, diplotype, phenotype, pk_v, pkdb_v = _get_details(data)
     annotated = "/tmp/annotations.pdf"
     template = f"{module_dir}/{kind}.pdf"
 
@@ -131,4 +151,4 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
 
 
 if __name__ == "__main__":
-    generate(pii_name="John Doe", pii_dob="01/01/1900", pii_gender="Male", variants=[1])
+    generate(pii_name="John Doe", pii_dob="01/01/1900", pii_gender="Male", data=dict())

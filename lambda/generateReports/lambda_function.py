@@ -4,7 +4,6 @@ import base64
 
 def lambda_handler(event, context):
     print("Backend Event Received: ", event)
-    variants = event.get("variants", [])
 
     # RSCM
     match event["lab"]:
@@ -21,6 +20,7 @@ def lambda_handler(event, context):
                 res = generate_neg(**data)
             elif event["kind"] == "pos":
                 assert len(event["variants"]) > 0, "Variants not provided"
+                variants = event.get("variants", [])
                 res = generate_pos(**data, variants=variants)
         case "RSPON":
             from rspon import generate
@@ -31,14 +31,7 @@ def lambda_handler(event, context):
                 "pii_dob": "01-05-1990",
                 "pii_gender": "Male",
             }
-            if event["kind"] == "neg":
-                res = generate(**data, variants=variants)
-            elif event["kind"] == "pos":
-                assert (
-                    "variants" in event and len(event["variants"]) > 0
-                ), "Variants not provided"
-                variants = event["variants"]
-                res = generate(**data, variants=variants)
+            res = generate(**data, data=data)
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

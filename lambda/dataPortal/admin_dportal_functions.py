@@ -173,6 +173,12 @@ def delete_project(event, context):
 
     project.delete()
 
+    payload = {
+        "reIndexTables": True,
+        "reIndexOntologyTerms": True,
+    }
+    invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
+
     return {"success": True}
 
 
@@ -192,10 +198,14 @@ def update_project(event, context):
     # delete file diff
     delete_s3_objects(
         DPORTAL_BUCKET,
-        [path for file in deleted_files for path in [
-            f"projects/{name}/project-files/{file}",
-            f"staging/projects/{name}/project-files/{file}",
-        ]]
+        [
+            path
+            for file in deleted_files
+            for path in [
+                f"projects/{name}/project-files/{file}",
+                f"staging/projects/{name}/project-files/{file}",
+            ]
+        ],
     )
 
     return project.to_dict()

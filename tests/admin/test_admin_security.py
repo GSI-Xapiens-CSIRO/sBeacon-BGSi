@@ -13,8 +13,6 @@ def test_admin_group_association(resources_dict):
 
     import lambda_function
 
-    print(lambda_function.router._routes)
-
     for (route, method), func in lambda_function.router._routes.items():
         parts = route.split("/")
 

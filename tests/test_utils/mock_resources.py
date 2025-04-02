@@ -5,8 +5,6 @@ import boto3
 import botocore
 from moto import mock_aws
 
-from shared.dynamodb import Quota, UsageMap
-
 from .env import keys  # to inject keys into the environment
 
 
@@ -21,6 +19,8 @@ def mock_make_api_call(self, operation_name, kwarg):
 
 @mock_aws
 def setup_resources():
+    from shared.dynamodb import Quota, UsageMap
+
     # Create a Cognito User Pool
     cognito_client = boto3.client(
         "cognito-idp", region_name=os.environ["AWS_DEFAULT_REGION"]

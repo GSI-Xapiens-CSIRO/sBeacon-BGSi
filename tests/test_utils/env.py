@@ -1,3 +1,5 @@
+import os
+
 keys = {
     # aws
     "AWS_DEFAULT_REGION": "ap-southeast-2",
@@ -66,3 +68,7 @@ keys = {
     "COGNITO_ADMIN_GROUP_NAME": "administrators",
     "COGNITO_REGISTRATION_EMAIL_LAMBDA": "COGNITO_REGISTRATION_EMAIL_LAMBDA",
 }
+
+# Set environment variables for testing
+for key, value in keys.items():
+    os.environ[key] = value

@@ -1,23 +1,22 @@
-import sys
 import os
+import sys
+
 import boto3
+import botocore
 from moto import mock_aws
 
-from .env import keys
-
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "../../shared_resources/python-modules/python/"
-        )
-    )
-)
-
-
-for key, value in keys.items():
-    os.environ[key] = value
-
 from shared.dynamodb import Quota, UsageMap
+
+from .env import keys  # to inject keys into the environment
+
+
+def mock_make_api_call(self, operation_name, kwarg):
+    if operation_name == "CreatePresignedNotebookInstanceUrl":
+        return {
+            "AuthorizedUrl": f"https://notebook-url.aws.amazon.com/sagemaker/{kwarg['NotebookInstanceName']}?token=1234",
+        }
+
+    return orig(self, operation_name, kwarg)
 
 
 @mock_aws
@@ -50,27 +49,49 @@ def setup_resources():
     userpool_id = response["UserPool"]["Id"]
     os.environ["COGNITO_USER_POOL_ID"] = userpool_id
 
-    # create cognito user
-    response = cognito_client.admin_create_user(
+    # create cognito users
+    # Admin
+    admin_user = cognito_client.admin_create_user(
         UserPoolId=userpool_id,
-        Username="testuser",
-        TemporaryPassword="testpassword",
+        Username="admin@example.com",
+        TemporaryPassword="admin1234",
         MessageAction="SUPPRESS",
         UserAttributes=[
-            {"Name": "email", "Value": "test@test.com"},
-            {"Name": "given_name", "Value": "test"},
-            {"Name": "family_name", "Value": "Test"},
+            {"Name": "email", "Value": "admin@example.com"},
+            {"Name": "given_name", "Value": "Admin"},
+            {"Name": "family_name", "Value": "Admin"},
+            {"Name": "email_verified", "Value": "true"},
+        ],
+    )
+    # Guest
+    guest_user = cognito_client.admin_create_user(
+        UserPoolId=userpool_id,
+        Username="guest@example.com",
+        TemporaryPassword="guest1234",
+        MessageAction="SUPPRESS",
+        UserAttributes=[
+            {"Name": "email", "Value": "guest@example.com"},
+            {"Name": "given_name", "Value": "Guest"},
+            {"Name": "family_name", "Value": "Guest"},
             {"Name": "email_verified", "Value": "true"},
         ],
     )
 
-    sub = next(filter(lambda x: x["Name"] == "sub", response["User"]["Attributes"]))[
-        "Value"
-    ]
+    admin_sub = next(
+        filter(lambda x: x["Name"] == "sub", admin_user["User"]["Attributes"])
+    )["Value"]
+    guest_sub = next(
+        filter(lambda x: x["Name"] == "sub", guest_user["User"]["Attributes"])
+    )["Value"]
 
     Quota.create_table()
     Quota(
-        uid=sub,
+        uid=admin_sub,
+        CostEstimation=100,
+        Usage=UsageMap(quotaSize=100, quotaQueryCount=100, usageSize=50, usageCount=50),
+    ).save()
+    Quota(
+        uid=guest_sub,
         CostEstimation=100,
         Usage=UsageMap(quotaSize=100, quotaQueryCount=100, usageSize=50, usageCount=50),
     ).save()
@@ -93,10 +114,10 @@ def setup_resources():
             },
         ],
     )
-    
 
     return {
-        "sub": sub,
+        "admin_sub": admin_sub,
+        "guest_sub": guest_sub,
         "userpool_id": userpool_id,
     }
 

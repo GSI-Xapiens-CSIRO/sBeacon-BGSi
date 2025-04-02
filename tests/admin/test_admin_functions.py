@@ -1,26 +1,10 @@
-import sys
-import os
 import json
+
 from moto import mock_aws
-
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../lambda/admin/"))
-)
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "../../shared_resources/python-modules/python/"
-        )
-    )
-)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
-
-from test_utils.mock_resources import setup_resources
 
 
 @mock_aws
-def test_admin_get_users():
-    resources_dict = setup_resources()
+def test_admin_get_users(resources_dict):
     import lambda_function
 
     event = {
@@ -30,7 +14,7 @@ def test_admin_get_users():
         "requestContext": {
             "authorizer": {
                 "claims": {
-                    "sub": resources_dict["sub"],
+                    "sub": resources_dict["admin_sub"],
                     "cognito:groups": "administrators",
                 }
             },
@@ -41,7 +25,7 @@ def test_admin_get_users():
 
     assert response["statusCode"] == 200
     assert response["body"] is not None
-    assert len(json.loads(response["body"])["users"]) == 1
+    assert len(json.loads(response["body"])["users"]) == 2
 
 
 def test_admin_add_user():

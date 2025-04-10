@@ -37,3 +37,7 @@ lambda/submitDataset/schemas
 
 # MAC
 .DS_Store
+
+# Coverage files
+.coverage
+htmlcov

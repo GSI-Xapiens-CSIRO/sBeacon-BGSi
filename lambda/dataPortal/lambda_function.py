@@ -8,16 +8,16 @@ from clinic_functions import router as clinic_router
 from shared.apiutils import LambdaRouter
 
 router = LambdaRouter()
+router.update(user_router)
+router.update(notebooks_router)
+router.update(admin_dportal_router)
+router.update(admin_notebook_router)
+router.update(quota_router)
+router.update(admin_user_router)
+router.update(clinic_router)
 
 
 def lambda_handler(event, context):
-    router.update(user_router)
-    router.update(notebooks_router)
-    router.update(admin_dportal_router)
-    router.update(admin_notebook_router)
-    router.update(quota_router)
-    router.update(admin_user_router)
-    router.update(clinic_router)
     return router.handle_route(event, context)
 
 

@@ -3,6 +3,7 @@ import random
 import string
 
 import boto3
+from botocore.exceptions import ClientError
 from markupsafe import escape
 
 from shared.cognitoutils import authenticate_admin
@@ -38,7 +39,7 @@ def logout_all_sessions(email):
 @router.attach("/admin/users", "post", authenticate_admin)
 def add_user(event, context):
     body_dict = json.loads(event.get("body"))
-    email = body_dict.get("email")
+    email = body_dict.get("email").lower()
     first_name = body_dict.get("first_name")
     last_name = body_dict.get("last_name")
     groups = body_dict.get("groups")
@@ -70,6 +71,11 @@ def add_user(event, context):
                 {"Name": "family_name", "Value": last_name},
                 {"Name": "email_verified", "Value": "true"},
             ],
+        )
+    except cognito_client.exceptions.UsernameExistsException:
+        raise BeaconError(
+            error_code="UsernameExistsException",
+            error_message="User already exists.",
         )
     except:
         raise BeaconError(

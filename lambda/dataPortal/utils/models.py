@@ -99,7 +99,9 @@ class ClinicJobs(Model):
     job_id = UnicodeAttribute(hash_key=True)
     job_name = UnicodeAttribute(default="")
     job_name_lower = UnicodeAttribute(default="")  # for case-insensitive search
-    created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
+    created_at = UTCDateTimeAttribute(
+        default_for_new=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f+0000")
+    )
     project_name = UnicodeAttribute(default="")
     input_vcf = UnicodeAttribute(default="")
     job_status = UnicodeAttribute(default="")

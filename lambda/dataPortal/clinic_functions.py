@@ -50,6 +50,7 @@ def list_jobs(event, context):
         "jobs": [
             {
                 "job_id": job.job_id,
+                "job_name": job.job_name,
                 "input_vcf": job.input_vcf,
                 "job_status": job.job_status,
                 "failed_step": job.failed_step,

@@ -117,11 +117,6 @@ resource "aws_dynamodb_table" "clinic_jobs" {
   }
 
   attribute {
-    name = "job_name"
-    type = "S"
-  }
-
-  attribute {
     name = "project_name"
     type = "S"
   }

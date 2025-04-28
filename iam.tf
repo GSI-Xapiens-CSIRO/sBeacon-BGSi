@@ -510,7 +510,7 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
       aws_dynamodb_table.vcfs.arn,
     ]
   }
-  
+
   statement {
     actions = [
       "dynamodb:Query",
@@ -652,6 +652,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       module.lambda-indexer.lambda_function_arn,
       module.lambda-submitDataset.lambda_function_arn,
       module.lambda-generateReports.lambda_function_arn,
+      module.lambda-generateCohortVCfs.lambda_function_arn,
     ]
   }
 }
@@ -667,6 +668,29 @@ data "aws_iam_policy_document" "lambda-getProjects" {
     ]
     resources = [
       aws_dynamodb_table.projects.arn,
+    ]
+  }
+}
+
+#
+# generateCohortVCfs Lambda Function
+#
+data "aws_iam_policy_document" "lambda-generateCohortVCfs" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "cognito-idp:ListUsers",
+    ]
+    resources = [
+      var.cognito-user-pool-arn,
     ]
   }
 }

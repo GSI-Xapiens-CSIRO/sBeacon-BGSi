@@ -72,4 +72,15 @@ data "aws_iam_policy_document" "ec2_deidentification_policy" {
       aws_dynamodb_table.projects.arn,
     ]
   }
+
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
+    ]
+    resources = [
+     "arn:aws:logs:${var.region}:${data.aws_caller_identity.this.account_id}:log-group:/aws/lambda/${module.lambda-deidentifyFiles.lambda_function_name}:*" 
+    ]
+  }
 }

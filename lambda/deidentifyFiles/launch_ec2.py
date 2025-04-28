@@ -26,6 +26,8 @@ def launch_deidentification_ec2(
     file_name,
     object_key,
     size_gb,
+    lambda_log_group,
+    lambda_log_stream,
 ):
     ec2_client = boto3.client("ec2")
     ami = REGION_AMI_MAP[AWS_DEFAULT_REGION]
@@ -35,6 +37,19 @@ def launch_deidentification_ec2(
 
     with open("deidentification.py", "rb") as file:
         compressed_deidentification_script = base64.b64encode(
+            bz2.compress(file.read())
+        ).decode()
+
+    with open("common.py", "rb") as file:
+        compressed_common_script = base64.b64encode(bz2.compress(file.read())).decode()
+
+    with open("genomic_deidentification.py", "rb") as file:
+        compressed_genomic_deidentification_script = base64.b64encode(
+            bz2.compress(file.read())
+        ).decode()
+
+    with open("metadata_deidentification.py", "rb") as file:
+        compressed_metadata_deidentification_script = base64.b64encode(
             bz2.compress(file.read())
         ).decode()
 
@@ -60,14 +75,12 @@ yum install -y \
     curl-devel \
     openssl-devel
 
-# Install boto3 and ijson
 pip install boto3
 pip install ijson==3.3.0
+pip install python-magic==0.4.27
 
-# Configure default region
 export AWS_DEFAULT_REGION={AWS_DEFAULT_REGION}
 
-# Install bcftools and htslib
 BCFTOOLS_VERSION="1.21"
 HTSLIB_VERSION="1.21"
 SAMTOOLS_VERSION="1.21"
@@ -90,22 +103,31 @@ make
 make install
 cd ..
 
+# Install file
+FILE_VERSION="5.46"
+curl -L https://astron.com/pub/file/file-$FILE_VERSION.tar.gz | tar -xjf -
+cd file-$FILE_VERSION
+./configure
+make
+make install
+cd ..
 
-# Verify installations
-bcftools --version
-htsfile --version
-samtools --version
-
-# Create project directory
-mkdir -p /opt/deidentification/
+mkdir -p /opt/deidentification/logs
 cd /opt/deidentification/
 
-# Copy contents of deidentification script
+# Copy contents of each script
 cat > ./compressed_deidentification << 'EOF'
 {compressed_deidentification_script}
 EOF
-
-# Copy contents of file validation script
+cat > ./compressed_common << 'EOF'
+{compressed_common_script}
+EOF
+cat > ./compressed_genomic_deidentification << 'EOF'
+{compressed_genomic_deidentification_script}
+EOF
+cat > ./compressed_metadata_deidentification << 'EOF'
+{compressed_metadata_deidentification_script}
+EOF
 cat > ./compressed_file_validation << 'EOF'
 {compressed_file_validation_script}
 EOF
@@ -114,12 +136,18 @@ cat > ./decompresser.py << 'EOF'
 import base64
 import bz2
 
-with open("compressed_deidentification", "rb") as cfile:
-    with open("deidentification.py", "wb") as output:
-        output.write(bz2.decompress(base64.b64decode(cfile.read())))
-with open ("compressed_file_validation", "rb") as cfile:
-    with open("file_validation.py", "wb") as output:
-        output.write(bz2.decompress(base64.b64decode(cfile.read())))
+compressed_file_map = {{
+    "compressed_deidentification": "deidentification.py",
+    "compressed_common": "common.py", 
+    "compressed_genomic_deidentification": "genomic_deidentification.py",
+    "compressed_metadata_deidentification": "metadata_deidentification.py",
+    "compressed_file_validation": "file_validation.py"
+}}
+
+for compressed_file, output_file in compressed_file_map.items():
+    with open(compressed_file, "rb") as cfile:
+        with open(output_file, "wb") as output:
+            output.write(bz2.decompress(base64.b64decode(cfile.read())))
 EOF
 python3 decompresser.py
 
@@ -131,14 +159,35 @@ sudo -E python3 deidentification.py \
     --files-table '{files_table.replace("'", "\\'")}' \
     --project '{project.replace("'", "\\'")}' \
     --file-name '{file_name.replace("'", "\\'")}' \
-    --object-key '{object_key.replace("'", "\\'")}'
-
-# Check disk space
-df -h
+    --object-key '{object_key.replace("'", "\\'")}' \
+    2>&1 | tee /opt/deidentification/logs/output.log
     
-# Shutdown instance after processing
+LOG_TIMESTAMP=$(date +%s000)
+
+LOG_CONTENTS=$(cat /opt/deidentification/logs/output.log | jq -Rs .)
+
+# Fallback message in case log is empty
+if [[ -z "$LOG_CONTENTS" ]]; then
+    LOG_CONTENTS="No output captured from deidentification.py"
+fi
+
+LOG_MESSAGE=$(echo "$LOG_CONTENTS" | jq -Rs .)
+
+SEQUENCE_TOKEN=$(aws logs describe-log-streams \
+    --log-group-name '{lambda_log_group.replace("'", "\\'")}' \
+    --log-stream-name '{lambda_log_stream.replace("'", "\\'")}' \
+    --query 'logStreams[0].uploadSequenceToken' --output text)
+
+aws logs put-log-events \
+    --log-group-name '{lambda_log_group.replace("'", "\\'")}' \
+    --log-stream-name '{lambda_log_stream.replace("'", "\\'")}' \
+    --log-events "[{{\\\"timestamp\\\":$LOG_TIMESTAMP,\\\"message\\\":$LOG_MESSAGE}}]" \
+    ${{SEQUENCE_TOKEN:+--sequence-token \\"$SEQUENCE_TOKEN\\"}}
+
+df -h
 sudo shutdown -h now
     """
+    print(f"User data size: {len(ec2_startup.encode('utf-8'))} bytes")
 
     try:
         # Launch EC2 instance

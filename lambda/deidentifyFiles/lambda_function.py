@@ -169,6 +169,7 @@ def remove_file(object_key):
 
 def lambda_handler(event, context):
     print(f"Event Received: {json.dumps(event)}")
+    print(f"Context Received: {context}")
     input_bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
     assert (
         input_bucket_name == DPORTAL_BUCKET
@@ -200,6 +201,8 @@ def lambda_handler(event, context):
                     object_key=object_key,
                 )
             else:
+                lambda_log_group = context.log_group_name
+                lambda_log_stream = context.log_stream_name
                 launch_deidentification_ec2(
                     input_bucket=DPORTAL_BUCKET,
                     output_bucket=DPORTAL_BUCKET,
@@ -209,5 +212,7 @@ def lambda_handler(event, context):
                     file_name=file_name,
                     object_key=object_key,
                     size_gb=size / 1024**3,
+                    lambda_log_group=lambda_log_group,
+                    lambda_log_stream=lambda_log_stream,
                 )
             return

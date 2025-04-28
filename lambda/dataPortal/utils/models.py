@@ -98,7 +98,7 @@ class ClinicJobs(Model):
 
     job_id = UnicodeAttribute(hash_key=True)
     job_name = UnicodeAttribute(default="")
-    job_name_lower = UnicodeAttribute(default="")
+    job_name_lower = UnicodeAttribute(default="")  # for case-insensitive search
     created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
     project_name = UnicodeAttribute(default="")
     input_vcf = UnicodeAttribute(default="")
@@ -107,6 +107,11 @@ class ClinicJobs(Model):
     error_message = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
     project_index = ClinicJobsProjectNameIndex()
+
+    def save(self, *args, **kwargs):
+        """Override save() to ensure lowercase fields are stored."""
+        self.job_name_lower = self.job_name.lower()
+        super().save(*args, **kwargs)
 
 
 class ClinicalAnnotations(Model):

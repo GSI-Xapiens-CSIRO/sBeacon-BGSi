@@ -97,6 +97,9 @@ class ClinicJobs(Model):
         region = REGION
 
     job_id = UnicodeAttribute(hash_key=True)
+    job_name = UnicodeAttribute(default="")
+    job_name_lower = UnicodeAttribute(default="")
+    created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
     project_name = UnicodeAttribute(default="")
     input_vcf = UnicodeAttribute(default="")
     job_status = UnicodeAttribute(default="")

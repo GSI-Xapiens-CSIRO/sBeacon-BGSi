@@ -26,6 +26,7 @@ def list_jobs(event, context):
     params = event["queryStringParameters"] or dict()
     limit = params.get("limit", "10") or "10"
     last_evaluated_key = params.get("last_evaluated_key", "null") or "null"
+    search_term = params.get("search", None)
 
     try:
         # ensure user has access to project
@@ -33,11 +34,20 @@ def list_jobs(event, context):
         # get project
         Projects.get(project)
         # get jobs
-        jobs = ClinicJobs.project_index.query(
-            project,
-            limit=int(limit),
-            last_evaluated_key=json.loads(last_evaluated_key),
-        )
+
+        if search_term:
+            search_term = search_term.lower()
+            jobs = ClinicJobs.scan(
+                filter_condition=(ClinicJobs.job_name_lower.contains(search_term)),
+                **params,
+            )
+        else:
+            jobs = ClinicJobs.project_index.query(
+                project,
+                limit=int(limit),
+                last_evaluated_key=json.loads(last_evaluated_key),
+            )
+
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except Projects.DoesNotExist:
@@ -50,6 +60,7 @@ def list_jobs(event, context):
         "jobs": [
             {
                 "job_id": job.job_id,
+                "job_name": job.job_name,
                 "input_vcf": job.input_vcf,
                 "job_status": job.job_status,
                 "failed_step": job.failed_step,

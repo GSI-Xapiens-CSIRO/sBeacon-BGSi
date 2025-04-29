@@ -740,6 +740,7 @@ module "lambda-data-portal" {
       SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
+      COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
     },
   )
@@ -799,4 +800,43 @@ module "lambda-generateReports" {
   source_path   = "${path.module}/lambda/generateReports"
 
   tags = var.common-tags
+}
+
+#
+# generateCohortVCfs Function
+#
+module "lambda-generateCohortVCfs" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name       = "sbeacon-backend-generateCohortVCfs"
+  description         = "Backend function to generate reports."
+  runtime             = "python3.12"
+  handler             = "lambda_function.lambda_handler"
+  memory_size         = 4096
+  timeout             = 60
+  source_path         = "${path.module}/lambda/generateCohortVCfs"
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-generateCohortVCfs.json,
+    data.aws_iam_policy_document.athena-full-access.json,
+    data.aws_iam_policy_document.dynamodb-onto-access.json
+  ]
+  number_of_policy_jsons = 3
+
+  tags = var.common-tags
+  environment_variables = merge(
+    local.athena_variables,
+    local.sbeacon_variables,
+    local.dynamodb_variables,
+    {
+      COGNITO_USER_POOL_ID = var.cognito-user-pool-id,
+      DPORTAL_BUCKET       = aws_s3_bucket.dataportal-bucket.bucket,
+    }
+  )
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+    local.binaries_layer,
+  ]
 }

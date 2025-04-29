@@ -4,9 +4,11 @@ import json
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import Projects, ProjectUsers, SavedQueries
 from utils.s3_util import get_presigned_url
+from utils.lambda_util import invoke_lambda_function
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
+COHORT_MAKER_LAMBDA = os.environ.get("COHORT_MAKER_LAMBDA")
 
 
 @router.attach("/dportal/projects", "get")
@@ -134,5 +136,16 @@ def delete_query(event, context):
         entry.delete()
     except SavedQueries.DoesNotExist:
         raise PortalError(404, "Query not found")
+
+    return {"success": True}
+
+
+@router.attach("/dportal/cohort", "post")
+def create_cohort(event, context):
+    body_dict = json.loads(event.get("body"))
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    body_dict["sub"] = sub
+
+    invoke_lambda_function(COHORT_MAKER_LAMBDA, body_dict, True)
 
     return {"success": True}

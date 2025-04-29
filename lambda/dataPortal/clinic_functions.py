@@ -27,6 +27,7 @@ def list_jobs(event, context):
     limit = params.get("limit", "10") or "10"
     last_evaluated_key = params.get("last_evaluated_key", "null") or "null"
     search_term = params.get("search", None)
+    job_status = params.get("job_status", None)
 
     try:
         # ensure user has access to project
@@ -35,11 +36,29 @@ def list_jobs(event, context):
         Projects.get(project)
         # get jobs
 
-        if search_term:
-            search_term = search_term.lower()
+        if search_term or job_status:
+            scan_params = {
+                "limit": int(limit),
+                "last_evaluated_key": json.loads(last_evaluated_key),
+            }
+
+            filter_condition = None
+
+            if search_term:
+                filter_condition = ClinicJobs.job_name_lower.contains(
+                    search_term.lower()
+                )
+
+            if job_status:
+                status_condition = ClinicJobs.job_status.contains(job_status)
+                if filter_condition is not None:
+                    filter_condition = filter_condition & status_condition
+                else:
+                    filter_condition = status_condition
+
             jobs = ClinicJobs.scan(
-                filter_condition=(ClinicJobs.job_name_lower.contains(search_term)),
-                **params,
+                filter_condition=filter_condition,
+                **scan_params,
             )
         else:
             jobs = ClinicJobs.project_index.query(

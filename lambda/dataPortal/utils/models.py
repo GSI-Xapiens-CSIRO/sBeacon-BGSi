@@ -38,6 +38,7 @@ class Projects(Model):
     description = UnicodeAttribute()
     description_lower = UnicodeAttribute()
     files = UnicodeSetAttribute(default=tuple())
+    pending_files = UnicodeSetAttribute(default=tuple())
     total_samples = NumberAttribute(default=0)
     ingested_datasets = UnicodeSetAttribute(default=tuple())
     error_messages = ListAttribute(default=tuple(), of=ProjectErrorMessages)
@@ -54,6 +55,7 @@ class Projects(Model):
             "description": self.description,
             # Convert set to list for JSON serialization
             "files": list(self.files) if self.files else [],
+            "pending_files": list(self.pending_files) if self.pending_files else [],
             "ingested_datasets": (
                 list(self.ingested_datasets) if self.ingested_datasets else []
             ),

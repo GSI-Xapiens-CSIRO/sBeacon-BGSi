@@ -192,9 +192,15 @@ def update_project(event, context):
     current_files = set(body_dict.get("files") or [])
     initial_files = project.files or set()
     deleted_files = initial_files - current_files
+    actions = [
+        # update description
+        Projects.description.set(description),
+    ]
+    if deleted_files:
+        # remove from pending list if this files were in pending status
+        Projects.pending_files.delete(deleted_files),
     # update entry
-    project.description = description
-    project.save()
+    project.update(actions=actions)
     # delete file diff
     delete_s3_objects(
         DPORTAL_BUCKET,

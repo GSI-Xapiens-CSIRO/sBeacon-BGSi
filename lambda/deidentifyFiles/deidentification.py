@@ -873,7 +873,6 @@ def deidentify(
     update_deidentification_status(
         files_table, f"{project}/project-files/{file_name}", "Pending"
     )
-    log_deidentification_status(projects_table, project, file_name, "Pending")
 
     local_input_path = f"{WORKING_DIR}/input_{file_name}"
     local_output_path = f"{WORKING_DIR}/deidentified_{file_name}"

@@ -610,7 +610,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
     resources = [
       aws_s3_bucket.dataportal-bucket.arn,
-      aws_s3_bucket.svep-temp.arn
+      "arn:aws:s3:::svep-backend-temp-20250506083224099300000001"
     ]
 
     condition {
@@ -633,7 +633,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     resources = [
       "${aws_s3_bucket.dataportal-bucket.arn}/projects/*",
       "${aws_s3_bucket.metadata-bucket.arn}/*",
-      "${aws_s3_bucket.svep-temp.arn}/*",
+      "arn:aws:s3:::svep-backend-temp-20250506083224099300000001/*",
     ]
   }
 

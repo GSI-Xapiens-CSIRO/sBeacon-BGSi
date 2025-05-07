@@ -14,7 +14,7 @@ s3 = boto3.client("s3")
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 FILES_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
-MAX_SIZE_FOR_LAMBDA = 200 * 1024**2  # 200 MB
+MAX_SIZE_FOR_LAMBDA = 1024**3  # 1 GB
 SUFFIXES = [
     ".bam",
     ".sam",

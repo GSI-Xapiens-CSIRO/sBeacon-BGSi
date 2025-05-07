@@ -643,8 +643,9 @@ module "lambda-deidentifyFiles" {
   description        = "Deidentifies files before moving them to the dataportal bucket"
   handler            = "lambda_function.lambda_handler"
   runtime            = "python3.12"
-  memory_size        = 1769
+  memory_size        = 4096
   timeout            = 900
+  ephemeral_storage_size = 2560
   attach_policy_json = true
   policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
   source_path        = "${path.module}/lambda/deidentifyFiles"

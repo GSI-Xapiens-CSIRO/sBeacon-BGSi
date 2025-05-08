@@ -832,6 +832,7 @@ module "lambda-generateCohortVCfs" {
     {
       COGNITO_USER_POOL_ID = var.cognito-user-pool-id,
       DPORTAL_BUCKET       = aws_s3_bucket.dataportal-bucket.bucket,
+      HTS_S3_HOST          = "s3.${var.region}.amazonaws.com"
     }
   )
 

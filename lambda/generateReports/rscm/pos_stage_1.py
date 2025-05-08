@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
@@ -235,6 +236,9 @@ def generate(*, variants=None):
         "Phenotype",
     ]
 
+    output_file_name_res = f"/tmp/{str(uuid.uuid4())}-res.pdf"
+    output_file_name_vs = f"/tmp/{str(uuid.uuid4())}-vs.pdf"
+
     for variant in variants:
         row = []
         for header in headers:
@@ -243,7 +247,7 @@ def generate(*, variants=None):
 
     _create_pdf_with_table_vs(output_pdf_annotations, headers, rows)
     _overlay_template_with_table(
-        output_pdf_annotations, input_pdf_path, "/tmp/annotated-RSCM_positive_vs.pdf"
+        output_pdf_annotations, input_pdf_path, output_file_name_vs
     )
 
     rows = []
@@ -266,6 +270,12 @@ Familial hypercholesterolemia is characterized by elevation of serum cholesterol
 
     _create_pdf_with_table_res(output_pdf_annotations, headers, rows)
     _overlay_template_with_table(
-        output_pdf_annotations, input_pdf_path, "/tmp/annotated-RSCM_positive_res.pdf"
+        output_pdf_annotations, input_pdf_path, output_file_name_res
     )
     os.remove(output_pdf_annotations)
+
+    print(
+        f"Generated Stage 1 PDFs: vs = {output_file_name_vs} res = {output_file_name_res}"
+    )
+
+    return output_file_name_vs, output_file_name_res

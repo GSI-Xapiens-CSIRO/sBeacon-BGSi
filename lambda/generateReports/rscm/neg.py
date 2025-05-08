@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -167,12 +168,14 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
         footer_dob_pos,
         output_pdf_path,
     )
+    output_file_name = f"/tmp/{str(uuid.uuid4())}.pdf"
     _overlay_pdf_with_annotations(
-        output_pdf_path, input_pdf_path, "/tmp/annotated_neg.pdf"
+        output_pdf_path, input_pdf_path, output_file_name
     )
     os.remove(output_pdf_path)
-    print("PDF created successfully with new content drawn on it.")
-    return "/tmp/annotated_neg.pdf"
+    
+    print(f"Generated report: {output_file_name}")
+    return output_file_name
 
 
 if __name__ == "__main__":

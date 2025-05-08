@@ -16,21 +16,23 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
     assert all([pii_name, pii_dob, pii_gender, variants]), "Missing required fields"
 
     # Generate the first stage of the report
-    pos_stage_1 = generate_pos_stage_1(variants=variants)
+    res_pdf, vs_pdf = generate_pos_stage_1(variants=variants)
 
     # Generate the second stage of the report
-    pos_stage_2 = generate_pos_stage_2(
+    annots_pdf = generate_pos_stage_2(
         pii_name=pii_name, pii_dob=pii_dob, pii_gender=pii_gender
     )
 
     # Generate the third stage of the report
-    pos_stage_3 = generate_pos_stage_3(pii_name=pii_name, pii_dob=pii_dob)
+    report = generate_pos_stage_3(
+        res_pdf, vs_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob
+    )
 
-    os.remove("/tmp/annotated-RSCM_positive_int.pdf")
-    os.remove("/tmp/annotated-RSCM_positive_res.pdf")
-    os.remove("/tmp/annotated-RSCM_positive_vs.pdf")
+    os.remove(res_pdf)
+    os.remove(vs_pdf)
+    os.remove(annots_pdf)
 
-    return "/tmp/annotated_pos.pdf"
+    return report
 
 
 if __name__ == "__main__":

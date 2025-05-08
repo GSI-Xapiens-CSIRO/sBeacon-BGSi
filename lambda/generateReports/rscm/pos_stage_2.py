@@ -1,4 +1,5 @@
 import os
+import uuid
 from pathlib import Path
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -174,7 +175,9 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
         symptoms_pos,
         versions_pos,
     )
-    _overlay_pdf_with_annotations(
-        output_pdf_path, input_pdf_path, "/tmp/annotated-RSCM_positive_int.pdf"
-    )
+    output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
+    _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
     os.remove(output_pdf_path)
+
+    print(f"Generated Stage 2 PDF: {output_file_name}")
+    return output_file_name

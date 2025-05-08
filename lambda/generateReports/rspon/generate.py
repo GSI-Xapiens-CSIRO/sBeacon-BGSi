@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Dict
+import uuid
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -141,13 +142,16 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, data=None):
     kind, diplotype, phenotype, pk_v, pkdb_v = _get_details(data)
     annotated = "/tmp/annotations.pdf"
     template = f"{module_dir}/{kind}.pdf"
+    output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
 
     _create_annotations(
         annotated, pii_name, pii_dob, pii_gender, diplotype, phenotype, pk_v, pkdb_v
     )
-    _overlay_pdf_with_annotations(annotated, template, "/tmp/annotated_m.pdf")
+    _overlay_pdf_with_annotations(annotated, template, output_file_name)
     os.remove(annotated)
-    return "/tmp/annotated_m.pdf"
+
+    print(f"Generated report: {output_file_name}")
+    return output_file_name
 
 
 if __name__ == "__main__":

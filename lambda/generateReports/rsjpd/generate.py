@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
@@ -232,14 +233,17 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
     module_dir = Path(__file__).parent
+    output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
     _create_annotations("/tmp/annotations.pdf")
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/template.pdf",
-        "/tmp/overlayed.pdf",
+        output_file_name,
     )
     os.remove("/tmp/annotations.pdf")
-    return "/tmp/overlayed.pdf"
+
+    print(f"Generated report: {output_file_name}")
+    return output_file_name
 
 
 if __name__ == "__main__":

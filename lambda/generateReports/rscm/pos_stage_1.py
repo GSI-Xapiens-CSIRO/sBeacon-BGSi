@@ -219,14 +219,6 @@ def generate(*, variants=None):
     output_pdf_annotations = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/blank.pdf"
 
-    column_mapping = {
-        "Gene/Variant": "Alt Allele",
-        "Genotype": "Consequence",
-        "Assesment": "Transcript ID & Version",
-        "Mode of Inheritance": "Amino Acid Change",
-        "Phenotype": "Codon Change",
-    }
-
     rows = []
     headers = [
         "Gene/Variant",
@@ -240,9 +232,19 @@ def generate(*, variants=None):
     output_file_name_vs = f"/tmp/{str(uuid.uuid4())}-vs.pdf"
 
     for variant in variants:
-        row = []
-        for header in headers:
-            row.append(variant[column_mapping[header]])
+        position = variant["Region"].split(":")[1].split("-")[0]
+        gene_variant = variant["ref"] + position + variant["Alt Allele"]
+        gt = variant["gt"]
+        if gt == "0/0":
+            genotype = "Homozygous (ref)"
+        elif gt == "1/1":
+            genotype = "Homozygous (alt)"
+        else:
+            genotype = "Heterozygous"
+        assessment = variant["clinSig"]
+        mode_of_inheritance = "-"  # below to be fetched from OMIM
+        phenotype = variant["conditions"]
+        row = [gene_variant, genotype, assessment, mode_of_inheritance, phenotype]
         rows.append(row)
 
     _create_pdf_with_table_vs(output_pdf_annotations, headers, rows)
@@ -259,7 +261,8 @@ def generate(*, variants=None):
 
     for variant in variants:
         row = []
-        row.append(variant[column_mapping[headers[0]]])
+        gene_variant = variant["ref"] + position + variant["Alt Allele"]
+        row.append(gene_variant)
         row.append(
             """Your genetic profile have indicated that you have the variant that is certain/probable to be the cause FH. 
 Familial hypercholesterolemia-1 (FHCL1) can be caused by heterozygous, compound heterozygous, or homozygous mutation in the low density lipoprotein receptor gene (LDLR; 606945) on chromosome 19p13

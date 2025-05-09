@@ -379,6 +379,27 @@ def generate_report(event, context):
                 "success": True,
                 "content": response["body"],
             }
+        elif HUB_NAME == "RSSARJITO":
+            if not variants:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "neg",
+                    "lang": body["lang"],
+                    "mode": body["mode"]
+                }
+            else:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "pos",
+                    "lang": body["lang"],
+                    "mode": body["mode"],
+                    "variants": variants,
+                }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
+            }
         else:
             response = {
                 "success": False,

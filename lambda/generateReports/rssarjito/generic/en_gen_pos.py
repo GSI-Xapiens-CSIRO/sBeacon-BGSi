@@ -324,7 +324,7 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, variants=None):
+def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
     header_rows = [
         [
             "Gene/ Transcript",
@@ -338,13 +338,39 @@ def generate(*, variants=None):
         ],
         ["", "", "", "", "" "", "SIFT", "PP2"],
     ]
-    data = variants
+    data = []
+    for variant in variants:
+        position = variant["Region"].split(":")[1].split("-")[0]
+        var = variant["ref"] + position + variant["Alt Allele"]
+        gene_transcript = (
+            variant["Gene Name"] + "/ " + variant["Transcript ID & Version"]
+        )
+        variant_protein_change = var + "/ " + variant["Amino Acid Change"]
+        gt = variant["gt"]
+        if gt == "0/0":
+            genotype = "Hom(ref)"
+        elif gt == "1/1":
+            genotype = "Hom(alt)"
+        else:
+            genotype = "Het"
+        data.append(
+            [
+                gene_transcript,
+                variant_protein_change,
+                variant["Allele Frequency (Global)"],
+                genotype,
+                "-/ " + variant["conditions"],
+                variant["SIFT (max)"],
+                "NA",
+                variant["clinSig"],
+            ]
+        )
     module_dir = Path(__file__).parent
     output_pdf_annotations = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/EN_Genome Report_Positive-GENERIC-TABLE.pdf"
 
     _create_pdf_with_table(
-        output_pdf_annotations, header_rows, [80, 68, 33, 55, 93, 37, 37, 93], data
+        output_pdf_annotations, header_rows, [80, 68, 60, 55, 93, 37, 37, 73], data
     )
     _overlay_template_with_table(
         output_pdf_annotations, input_pdf_path, "/tmp/overlayed-table.pdf"
@@ -393,15 +419,57 @@ def generate(*, variants=None):
 
 if __name__ == "__main__":
     data = [
-        [
-            "PCSK9/NM",
-            "HGVS",
-            "<0.1%",
-            "Het",
-            "AD/Pulmonary Arterial Hypertension",
-            "s1.2",
-            "pp21.123",
-            "Pathogenic",
-        ]
-    ] * 10
+        {
+            "ref": "G",
+            "Alt Allele": "T",
+            "Region": "chr4:88131171-88131171",
+            "gt": "0/0",
+            "clinSig": "Benign",
+            "conditions": "ABCG2-related disorder",
+            "SIFT (max)": "0.19",
+            "Allele Frequency (Global)": "0.0929589",
+            "Gene Name": "ABCG2",
+            "Transcript ID & Version": "ENST00000650821.1",
+            "Amino Acid Change": "Q/K",
+        },
+        {
+            "ref": "G",
+            "Alt Allele": "T",
+            "Region": "chr4:88131171-88131171",
+            "gt": "0/0",
+            "clinSig": "association",
+            "conditions": "BLOOD GROUP, JUNIOR SYSTEM",
+            "SIFT (max)": "0.19",
+            "Allele Frequency (Global)": "0.0929589",
+            "Gene Name": "ABCG2",
+            "Transcript ID & Version": "ENST00000650821.1",
+            "Amino Acid Change": "Q/K",
+        },
+        {
+            "ref": "G",
+            "Alt Allele": "T",
+            "Region": "chr4:88131171-88131171",
+            "gt": "0/0",
+            "clinSig": "drug response",
+            "conditions": "Gemcitabine response",
+            "SIFT (max)": "0.19",
+            "Allele Frequency (Global)": "0.0929589",
+            "Gene Name": "ABCG2",
+            "Transcript ID & Version": "ENST00000650821.1",
+            "Amino Acid Change": "Q/K",
+        },
+        {
+            "ref": "G",
+            "Alt Allele": "T",
+            "Region": "chr4:88131171-88131171",
+            "gt": "0/0",
+            "clinSig": "association",
+            "conditions": "Uric acid concentration, serum, quantitative trait locus 1",
+            "SIFT (max)": "0.19",
+            "Allele Frequency (Global)": "0.0929589",
+            "Gene Name": "ABCG2",
+            "Transcript ID & Version": "ENST00000650821.1",
+            "Amino Acid Change": "Q/K",
+        },
+    ]
     generate(variants=data)

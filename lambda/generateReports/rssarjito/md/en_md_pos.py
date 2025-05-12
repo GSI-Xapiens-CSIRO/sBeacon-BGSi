@@ -16,18 +16,18 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 
-def _write_header_footer(filename, pages):
+def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
     fields = [
         # Name
-        (186, 670, 135, 12, 12, "", 0),
+        (186, 670, 135, 12, 12, pii_name, 0),
         # Lab number
         (186, 670 - 14, 135, 12, 12, "", 0),
         # gender
-        (186, 670 - 14 * 2, 135, 12, 12, "", 0),
+        (186, 670 - 14 * 2, 135, 12, 12, pii_gender, 0),
         # DOB
-        (186, 670 - 14 * 3, 135, 12, 12, "", 0),
+        (186, 670 - 14 * 3, 135, 12, 12, pii_dob, 0),
         # Race
         (186, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Specimen type
@@ -41,7 +41,7 @@ def _write_header_footer(filename, pages):
         # Testing Date
         (438, 670 - 14 * 2, 135, 12, 12, "", 0),
         # Reporting Date
-        (438, 670 - 14 * 3, 135, 12, 12, "", 0),
+        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime("%d/%m/%Y"), 0),
         # Referring institution
         (438, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Testing lab
@@ -389,8 +389,7 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
     total_pages = len(pdf_table.pages) + len(pdf_rest.pages)
 
     _write_header_footer(
-        output_pdf_annotations,
-        total_pages,
+        output_pdf_annotations, total_pages, pii_name, pii_dob, pii_gender
     )
 
     footer_pagenum_annotations = PdfReader(output_pdf_annotations)
@@ -472,4 +471,5 @@ if __name__ == "__main__":
             "Amino Acid Change": "Q/K",
         },
     ]
-    generate(variants=data)
+    pii_data = {"pii_name": "John Doe", "pii_dob": "01/01/2000", "pii_gender": "Male"}
+    generate(variants=data, **pii_data)

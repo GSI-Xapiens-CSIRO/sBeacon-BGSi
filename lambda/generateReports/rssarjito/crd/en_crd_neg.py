@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
@@ -8,16 +9,16 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def _write_header(c, form):
+def _write_header(c, form, pii_name, pii_dob, pii_gender):
     fields = [
         # Name
-        (186, 670, 135, 12, 12, "", 0),
+        (186, 670, 135, 12, 12, pii_name, 0),
         # Lab number
         (186, 670 - 14, 135, 12, 12, "", 0),
         # gender
-        (186, 670 - 14 * 2, 135, 12, 12, "", 0),
+        (186, 670 - 14 * 2, 135, 12, 12, pii_gender, 0),
         # DOB
-        (186, 670 - 14 * 3, 135, 12, 12, "", 0),
+        (186, 670 - 14 * 3, 135, 12, 12, pii_dob, 0),
         # Race
         (186, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Specimen type
@@ -31,7 +32,7 @@ def _write_header(c, form):
         # Testing Date
         (438, 670 - 14 * 2, 135, 12, 12, "", 0),
         # Reporting Date
-        (438, 670 - 14 * 3, 135, 12, 12, "", 0),
+        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime("%d/%m/%Y"), 0),
         # Referring institution
         (438, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Testing lab
@@ -56,6 +57,9 @@ def _write_header(c, form):
 
 
 def _create_annotations(
+    pii_name,
+    pii_dob,
+    pii_gender,
     filename,
 ):
     _text_field_positions_page_1 = [
@@ -124,7 +128,7 @@ def _create_annotations(
             x, y, fs, text = pos
             c.setFont("Helvetica", fs)
             c.drawString(x, y, text)
-        _write_header(c, form)
+        _write_header(c, form, pii_name, pii_dob, pii_gender)
         c.showPage()
 
     c.save()
@@ -154,7 +158,7 @@ def _overlay_pdf_with_annotations(src, dest, output):
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
-    _create_annotations("/tmp/annotations.pdf")
+    _create_annotations(pii_name, pii_dob, pii_gender, "/tmp/annotations.pdf")
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/EN_Genome Report_No Finding_CRD.pdf",
@@ -167,4 +171,5 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
 
 
 if __name__ == "__main__":
-    generate()
+    data = {"pii_name": "John Doe", "pii_dob": "01/01/2000", "pii_gender": "Male"}
+    generate(**data)

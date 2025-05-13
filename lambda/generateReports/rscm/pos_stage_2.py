@@ -39,7 +39,10 @@ def _create_annotations(
         width=100,
         height=fs,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -54,7 +57,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -69,7 +75,10 @@ def _create_annotations(
         width=200,
         height=fs,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -86,6 +95,10 @@ def _create_annotations(
         fontName="Helvetica",
         fontSize=8,
         options=[("Male", "male"), ("Female", "female")],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
 
     # symptoms
@@ -99,8 +112,11 @@ def _create_annotations(
         width=200,
         height=fs,
         fontSize=8,
-        fillColor=colors.white,
         fieldFlags=0,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
     c.showPage()
     c.showPage()

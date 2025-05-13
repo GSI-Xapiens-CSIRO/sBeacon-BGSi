@@ -59,7 +59,11 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
         width=372,
         height=35,
         fontSize=12 - 2,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        borderColor=None,
+        forceBorder=False,
         fieldFlags=1 << 12,
     )
 
@@ -76,7 +80,11 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                borderColor=None,
+                forceBorder=False,
                 fieldFlags=flags,
             )
         c.setFont("Helvetica", fs)
@@ -291,7 +299,11 @@ def _create_annotations(
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                borderColor=None,
                 fieldFlags=flags,
             )
         for n, pos in enumerate(page_poses_st):

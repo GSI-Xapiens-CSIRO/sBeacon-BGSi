@@ -41,7 +41,7 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
         # Testing Date
         (438, 670 - 14 * 2, 135, 12, 12, "", 0),
         # Reporting Date
-        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime('%d/%m/%Y'), 0),
+        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime("%d/%m/%Y"), 0),
         # Referring institution
         (438, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Testing lab
@@ -59,7 +59,11 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
         width=372,
         height=35,
         fontSize=12 - 2,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        borderColor=None,
         fieldFlags=1 << 12,
     )
 
@@ -76,7 +80,11 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                borderColor=None,
                 fieldFlags=flags,
             )
         c.setFont("Helvetica", fs)
@@ -291,7 +299,11 @@ def _create_annotations(
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                borderColor=None,
                 fieldFlags=flags,
             )
         for n, pos in enumerate(page_poses_st):

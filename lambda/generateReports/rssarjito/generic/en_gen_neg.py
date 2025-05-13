@@ -32,7 +32,7 @@ def _write_header(c, form, pii_name, pii_dob, pii_gender):
         # Testing Date
         (438, 670 - 14 * 2, 135, 12, 12, "", 0),
         # Reporting Date
-        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime('%d/%m/%Y'), 0),
+        (438, 670 - 14 * 3, 135, 12, 12, datetime.now().strftime("%d/%m/%Y"), 0),
         # Referring institution
         (438, 670 - 14 * 4, 135, 12, 12, "", 0),
         # Testing lab
@@ -51,7 +51,11 @@ def _write_header(c, form, pii_name, pii_dob, pii_gender):
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
+            borderColor=None,
             fieldFlags=flags,
         )
 
@@ -121,7 +125,11 @@ def _create_annotations(
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                borderColor=None,
                 fieldFlags=flags,
             )
         for n, pos in enumerate(page_poses_st):

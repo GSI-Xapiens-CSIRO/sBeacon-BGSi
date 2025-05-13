@@ -154,7 +154,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     for n, pos in enumerate(_checkbox_positions_page_1):
@@ -168,9 +171,10 @@ def _create_annotations(
             buttonStyle="check",
             shape="square",
             borderStyle="solid",
-            borderWidth=1,
+            borderWidth=0,
             fillColor=colors.white,
-            borderColor=colors.black,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
 
@@ -188,7 +192,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     c.showPage()
@@ -204,7 +211,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     c.save()

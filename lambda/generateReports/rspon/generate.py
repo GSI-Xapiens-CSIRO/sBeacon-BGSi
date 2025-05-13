@@ -72,7 +72,10 @@ def _create_annotations(
                 width=w,
                 height=h,
                 fontSize=8,
+                borderWidth=0,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
                 fieldFlags=flags,
             )
         for n, (x, y, fs, text) in enumerate(page_text_boxes):

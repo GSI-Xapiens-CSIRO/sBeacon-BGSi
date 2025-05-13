@@ -39,7 +39,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -54,7 +57,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -69,7 +75,10 @@ def _create_annotations(
         width=200,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -86,6 +95,10 @@ def _create_annotations(
         fontName="Helvetica",
         fontSize=8,
         options=[("Male", "male"), ("Female", "female")],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
 
     # symptoms
@@ -99,7 +112,10 @@ def _create_annotations(
         width=200,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -169,11 +185,9 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
         output_pdf_path,
     )
     output_file_name = f"/tmp/{str(uuid.uuid4())}.pdf"
-    _overlay_pdf_with_annotations(
-        output_pdf_path, input_pdf_path, output_file_name
-    )
+    _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
     os.remove(output_pdf_path)
-    
+
     print(f"Generated report: {output_file_name}")
     return output_file_name
 

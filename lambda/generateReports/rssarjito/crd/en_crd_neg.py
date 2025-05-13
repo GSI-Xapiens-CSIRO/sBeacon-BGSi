@@ -51,7 +51,11 @@ def _write_header(c, form, pii_name, pii_dob, pii_gender):
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
+            borderColor=None,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
 
@@ -121,7 +125,11 @@ def _create_annotations(
                 width=w,
                 height=h,
                 fontSize=fs - 2,
+                borderWidth=0,
+                borderColor=None,
                 fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
                 fieldFlags=flags,
             )
         for n, pos in enumerate(page_poses_st):

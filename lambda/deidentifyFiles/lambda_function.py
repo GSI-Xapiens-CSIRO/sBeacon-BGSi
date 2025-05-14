@@ -5,7 +5,7 @@ from urllib.parse import unquote_plus
 import boto3
 from botocore.exceptions import ClientError
 
-from deidentification import deidentify
+from deidentification import deidentify, log_deidentification_status
 from launch_ec2 import launch_deidentification_ec2
 
 dynamodb = boto3.client("dynamodb")
@@ -14,7 +14,7 @@ s3 = boto3.client("s3")
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 FILES_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
-MAX_SIZE_FOR_LAMBDA = 200 * 1024**2  # 200 MB
+MAX_SIZE_FOR_LAMBDA = 1024**3  # 1 GB
 SUFFIXES = [
     ".bam",
     ".sam",
@@ -182,9 +182,11 @@ def lambda_handler(event, context):
     all_project_files = get_all_project_files(project_prefix)
     update_project(project, all_project_files)
     if event_name.startswith("ObjectCreated:"):
+        log_deidentification_status(PROJECTS_TABLE, project, file_name, "Pending")
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
             print(f"{object_key} is an index file, moving directly")
             move_file(object_key)
+            log_deidentification_status(PROJECTS_TABLE, project, file_name, "Anonymised")
             return
         else:
             print(f"{object_key} is a genomic or metadata file, deidentifying")

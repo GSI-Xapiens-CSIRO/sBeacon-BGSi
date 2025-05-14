@@ -32,6 +32,17 @@ def lambda_handler(event, context):
                 "pii_gender": "Male",
             }
             res = generate(**data, data=data)
+        case "RSJPD":
+            from rsjpd import generate
+
+            data = {
+                "pii_name": "John Doe",
+                "pii_dob": "01-05-1990",
+                "pii_gender": "Male",
+                "apoe": event.get("apoe", None),
+                "slco1b1": event.get("slco1b1", None),  
+            }
+            res = generate(**data)
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

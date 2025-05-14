@@ -352,12 +352,10 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
     ]
     data = []
     for variant in variants:
-        position = variant["Region"].split(":")[1].split("-")[0]
-        var = variant["ref"] + position + variant["Alt Allele"]
+        variant_protein_change = variant["Variant Name"]
         gene_transcript = (
             variant["Gene Name"] + "/ " + variant["Transcript ID & Version"]
         )
-        variant_protein_change = var + "/ " + variant["Amino Acid Change"]
         gt = variant["gt"]
         if gt == "0/0":
             genotype = "Hom(ref)"
@@ -431,56 +429,37 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
 if __name__ == "__main__":
     data = [
         {
-            "ref": "G",
-            "Alt Allele": "T",
-            "Region": "chr4:88131171-88131171",
-            "gt": "0/0",
-            "clinSig": "Benign",
-            "conditions": "ABCG2-related disorder",
-            "SIFT (max)": "0.19",
-            "Allele Frequency (Global)": "0.0929589",
-            "Gene Name": "ABCG2",
-            "Transcript ID & Version": "ENST00000650821.1",
-            "Amino Acid Change": "Q/K",
-        },
-        {
-            "ref": "G",
-            "Alt Allele": "T",
-            "Region": "chr4:88131171-88131171",
-            "gt": "0/0",
-            "clinSig": "association",
-            "conditions": "BLOOD GROUP, JUNIOR SYSTEM",
-            "SIFT (max)": "0.19",
-            "Allele Frequency (Global)": "0.0929589",
-            "Gene Name": "ABCG2",
-            "Transcript ID & Version": "ENST00000650821.1",
-            "Amino Acid Change": "Q/K",
-        },
-        {
-            "ref": "G",
-            "Alt Allele": "T",
-            "Region": "chr4:88131171-88131171",
+            "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
             "gt": "0/0",
             "clinSig": "drug response",
-            "conditions": "Gemcitabine response",
-            "SIFT (max)": "0.19",
-            "Allele Frequency (Global)": "0.0929589",
-            "Gene Name": "ABCG2",
-            "Transcript ID & Version": "ENST00000650821.1",
-            "Amino Acid Change": "Q/K",
+            "conditions": "Thiopurine S-methyltransferase deficiency",
+            "SIFT (max)": "0",
+            "Allele Frequency (Global)": "0.0431942",
+            "Gene Name": "TPMT",
+            "Transcript ID & Version": "ENST00000309983.5",
+            "Amino Acid Change": "Y/C",
         },
         {
-            "ref": "G",
-            "Alt Allele": "T",
-            "Region": "chr4:88131171-88131171",
+            "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
             "gt": "0/0",
-            "clinSig": "association",
-            "conditions": "Uric acid concentration, serum, quantitative trait locus 1",
-            "SIFT (max)": "0.19",
-            "Allele Frequency (Global)": "0.0929589",
-            "Gene Name": "ABCG2",
-            "Transcript ID & Version": "ENST00000650821.1",
-            "Amino Acid Change": "Q/K",
+            "clinSig": "Likely benign; other",
+            "conditions": "not provided",
+            "SIFT (max)": "0",
+            "Allele Frequency (Global)": "0.0431942",
+            "Gene Name": "TPMT",
+            "Transcript ID & Version": "ENST00000309983.5",
+            "Amino Acid Change": "Y/C",
+        },
+        {
+            "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
+            "gt": "0/0",
+            "clinSig": "drug response",
+            "conditions": "Thiopurine S-methyltransferase deficiency",
+            "SIFT (max)": "0",
+            "Allele Frequency (Global)": "0.0431942",
+            "Gene Name": "-",
+            "Transcript ID & Version": "ENST00000830125.1",
+            "Amino Acid Change": "-",
         },
     ]
     pii_data = {"pii_name": "John Doe", "pii_dob": "01/01/2000", "pii_gender": "Male"}

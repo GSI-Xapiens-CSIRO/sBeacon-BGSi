@@ -4,7 +4,7 @@ import boto3
 from pynamodb.models import Model
 from pynamodb.attributes import NumberAttribute, UnicodeAttribute, MapAttribute
 from shared.utils import ENV_DYNAMO
-
+from pynamodb.exceptions import DoesNotExist
 
 SESSION = boto3.session.Session()
 REGION = SESSION.region_name
@@ -32,9 +32,25 @@ class Quota(Model):
             "CostEstimation": self.CostEstimation,
             "Usage": self.Usage.as_dict(),
         }
-    
+
     def increment_quota(self):
         self.update(actions=[Quota.Usage.usageCount.add(1)])
 
     def user_has_quota(self):
+        if self.Usage is None:
+            return False
         return self.Usage.usageCount < self.Usage.quotaQueryCount
+
+
+def get_user_quota(sub):
+    try:
+        quota = Quota.get(sub)
+        user_has_quota = quota.user_has_quota()
+
+        if user_has_quota:
+            quota.increment_quota()
+            return True
+
+        return user_has_quota
+    except DoesNotExist:
+        return False

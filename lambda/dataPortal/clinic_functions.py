@@ -357,6 +357,7 @@ def delete_variants(event, context):
 
 @router.attach("/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post")
 def generate_report(event, context):
+    print(f"Generating report for lab: {HUB_NAME}")
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     project = event["pathParameters"]["project"]
     job_id = event["pathParameters"]["job_id"]
@@ -373,6 +374,10 @@ def generate_report(event, context):
             for entry in ClinicalVariants.query(f"{project}:{job_id}")
             for variant in json.loads(entry.variants)
         ]
+        if len(variants) == 0:
+            print("Generating report with no variants")
+        else:
+            print(f"Generating report with {len(variants)} variants")
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except Projects.DoesNotExist:
@@ -381,30 +386,57 @@ def generate_report(event, context):
         raise PortalError(404, "Variants collection not found")
 
     try:
-        if HUB_NAME not in ["RSCM", "RSPON"]:
+        if HUB_NAME not in ["RSCM", "RSPON", "RSSARJITO", "RSJPD", "IGNG"]:
             response = {
                 "success": False,
                 "message": "Lab not configured. Please contact administrator.",
             }
             raise KeyError("Lab not configured")
-        if not variants:
-            payload = {
-                "lab": HUB_NAME,
-                "kind": "neg",
+        if HUB_NAME == "RSCM":
+            if not variants:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "neg",
+                }
+            else:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "pos",
+                    "variants": variants,
+                }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
+            }
+        elif HUB_NAME == "RSSARJITO":
+            if not variants:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "neg",
+                    "lang": body["lang"],
+                    "mode": body["mode"]
+                }
+            else:
+                payload = {
+                    "lab": HUB_NAME,
+                    "kind": "pos",
+                    "lang": body["lang"],
+                    "mode": body["mode"],
+                    "variants": variants,
+                }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
             }
         else:
-            payload = {
-                "lab": HUB_NAME,
-                "kind": "pos",
-                "variants": variants,
+            response = {
+                "success": False,
+                "message": "Lab is not ready for reporting.",
             }
-        response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-        response = {
-            "success": True,
-            "content": response["body"],
-        }
-    except KeyError:
-        print("Error invoking lambda function: missing key")
+    except KeyError as e:
+        print(f"Error invoking lambda function: missing key: {e}")
         response = {
             "success": False,
             "message": "Lab not configured. Please contact administrator.",

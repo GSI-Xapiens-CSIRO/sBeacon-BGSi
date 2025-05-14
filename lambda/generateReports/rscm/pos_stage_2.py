@@ -1,4 +1,5 @@
 import os
+import uuid
 from pathlib import Path
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -38,7 +39,10 @@ def _create_annotations(
         width=100,
         height=fs,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -53,7 +57,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -68,7 +75,10 @@ def _create_annotations(
         width=200,
         height=fs,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -85,6 +95,10 @@ def _create_annotations(
         fontName="Helvetica",
         fontSize=8,
         options=[("Male", "male"), ("Female", "female")],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
 
     # symptoms
@@ -98,8 +112,11 @@ def _create_annotations(
         width=200,
         height=fs,
         fontSize=8,
-        fillColor=colors.white,
         fieldFlags=0,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
     c.showPage()
     c.showPage()
@@ -174,7 +191,9 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
         symptoms_pos,
         versions_pos,
     )
-    _overlay_pdf_with_annotations(
-        output_pdf_path, input_pdf_path, "/tmp/annotated-RSCM_positive_int.pdf"
-    )
+    output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
+    _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
     os.remove(output_pdf_path)
+
+    print(f"Generated Stage 2 PDF: {output_file_name}")
+    return output_file_name

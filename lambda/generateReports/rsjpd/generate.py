@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
@@ -153,7 +154,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     for n, pos in enumerate(_checkbox_positions_page_1):
@@ -167,9 +171,10 @@ def _create_annotations(
             buttonStyle="check",
             shape="square",
             borderStyle="solid",
-            borderWidth=1,
+            borderWidth=0,
             fillColor=colors.white,
-            borderColor=colors.black,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
 
@@ -187,7 +192,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     c.showPage()
@@ -203,7 +211,10 @@ def _create_annotations(
             width=w,
             height=h,
             fontSize=fs - 2,
+            borderWidth=0,
             fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
             fieldFlags=flags,
         )
     c.save()
@@ -232,14 +243,17 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
     module_dir = Path(__file__).parent
+    output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
     _create_annotations("/tmp/annotations.pdf")
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/template.pdf",
-        "/tmp/overlayed.pdf",
+        output_file_name,
     )
     os.remove("/tmp/annotations.pdf")
-    return "/tmp/overlayed.pdf"
+
+    print(f"Generated report: {output_file_name}")
+    return output_file_name
 
 
 if __name__ == "__main__":

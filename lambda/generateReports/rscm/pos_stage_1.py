@@ -1,6 +1,5 @@
 import os
 import uuid
-from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 from copy import deepcopy
@@ -8,7 +7,6 @@ from copy import deepcopy
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer

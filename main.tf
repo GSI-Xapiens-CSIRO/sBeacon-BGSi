@@ -639,17 +639,17 @@ module "lambda-admin" {
 module "lambda-deidentifyFiles" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-deidentifyFiles"
-  description        = "Deidentifies files before moving them to the dataportal bucket"
-  handler            = "lambda_function.lambda_handler"
-  runtime            = "python3.12"
-  memory_size        = 4096
-  timeout            = 900
+  function_name          = "sbeacon-backend-deidentifyFiles"
+  description            = "Deidentifies files before moving them to the dataportal bucket"
+  handler                = "lambda_function.lambda_handler"
+  runtime                = "python3.12"
+  memory_size            = 4096
+  timeout                = 900
   ephemeral_storage_size = 2560
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
-  source_path        = "${path.module}/lambda/deidentifyFiles"
-  tags               = var.common-tags
+  attach_policy_json     = true
+  policy_json            = data.aws_iam_policy_document.lambda-deidentifyFiles.json
+  source_path            = "${path.module}/lambda/deidentifyFiles"
+  tags                   = var.common-tags
 
   environment_variables = {
     DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
@@ -799,6 +799,18 @@ module "lambda-generateReports" {
   memory_size   = 512
   timeout       = 60
   source_path   = "${path.module}/lambda/generateReports"
+
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-generateCohortVCfs.json,
+    data.aws_iam_policy_document.athena-full-access.json,
+    data.aws_iam_policy_document.dynamodb-onto-access.json
+  ]
+  number_of_policy_jsons = 1
+
+  environment_variables = {
+    DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
+  }
 
   tags = var.common-tags
 }

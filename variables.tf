@@ -260,3 +260,9 @@ variable "hub_name" {
   type        = string
   description = "Configuration for the hub"
 }
+
+# external dynamodb tables
+variable "svep-references-table-name" {
+  type        = string
+  description = "Name of the references table"
+}

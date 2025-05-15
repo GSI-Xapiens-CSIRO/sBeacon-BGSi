@@ -1,12 +1,10 @@
 import os
-from datetime import datetime
 import uuid
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle
 
 
 def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_num_pos):

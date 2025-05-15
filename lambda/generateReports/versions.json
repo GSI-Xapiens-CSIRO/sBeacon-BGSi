@@ -1,0 +1,11 @@
+{
+  "gnomad_version": "v4.1.0",
+  "sift_version": "5.2.2",
+  "dbsnp_version": "b156",
+  "gnomad_1KG_version": "v3.1.2",
+  "gnomad_constraints_version": "v3.1.2",
+  "snp_eff_version": "N/A",
+  "snp_sift_version": "N/A",
+  "polyphen2_version": "N/A",
+  "omim_version": "N/A"
+}

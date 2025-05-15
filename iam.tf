@@ -621,8 +621,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
 
     resources = [
-      aws_s3_bucket.dataportal-bucket.arn,
-      aws_s3_bucket.svep-temp.arn
+      aws_s3_bucket.dataportal-bucket.arn
     ]
 
     condition {
@@ -633,6 +632,15 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
         "private/*",
       ]
     }
+  }
+
+  statement {
+    actions = [
+        "s3:ListBucket",
+    ]
+    resources = [
+        aws_s3_bucket.svep-temp.arn,
+    ]
   }
 
   statement {

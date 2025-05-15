@@ -35,8 +35,8 @@ def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_n
 
 
 def generate(
-    res_pdf,
-    vs_pdf,
+    summary_pdf,
+    results_pdf,
     annots_pdf,
     *,
     pii_name=None,
@@ -51,10 +51,10 @@ def generate(
 
     output_pdf_path = "/tmp/annotations.pdf"
     pdf_int = PdfReader(annots_pdf)
-    pdf_vs = PdfReader(vs_pdf)
-    pdf_res = PdfReader(res_pdf)
+    pdf_summary = PdfReader(summary_pdf)
+    pdf_results = PdfReader(results_pdf)
 
-    total_pages = len(pdf_int.pages) + len(pdf_vs.pages) + len(pdf_res.pages)
+    total_pages = len(pdf_int.pages) + len(pdf_results.pages) + len(pdf_summary.pages)
 
     _create_annotations(
         output_pdf_path, total_pages, footer_name_pos, footer_dob_pos, page_num_pos
@@ -64,9 +64,9 @@ def generate(
     pages = []
 
     pages.append(pdf_int.pages[0])
-    pages += pdf_vs.pages
+    pages += pdf_summary.pages
     pages.append(pdf_int.pages[1])
-    pages += pdf_res.pages
+    pages += pdf_results.pages
     pages += pdf_int.pages[2:]
 
     footer_pagenum_annotations = PdfReader(output_pdf_path)

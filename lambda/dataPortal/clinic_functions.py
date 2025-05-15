@@ -415,7 +415,7 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "kind": "neg",
                     "lang": body["lang"],
-                    "mode": body["mode"]
+                    "mode": body["mode"],
                 }
             else:
                 payload = {

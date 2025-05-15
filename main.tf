@@ -787,7 +787,7 @@ module "lambda-getProjects" {
 }
 
 #
-# getProjects Function
+# generateReports Function
 #
 module "lambda-generateReports" {
   source = "terraform-aws-modules/lambda/aws"
@@ -799,6 +799,15 @@ module "lambda-generateReports" {
   memory_size   = 512
   timeout       = 60
   source_path   = "${path.module}/lambda/generateReports"
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-generateReports.json
+  ]
+  environment_variables = merge(
+    local.sbeacon_variables,
+    {
+      PDF_TEMPLATE_BUCKEET = aws_s3_bucket.report-template-bucket.bucket,
+    }
+  )
 
   tags = var.common-tags
 }

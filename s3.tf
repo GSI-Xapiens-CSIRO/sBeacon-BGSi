@@ -212,3 +212,71 @@ resource "aws_s3_bucket_notification" "updateFiles" {
     aws_lambda_permission.S3deidentifyFiles,
   ]
 }
+
+
+#
+# S3 bucket for report templates
+#
+resource "aws_s3_bucket" "report-template-bucket" {
+  bucket_prefix = var.report_template_bucket_prefix
+  force_destroy = true
+  tags          = var.common-tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "report_template_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.report-template-bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "report_template_bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.report_template_bucket_ownership_controls]
+
+  bucket = aws_s3_bucket.report-template-bucket.id
+  acl    = "private"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "report_template_bucket_lifecycle" {
+  bucket = aws_s3_bucket.report-template-bucket.id
+
+  rule {
+    id     = "remove-zombie-staging-files"
+    status = "Enabled"
+
+    filter {
+      prefix = "staging/"
+    }
+
+    expiration {
+      days = 3
+    }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "report_template_bucket_cors" {
+  bucket = aws_s3_bucket.report-template-bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    allowed_origins = ["*"]
+    expose_headers  = ["ETag", "x-amz-multipart-parts-count", "x-amz-abort-date"]
+    max_age_seconds = 36000
+  }
+}
+
+resource "null_resource" "upload_report_templates" {
+  provisioner "local-exec" {
+    command = <<EOT
+      aws s3 cp ${path.module}/report_templates s3://${aws_s3_bucket.report-template-bucket.bucket}/templates --recursive
+    EOT
+  }
+
+  triggers = {
+    always_run = timestamp()
+  }
+
+  depends_on = [aws_s3_bucket.report-template-bucket]
+}

@@ -694,3 +694,17 @@ data "aws_iam_policy_document" "lambda-generateCohortVCfs" {
     ]
   }
 }
+
+
+#
+# generateReports Lambda Function
+#
+data "aws_iam_policy_document" "lambda-generateReports" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    resources = ["*"]
+  }
+}

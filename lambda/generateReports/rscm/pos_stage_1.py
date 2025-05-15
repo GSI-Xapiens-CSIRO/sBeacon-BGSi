@@ -232,8 +232,7 @@ def generate(*, variants=None):
     output_file_name_vs = f"/tmp/{str(uuid.uuid4())}-vs.pdf"
 
     for variant in variants:
-        position = variant["Region"].split(":")[1].split("-")[0]
-        gene_variant = variant["ref"] + position + variant["Alt Allele"]
+        gene_variant = variant["Gene Name"] + "<br/>" + variant["Variant Name"]
         gt = variant["gt"]
         if gt == "0/0":
             genotype = "Homozygous (ref)"
@@ -261,7 +260,7 @@ def generate(*, variants=None):
 
     for variant in variants:
         row = []
-        gene_variant = variant["ref"] + position + variant["Alt Allele"]
+        gene_variant = variant["Gene Name"] + "<br/>" + variant["Variant Name"]
         row.append(gene_variant)
         row.append(
             """Your genetic profile have indicated that you have the variant that is certain/probable to be the cause FH. 

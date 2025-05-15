@@ -16,7 +16,7 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
     assert all([pii_name, pii_dob, pii_gender, variants]), "Missing required fields"
 
     # Generate the first stage of the report
-    res_pdf, vs_pdf = generate_pos_stage_1(variants=variants)
+    summary_pdf, results_pdf = generate_pos_stage_1(variants=variants)
 
     # Generate the second stage of the report
     annots_pdf = generate_pos_stage_2(
@@ -25,11 +25,11 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
 
     # Generate the third stage of the report
     report = generate_pos_stage_3(
-        res_pdf, vs_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob
+        summary_pdf, results_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob
     )
 
-    os.remove(res_pdf)
-    os.remove(vs_pdf)
+    os.remove(summary_pdf)
+    os.remove(results_pdf)
     os.remove(annots_pdf)
 
     return report
@@ -43,49 +43,43 @@ if __name__ == "__main__":
         pii_gender="Female",
         variants=[
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
                 "gt": "0/0",
                 "clinSig": "Benign",
                 "conditions": "ABCG2-related disorder",
             },
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
                 "gt": "0/0",
                 "clinSig": "association",
                 "conditions": "BLOOD GROUP, JUNIOR SYSTEM",
             },
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.626-1G>A",
                 "gt": "0/0",
                 "clinSig": "drug response",
                 "conditions": "Gemcitabine response",
             },
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.500C>G (p.Ala167Gly)",
                 "gt": "0/0",
                 "clinSig": "association",
                 "conditions": "Uric acid concentration, serum, quantitative trait locus 1",
             },
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.460G>A (p.Ala154Thr)",
                 "gt": "0/0",
                 "clinSig": "drug response",
                 "conditions": "rosuvastatin response - Efficacy",
             },
             {
-                "ref": "G",
-                "Alt Allele": "T",
-                "Region": "chr4:88131171-88131171",
+                "Gene Name": "-",
+                "Variant Name": "NM_000367.5(TPMT):c.497A>G (p.Tyr166Cys)",
                 "gt": "0/0",
                 "clinSig": "drug response",
                 "conditions": "rosuvastatin response - Metabolism/PK",

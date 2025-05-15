@@ -210,11 +210,6 @@ variable "dataportal-bucket-prefix" {
   description = "Prefix for the dataportal S3 bucket"
 }
 
-variable "report_template_bucket_prefix" {
-  type        = string
-  description = "Prefix for the pdf report template S3 bucket"
-}
-
 # cognito variables
 variable "cognito-user-pool-arn" {
   type        = string

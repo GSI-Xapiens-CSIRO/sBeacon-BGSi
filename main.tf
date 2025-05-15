@@ -639,16 +639,21 @@ module "lambda-admin" {
 module "lambda-deidentifyFiles" {
   source = "terraform-aws-modules/lambda/aws"
 
-  function_name      = "sbeacon-backend-deidentifyFiles"
-  description        = "Deidentifies files before moving them to the dataportal bucket"
-  handler            = "lambda_function.lambda_handler"
-  runtime            = "python3.12"
-  memory_size        = 1769
-  timeout            = 900
-  attach_policy_json = true
-  policy_json        = data.aws_iam_policy_document.lambda-deidentifyFiles.json
-  source_path        = "${path.module}/lambda/deidentifyFiles"
-  tags               = var.common-tags
+  function_name          = "sbeacon-backend-deidentifyFiles"
+  description            = "Deidentifies files before moving them to the dataportal bucket"
+  handler                = "lambda_function.lambda_handler"
+  runtime                = "python3.12"
+<<<<<<< HEAD
+  memory_size            = 3000
+=======
+  memory_size            = 4096
+>>>>>>> 878c16e507b8fcaeaf2a9e58a4f23c4a864760e2
+  timeout                = 900
+  ephemeral_storage_size = 2560
+  attach_policy_json     = true
+  policy_json            = data.aws_iam_policy_document.lambda-deidentifyFiles.json
+  source_path            = "${path.module}/lambda/deidentifyFiles"
+  tags                   = var.common-tags
 
   environment_variables = {
     DPORTAL_BUCKET           = aws_s3_bucket.dataportal-bucket.bucket
@@ -787,7 +792,7 @@ module "lambda-getProjects" {
 }
 
 #
-# getProjects Function
+# generateReports Function
 #
 module "lambda-generateReports" {
   source = "terraform-aws-modules/lambda/aws"
@@ -799,6 +804,16 @@ module "lambda-generateReports" {
   memory_size   = 512
   timeout       = 60
   source_path   = "${path.module}/lambda/generateReports"
+
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-generateReports.json,
+  ]
+  number_of_policy_jsons = 1
+
+  environment_variables = {
+    DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
+  }
 
   tags = var.common-tags
 }
@@ -813,7 +828,7 @@ module "lambda-generateCohortVCfs" {
   description         = "Backend function to generate reports."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
-  memory_size         = 4096
+  memory_size         = 3000
   timeout             = 60
   source_path         = "${path.module}/lambda/generateCohortVCfs"
   attach_policy_jsons = true
@@ -832,6 +847,7 @@ module "lambda-generateCohortVCfs" {
     {
       COGNITO_USER_POOL_ID = var.cognito-user-pool-id,
       DPORTAL_BUCKET       = aws_s3_bucket.dataportal-bucket.bucket,
+      HTS_S3_HOST          = "s3.${var.region}.amazonaws.com"
     }
   )
 

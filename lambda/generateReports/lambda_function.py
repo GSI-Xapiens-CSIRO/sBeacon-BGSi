@@ -1,37 +1,87 @@
 import os
 import base64
+import json
+from collections import defaultdict
+
+import boto3
+
+DYNAMO_SVEP_REFERENCES_TABLE = os.environ.get(
+    "DYNAMO_SVEP_REFERENCES_TABLE", "svep-references"
+)
+
+
+def get_all_versions():
+    client = boto3.client("dynamodb")
+    response = client.scan(TableName=DYNAMO_SVEP_REFERENCES_TABLE)
+    items = response["Items"]
+    versions = {}
+
+    while "LastEvaluatedKey" in response:
+        response = client.scan(
+            TableName=DYNAMO_SVEP_REFERENCES_TABLE,
+            ExclusiveStartKey=response["LastEvaluatedKey"],
+        )
+        items.extend(response["Items"])
+
+    for item in items:
+        version = item["version"]["S"]
+        tool = item["id"]["S"]
+        versions[tool] = version
+    versions = {**versions, **json.load(open("versions.json"))}
+    return versions
 
 
 def lambda_handler(event, context):
     print("Backend Event Received: ", event)
+
+    # TODO: connect to API
+    data = {
+        "pii_name": "",
+        "pii_dob": "",
+        "pii_gender": "",
+    }
+
+    try:
+        versions = get_all_versions()
+    except Exception as e:
+        print("Error fetching versions: ", e)
+        versions = defaultdict(lambda: "ERRORED")
 
     # RSCM
     match event["lab"]:
         case "RSCM":
             from rscm import generate_neg, generate_pos
 
-            # TODO: connect to API
-            data = {
-                "pii_name": "John Doe",
-                "pii_dob": "01-05-1990",
-                "pii_gender": "Male",
-            }
             if event["kind"] == "neg":
-                res = generate_neg(**data)
+                res = generate_neg(**data, versions=versions)
             elif event["kind"] == "pos":
                 assert len(event["variants"]) > 0, "Variants not provided"
                 variants = event.get("variants", [])
-                res = generate_pos(**data, variants=variants)
+                res = generate_pos(**data, variants=variants, versions=versions)
+        case "RSSARJITO":
+            from rssarjito import get_report_generator
+
+            variants = event.get("variants", [])
+            generator = get_report_generator(
+                event["kind"], event["mode"], event["lang"]
+            )
+            if event["kind"] == "pos":
+                res = generator(**data, variants=variants, versions=versions)
+            else:
+                res = generator(**data, versions=versions)
         case "RSPON":
             from rspon import generate
 
-            # TODO: connect to API
-            data = {
-                "pii_name": "John Doe",
-                "pii_dob": "01-05-1990",
-                "pii_gender": "Male",
-            }
             res = generate(**data, data=data)
+        case "RSJPD":
+            from rsjpd import generate
+
+            data = {
+                **data,
+                "apoe": event.get("apoe", None),
+                "slco1b1": event.get("slco1b1", None),
+            }
+            res = generate(**data)
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

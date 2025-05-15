@@ -790,6 +790,32 @@ def log_error(files_table, location, error_message):
     dynamodb_update_item(files_table, location, update_fields)
 
 
+def log_deidentification_status(
+    projects_table: str, project_name: str, file_name: str, status: str
+):
+    if status == "Pending":
+        update_expression = """
+        ADD pending_files :file_name
+        """
+    else:
+        update_expression = """
+        DELETE pending_files :file_name
+        """
+    kwargs = {
+        "TableName": projects_table,
+        "Key": {
+            "name": {"S": project_name},
+        },
+        "UpdateExpression": update_expression,
+        "ExpressionAttributeValues": {
+            ":file_name": {"SS": [file_name]},
+        },
+    }
+    print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
+    response = dynamodb.update_item(**kwargs)
+    print(f"Received response: {json.dumps(response, default=str)}")
+
+
 def log_projects_error(
     projects_table: str, project_name: str, file_name: str, error_message: str
 ):
@@ -860,6 +886,7 @@ def deidentify(
         print(f"An error occurred when validating {object_key}: {e}")
         log_error(files_table, f"{project}/project-files/{file_name}", str(e))
         log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+        log_deidentification_status(projects_table, project, file_name, "Error")
         s3.delete_object(Bucket=input_bucket, Key=object_key)
         print("Exiting")
         return
@@ -881,6 +908,7 @@ def deidentify(
             print(f"An error occurred while deidentifying {object_key}: {e}")
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+            log_deidentification_status(projects_table, project, file_name, "Error")
             s3.delete_object(Bucket=input_bucket, Key=object_key)
             print("Exiting")
             return
@@ -894,6 +922,7 @@ def deidentify(
             print(f"An error occurred while deidentifying {object_key}: {e}")
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
+            log_deidentification_status(projects_table, project, file_name, "Error")
             s3.delete_object(Bucket=input_bucket, Key=object_key)
             print("Exiting")
             return
@@ -918,6 +947,7 @@ def deidentify(
     update_deidentification_status(
         files_table, f"{project}/project-files/{file_name}", "Anonymised"
     )
+    log_deidentification_status(projects_table, project, file_name, "Anonymised")
 
 
 if __name__ == "__main__":

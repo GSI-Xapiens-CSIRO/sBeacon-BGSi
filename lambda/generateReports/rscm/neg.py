@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -18,6 +19,7 @@ def _create_annotations(
     footer_name_pos,
     footer_dob_pos,
     filename,
+    versions,
 ):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
@@ -38,7 +40,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -53,7 +58,10 @@ def _create_annotations(
         width=100,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -68,7 +76,10 @@ def _create_annotations(
         width=200,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
@@ -85,6 +96,10 @@ def _create_annotations(
         fontName="Helvetica",
         fontSize=8,
         options=[("Male", "male"), ("Female", "female")],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
     )
 
     # symptoms
@@ -98,11 +113,14 @@ def _create_annotations(
         width=200,
         height=12,
         fontSize=8,
+        borderWidth=0,
         fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
         fieldFlags=0,
     )
 
-    for _ in range(3):
+    for n in range(3):
         # footer name
         x, y, fs, text = footer_name_pos
         c.setFont("Helvetica", fs)
@@ -114,7 +132,25 @@ def _create_annotations(
         c.setFont("Helvetica", fs)
         c.setFillColor(colors.HexColor("#156082"))
         c.drawString(x, y, text)
+        if n == 2:
+            versions_pos = [
+                # left col
+                (180, 570+15, 12, versions["snp_eff_version"]),
+                (180, 556+15, 12, versions["snp_sift_version"]),
+                (180, 542+15, 12, versions["clinvar_version"]),
+                (180, 528+15, 12, versions["omim_version"]),
+                # right col
+                (480-20, 570+15, 12, versions["gnomad_version"]),
+                (480-20, 556+15, 12, versions["dbsnp_version"]),
+                (480-20, 542+15, 12, versions["sift_version"]),
+                (480-20, 528+15, 12, versions["polyphen2_version"]),
+            ]
+            for pos in versions_pos:
+                x, y, fs, text = pos
+                c.setFont("Helvetica", fs)
+                c.drawString(x, y, text)
         c.showPage()
+
     c.save()
 
 
@@ -139,14 +175,14 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
+def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
     assert all([pii_name, pii_dob, pii_gender]), "Missing required fields."
 
     module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/neg.pdf"
 
-    # x, y, w, h, text
+    # x, y, h, text
     date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
     name_pos = (192, 568, 12, pii_name)
     dob_pos = (192, 552, 12, pii_dob)
@@ -166,14 +202,32 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
         footer_name_pos,
         footer_dob_pos,
         output_pdf_path,
+        versions,
     )
-    _overlay_pdf_with_annotations(
-        output_pdf_path, input_pdf_path, "/tmp/annotated_neg.pdf"
-    )
+    output_file_name = f"/tmp/{str(uuid.uuid4())}.pdf"
+    _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
     os.remove(output_pdf_path)
-    print("PDF created successfully with new content drawn on it.")
-    return "/tmp/annotated_neg.pdf"
+
+    print(f"Generated report: {output_file_name}")
+    return output_file_name
 
 
 if __name__ == "__main__":
-    generate(pii_name="John Doe", pii_dob="01/01/1990", pii_gender="Male")
+    generate(
+        pii_name="John Doe",
+        pii_dob="01/01/1990",
+        pii_gender="Male",
+        versions={
+            "clinvar_version": "2025-0504",
+            "ensembl_version": "114",
+            "gnomad_version": "v4.1.0",
+            "sift_version": "5.2.2",
+            "dbsnp_version": "b156",
+            "gnomad_1KG_version": "v3.1.2",
+            "gnomad_constraints_version": "v3.1.2",
+            "snp_eff_version": "N/A",
+            "snp_sift_version": "N/A",
+            "polyphen2_version": "N/A",
+            "omim_version": "N/A",
+        },
+    )

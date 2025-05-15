@@ -12,53 +12,92 @@ except:
     from pos_stage_3 import generate as generate_pos_stage_3
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
+def generate(
+    *, pii_name=None, pii_dob=None, pii_gender=None, variants=None, versions=None
+):
     assert all([pii_name, pii_dob, pii_gender, variants]), "Missing required fields"
 
     # Generate the first stage of the report
-    pos_stage_1 = generate_pos_stage_1(variants=variants)
+    summary_pdf, results_pdf = generate_pos_stage_1(variants=variants)
 
     # Generate the second stage of the report
-    pos_stage_2 = generate_pos_stage_2(
-        pii_name=pii_name, pii_dob=pii_dob, pii_gender=pii_gender
+    annots_pdf = generate_pos_stage_2(
+        pii_name=pii_name, pii_dob=pii_dob, pii_gender=pii_gender, versions=versions
     )
 
     # Generate the third stage of the report
-    pos_stage_3 = generate_pos_stage_3(pii_name=pii_name, pii_dob=pii_dob)
+    report = generate_pos_stage_3(
+        summary_pdf, results_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob
+    )
 
-    os.remove("/tmp/annotated-RSCM_positive_int.pdf")
-    os.remove("/tmp/annotated-RSCM_positive_res.pdf")
-    os.remove("/tmp/annotated-RSCM_positive_vs.pdf")
+    os.remove(summary_pdf)
+    os.remove(results_pdf)
+    os.remove(annots_pdf)
 
-    return "/tmp/annotated_pos.pdf"
+    return report
 
 
 if __name__ == "__main__":
+    # Example usage - for testing includes made up data
     generate(
         pii_name="John Doe",
         pii_dob="01/01/1900",
         pii_gender="Female",
+        versions={
+            "clinvar_version": "2025-0504",
+            "ensembl_version": "114",
+            "gnomad_version": "v4.1.0",
+            "sift_version": "5.2.2",
+            "dbsnp_version": "b156",
+            "gnomad_1KG_version": "v3.1.2",
+            "gnomad_constraints_version": "v3.1.2",
+            "snp_eff_version": "N/A",
+            "snp_sift_version": "N/A",
+            "polyphen2_version": "N/A",
+            "omim_version": "N/A",
+        },
         variants=[
             {
-                "Alt Allele": "C1",
-                "Consequence": "C2",
-                "Transcript ID & Version": "C3",
-                "Amino Acid Change": "C4",
-                "Codon Change": "C5",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
+                "gt": "0/0",
+                "clinSig": "Benign",
+                "conditions": "ABCG2-related disorder",
             },
             {
-                "Alt Allele": "V1",
-                "Consequence": "V2",
-                "Transcript ID & Version": "V3",
-                "Amino Acid Change": "V4",
-                "Codon Change": "V5",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.719A>G (p.Tyr240Cys)",
+                "gt": "0/0",
+                "clinSig": "association",
+                "conditions": "BLOOD GROUP, JUNIOR SYSTEM",
             },
             {
-                "Alt Allele": "R1",
-                "Consequence": "R2",
-                "Transcript ID & Version": "R3",
-                "Amino Acid Change": "R4",
-                "Codon Change": "R5",
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.626-1G>A",
+                "gt": "0/0",
+                "clinSig": "drug response",
+                "conditions": "Gemcitabine response",
+            },
+            {
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.500C>G (p.Ala167Gly)",
+                "gt": "0/0",
+                "clinSig": "association",
+                "conditions": "Uric acid concentration, serum, quantitative trait locus 1",
+            },
+            {
+                "Gene Name": "TPMT",
+                "Variant Name": "NM_000367.5(TPMT):c.460G>A (p.Ala154Thr)",
+                "gt": "0/0",
+                "clinSig": "drug response",
+                "conditions": "rosuvastatin response - Efficacy",
+            },
+            {
+                "Gene Name": "-",
+                "Variant Name": "NM_000367.5(TPMT):c.497A>G (p.Tyr166Cys)",
+                "gt": "0/0",
+                "clinSig": "drug response",
+                "conditions": "rosuvastatin response - Metabolism/PK",
             },
         ],
     )

@@ -805,9 +805,14 @@ module "lambda-generateReports" {
   environment_variables = merge(
     local.sbeacon_variables,
     {
-      PDF_TEMPLATE_BUCKEET = aws_s3_bucket.report-template-bucket.bucket,
+      PDF_TEMPLATE_BUCKEET         = aws_s3_bucket.report-template-bucket.bucket,
+      DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
+
     }
   )
+
+  attach_policy_jsons    = true
+  number_of_policy_jsons = 1
 
   tags = var.common-tags
 }

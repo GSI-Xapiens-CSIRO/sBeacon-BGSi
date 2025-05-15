@@ -702,8 +702,20 @@ data "aws_iam_policy_document" "lambda-generateCohortVCfs" {
 data "aws_iam_policy_document" "lambda-generateReports" {
   statement {
     actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+    resources = [
+      "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.this.account_id}:table/${var.svep-references-table-name}"
+    ]
+  }
+  statement {
+    actions = [
       "s3:GetObject",
       "s3:ListBucket",
+      "s3:PutObject"
     ]
     resources = ["*"]
   }

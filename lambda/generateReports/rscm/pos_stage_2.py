@@ -1,13 +1,12 @@
 import os
 import uuid
 from pathlib import Path
+from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from datetime import datetime
-from reportlab.platypus import Table, TableStyle
 
 
 def _create_annotations(
@@ -151,7 +150,7 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
+def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
     assert all([pii_name, pii_dob, pii_gender]), "Missing required fields."
 
     module_dir = Path(__file__).parent
@@ -170,15 +169,15 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None):
 
     versions_pos = [
         # left col
-        (180, 570, 12, "SnpEff v1.0"),
-        (180, 556, 12, "SnpSift v1.0"),
-        (180, 542, 12, "ClinVar v1.0"),
-        (180, 528, 12, "OMIM 1.0"),
+        (180, 570, 12, versions["snp_eff_version"]),
+        (180, 556, 12, versions["snp_sift_version"]),
+        (180, 542, 12, versions["clinvar_version"]),
+        (180, 528, 12, versions["omim_version"]),
         # right col
-        (480, 570, 12, "gnomAD v1.0"),
-        (480, 556, 12, "dbSNP v1.0"),
-        (480, 542, 12, "SIFT v1.0"),
-        (480, 528, 12, "PolyPhen2 v2 1.0"),
+        (480, 570, 12, versions["gnomad_version"]),
+        (480, 556, 12, versions["dbsnp_version"]),
+        (480, 542, 12, versions["sift_version"]),
+        (480, 528, 12, versions["polyphen2_version"]),
     ]
 
     _create_annotations(

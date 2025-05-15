@@ -72,7 +72,7 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
             x, y, w, h, fs, text, flags = pos
             c.setFont("Helvetica", fs)
             form.textfield(
-                name=f"name-{n}",
+                name=f"header-{n}",
                 tooltip="",
                 value=f"{text}",
                 x=x,
@@ -239,6 +239,7 @@ def _overlay_template_with_table(src, dest, output):
 
 def _create_annotations(
     filename,
+    versions,
 ):
     _text_field_positions_page_1 = [
         # Results Interpretation
@@ -265,21 +266,22 @@ def _create_annotations(
     _static_text_page_3 = []
     _static_text_page_4 = [
         # OMIM
-        (170, 479 - 15, 11, "vOMIM"),
+        (170, 479 - 15, 11, versions["omim_version"]),
         # ClinVar
-        (170, 467 - 15, 11, "vClinvar"),
+        (170, 467 - 15, 11, versions["clinvar_version"]),
         # gnomAD
-        (170, 455 - 15, 11, "vgnomAD"),
+        (170, 455 - 15, 11, versions["gnomad_version"]),
         # dbSNP
-        (170, 443 - 15, 11, "vdbSNP"),
+        (170, 443 - 15, 11, versions["dbsnp_version"]),
         # SIFT
-        (170, 431 - 15, 11, "vSIFT"),
+        (170, 431 - 15, 11, versions["sift_version"]),
         # PolyPhen2
-        (170, 419 - 15, 11, "vPolyPhen2"),
+        (170, 419 - 15, 11, versions["polyphen2_version"]),
     ]
 
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
+    unique_counter = 0
 
     for page_poses_tf, page_poses_st in [
         (_text_field_positions_page_1, _static_text_page_1),
@@ -291,7 +293,7 @@ def _create_annotations(
             x, y, w, h, fs, text, flags = pos
             c.setFont("Helvetica", fs)
             form.textfield(
-                name=f"name-{n}",
+                name=f"name-{unique_counter}",
                 tooltip="",
                 value=f"{text}",
                 x=x,
@@ -306,6 +308,7 @@ def _create_annotations(
                 borderColor=None,
                 fieldFlags=flags,
             )
+            unique_counter += 1
         for n, pos in enumerate(page_poses_st):
             x, y, fs, text = pos
             c.setFont("Helvetica", fs)
@@ -336,7 +339,9 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
+def generate(
+    *, pii_name=None, pii_dob=None, pii_gender=None, variants=None, versions=None
+):
     header_rows = [
         [
             "Gene/ Transcript",
@@ -386,7 +391,7 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, variants=None):
         output_pdf_annotations, input_pdf_path, "/tmp/overlayed-table.pdf"
     )
 
-    _create_annotations(output_pdf_annotations)
+    _create_annotations(output_pdf_annotations, versions)
     _overlay_pdf_with_annotations(
         output_pdf_annotations,
         f"{module_dir}/EN_Genome Report_Positive-GENERIC-REST.pdf",
@@ -463,4 +468,18 @@ if __name__ == "__main__":
         },
     ]
     pii_data = {"pii_name": "John Doe", "pii_dob": "01/01/2000", "pii_gender": "Male"}
-    generate(variants=data, **pii_data)
+    versions = {
+        "clinvar_version": "2025-0504",
+        "ensembl_version": "114",
+        "gnomad_version": "v4.1.0",
+        "sift_version": "5.2.2",
+        "dbsnp_version": "b156",
+        "gnomad_1KG_version": "v3.1.2",
+        "gnomad_constraints_version": "v3.1.2",
+        "snp_eff_version": "N/A",
+        "snp_sift_version": "N/A",
+        "polyphen2_version": "N/A",
+        "omim_version": "N/A",
+    }
+
+    generate(variants=data, **pii_data, versions=versions)

@@ -643,7 +643,11 @@ module "lambda-deidentifyFiles" {
   description            = "Deidentifies files before moving them to the dataportal bucket"
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
+<<<<<<< HEAD
   memory_size            = 3000
+=======
+  memory_size            = 4096
+>>>>>>> 878c16e507b8fcaeaf2a9e58a4f23c4a864760e2
   timeout                = 900
   ephemeral_storage_size = 2560
   attach_policy_json     = true
@@ -787,7 +791,7 @@ module "lambda-getProjects" {
 }
 
 #
-# getProjects Function
+# generateReports Function
 #
 module "lambda-generateReports" {
   source = "terraform-aws-modules/lambda/aws"
@@ -799,6 +803,16 @@ module "lambda-generateReports" {
   memory_size   = 512
   timeout       = 60
   source_path   = "${path.module}/lambda/generateReports"
+
+  attach_policy_jsons = true
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-generateReports.json,
+  ]
+  number_of_policy_jsons = 1
+
+  environment_variables = {
+    DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
+  }
 
   tags = var.common-tags
 }

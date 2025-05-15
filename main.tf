@@ -787,7 +787,7 @@ module "lambda-getProjects" {
 }
 
 #
-# getProjects Function
+# generateReports Function
 #
 module "lambda-generateReports" {
   source = "terraform-aws-modules/lambda/aws"
@@ -802,9 +802,7 @@ module "lambda-generateReports" {
 
   attach_policy_jsons = true
   policy_jsons = [
-    data.aws_iam_policy_document.lambda-generateCohortVCfs.json,
-    data.aws_iam_policy_document.athena-full-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-access.json
+    data.aws_iam_policy_document.lambda-generateReports.json,
   ]
   number_of_policy_jsons = 1
 

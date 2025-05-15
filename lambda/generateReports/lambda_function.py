@@ -1,8 +1,9 @@
 import os
 import base64
 import json
-import boto3
+from collections import defaultdict
 
+import boto3
 
 DYNAMO_SVEP_REFERENCES_TABLE = os.environ.get(
     "DYNAMO_SVEP_REFERENCES_TABLE", "svep-references"
@@ -44,10 +45,7 @@ def lambda_handler(event, context):
         versions = get_all_versions()
     except Exception as e:
         print("Error fetching versions: ", e)
-        return {
-            "statusCode": 500,
-            "body": "Failed to fetch versions",
-        }
+        versions = defaultdict(lambda: "ERRORED")
 
     # RSCM
     match event["lab"]:

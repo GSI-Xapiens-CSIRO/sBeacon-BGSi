@@ -643,11 +643,7 @@ module "lambda-deidentifyFiles" {
   description            = "Deidentifies files before moving them to the dataportal bucket"
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
-<<<<<<< HEAD
-  memory_size            = 3000
-=======
   memory_size            = 4096
->>>>>>> 878c16e507b8fcaeaf2a9e58a4f23c4a864760e2
   timeout                = 900
   ephemeral_storage_size = 2560
   attach_policy_json     = true

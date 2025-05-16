@@ -625,6 +625,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
   statement {
     actions = [
         "s3:ListBucket",
+        "s3:DeleteObject",
     ]
     resources = [
         var.svep-temp-arn,

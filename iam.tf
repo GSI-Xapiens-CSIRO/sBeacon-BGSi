@@ -627,7 +627,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
         "s3:ListBucket",
     ]
     resources = [
-        aws_s3_bucket.svep-temp.arn,
+        "${aws_s3_bucket.svep-temp.arn}/*",
     ]
   }
 

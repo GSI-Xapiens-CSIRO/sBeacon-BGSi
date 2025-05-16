@@ -628,7 +628,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
         "s3:DeleteObject",
     ]
     resources = [
-        var.svep-temp-arn,
+        "${var.svep-temp-arn}/*",
     ]
   }
 

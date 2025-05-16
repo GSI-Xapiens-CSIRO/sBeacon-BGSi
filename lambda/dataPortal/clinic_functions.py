@@ -379,13 +379,49 @@ def generate_report(event, context):
                 "success": True,
                 "content": response["body"],
             }
+        if HUB_NAME == "RSPON":
+            if not variants:
+                return {
+                    "success": False,
+                    "message": "Report cannot be generated without variants",
+                }
+            else:
+                # phenotype validation
+                phenotype = ",".join((variants[0]["Phenotypes"]))
+                if phenotype not in [
+                    "Normal Metabolizer",
+                    "Intermediate Metabolizer",
+                    "Poor Metabolizer",
+                    "Rapid Metabolizer",
+                ]:
+                    return {
+                        "success": False,
+                        "message": "Invalid phenotype",
+                    }
+                for ph in variants[1:]:
+                    if ",".join((ph["Phenotypes"])) != phenotype:
+                        return {
+                            "success": False,
+                            "message": "Phenotype mismatch",
+                        }
+
+                payload = {
+                    "lab": HUB_NAME,
+                    "phenotype": phenotype,
+                    "alleles": ",".join((variants[0]["Alleles"])),
+                }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
+            }
         elif HUB_NAME == "RSSARJITO":
             if not variants:
                 payload = {
                     "lab": HUB_NAME,
                     "kind": "neg",
                     "lang": body["lang"],
-                    "mode": body["mode"]
+                    "mode": body["mode"],
                 }
             else:
                 payload = {

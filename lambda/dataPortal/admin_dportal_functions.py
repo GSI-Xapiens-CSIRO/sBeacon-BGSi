@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import boto3
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
@@ -9,6 +10,11 @@ from utils.cognito import get_user_from_attribute, get_user_attribute, list_user
 from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_manager
 from shared.apiutils import LambdaRouter, PortalError
+from utils.models import (
+    ClinicJobs,
+)
+
+s3 = boto3.client("s3")
 
 
 router = LambdaRouter()
@@ -16,7 +22,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-
+TEMP_BUCKET = os.environ.get("SVEP_TEMP_ARN") 
 
 #
 # Files' Admin Functions
@@ -367,3 +373,25 @@ def index_sbeacon(event, context):
     invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
 
     return {"success": True, "message": "Indexing started asynchonously"}
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/delete-job/{job_id}",
+    "delete",
+)
+def delete_jobid(event, context):
+    DPORTAL_BUCKET_TEMP = match = re.search(r"(svep-[\w\-]+)", TEMP_BUCKET).group(1)
+    selectedJOB = event["pathParameters"]["job_id"]
+    project_name = event["pathParameters"]["project"]
+    
+    try:
+        job = ClinicJobs.get(selectedJOB)
+        job.delete()
+        # delete file from temp data 
+        keys = list_s3_prefix(DPORTAL_BUCKET_TEMP, selectedJOB)
+        deleted = delete_s3_objects(DPORTAL_BUCKET_TEMP, keys)
+        print("keys",keys)
+        print("deleted",deleted)
+    except ClinicJobs.DoesNotExist:
+        raise PortalError(404, f"Job with ID {selectedJOB} not found")
+
+    return {"success": True, "message": f"Deleted job {selectedJOB} from project {project_name}"}

@@ -643,11 +643,7 @@ module "lambda-deidentifyFiles" {
   description            = "Deidentifies files before moving them to the dataportal bucket"
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
-<<<<<<< HEAD
-  memory_size            = 3000
-=======
   memory_size            = 4096
->>>>>>> 878c16e507b8fcaeaf2a9e58a4f23c4a864760e2
   timeout                = 900
   ephemeral_storage_size = 2560
   attach_policy_json     = true
@@ -747,6 +743,8 @@ module "lambda-data-portal" {
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
+      SVEP_TEMP                         = aws_s3_bucket.svep-temp.bucket
+      SVEP_TEMP_ARN                     = var.svep-temp-arn
     },
   )
 

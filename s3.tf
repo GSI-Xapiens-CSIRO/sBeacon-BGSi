@@ -212,30 +212,3 @@ resource "aws_s3_bucket_notification" "updateFiles" {
     aws_lambda_permission.S3deidentifyFiles,
   ]
 }
-
-#
-# Enables S3 temp bucket information
-#
-
-resource "aws_s3_bucket" "svep-temp" {
-  bucket_prefix = "svep-backend-temp-"
-  force_destroy = true
-  tags          = var.common-tags
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "svep-temp-lifecycle" {
-  bucket = aws_s3_bucket.svep-temp.id
-
-  rule {
-    id     = "remove-old-payloads"
-    status = "Enabled"
-
-    filter {
-      prefix = "payloads/"
-    }
-
-    expiration {
-      days = 1
-    }
-  }
-}

@@ -645,7 +645,7 @@ module "lambda-deidentifyFiles" {
   description            = "Deidentifies files before moving them to the dataportal bucket"
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
-  memory_size            = 4096
+  memory_size            = var.region == "ap-southeast-3" ? 3008 : 4096
   timeout                = 900
   ephemeral_storage_size = 2560
   attach_policy_json     = true
@@ -826,7 +826,7 @@ module "lambda-generateCohortVCfs" {
   description         = "Backend function to generate reports."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
-  memory_size         = 4096
+  memory_size         = var.region == "ap-southeast-3" ? 3008 : 4096
   timeout             = 60
   source_path         = "${path.module}/lambda/generateCohortVCfs"
   attach_policy_jsons = true

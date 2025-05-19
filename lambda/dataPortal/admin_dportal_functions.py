@@ -9,7 +9,7 @@ from utils.cognito import get_user_from_attribute, get_user_attribute, list_user
 from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_manager
 from shared.apiutils import LambdaRouter, PortalError
-
+from shared.dynamodb.locks import acquire_lock
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
@@ -360,10 +360,30 @@ def un_ingest_dataset_from_sbeacon(event, context):
 
 @router.attach("/dportal/admin/sbeacon/index", "post", authenticate_manager)
 def index_sbeacon(event, context):
+    request_id = event["requestContext"]["requestId"]
     payload = {
         "reIndexTables": True,
         "reIndexOntologyTerms": True,
+        "ownerId": request_id,
     }
-    invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
 
-    return {"success": True, "message": "Indexing started asynchonously"}
+    try:
+        lock = acquire_lock(
+            lock_id="sbeacon-indexer",
+            owner_id=request_id,
+            ttl_seconds=600,
+        )
+        if not lock:
+            return {
+                "success": False,
+                "message": "Unable to acquire lock. Another indexing process is already running.",
+            }
+        else:
+            invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
+            return {"success": True, "message": "Indexing started asynchonously"}
+    except Exception as e:
+        print(f"Error acquiring lock: {e}")
+        return {
+            "success": False,
+            "message": "Unable to initiate indexing, please try again.",
+        }

@@ -74,6 +74,7 @@ locals {
     DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
     DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
     DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
+    DYNAMO_DATAPORTAL_LOCKS_TABLE  = aws_dynamodb_table.dataportal_locks_table.name
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"
@@ -579,9 +580,10 @@ module "lambda-indexer" {
   policy_jsons = [
     data.aws_iam_policy_document.athena-full-access.json,
     data.aws_iam_policy_document.dynamodb-onto-access.json,
-    data.aws_iam_policy_document.dynamodb-onto-write-access.json
+    data.aws_iam_policy_document.dynamodb-onto-write-access.json,
+    data.aws_iam_policy_document.dataportal-locks-access.json,
   ]
-  number_of_policy_jsons = 3
+  number_of_policy_jsons = 4
   source_path            = "${path.module}/lambda/indexer"
 
   tags = var.common-tags
@@ -713,9 +715,10 @@ module "lambda-data-portal" {
   timeout             = 60
   attach_policy_jsons = true
   policy_jsons = [
-    data.aws_iam_policy_document.data-portal-lambda-access.json
+    data.aws_iam_policy_document.data-portal-lambda-access.json,
+    data.aws_iam_policy_document.dataportal-locks-access.json
   ]
-  number_of_policy_jsons = 1
+  number_of_policy_jsons = 2
   source_path            = "${path.module}/lambda/dataPortal"
 
   tags = var.common-tags

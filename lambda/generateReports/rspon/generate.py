@@ -11,7 +11,14 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
 def _create_annotations(
-    filename, pii_name, pii_dob, pii_gender, diplotype, phenotype, pk_v, pkdb_v
+    filename,
+    pii_name,
+    pii_dob,
+    pii_gender,
+    diplotype,
+    phenotype,
+    pharmcat_version,
+    pharmgkb_version,
 ):
     YT = 695
     # x, y, w, h, flags, text
@@ -44,27 +51,26 @@ def _create_annotations(
 
     pg_1_text_boxes = [
         # examination details
-        (260, 454, 11, diplotype),
-        (400, 454, 11, phenotype),
+        (280, 454, 11, diplotype),
+        (380, 454, 11, phenotype),
     ]
     pg_2_text_boxes = [
         # versions
-        (200, 300, 10, pk_v),
-        (200, 284, 10, pkdb_v),
+        (200, 300, 10, pharmcat_version),
+        (200, 284, 10, pharmgkb_version),
     ]
     pg_3_text_boxes = []
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
+    unique_counter = 0
 
     for page_text_fields, page_text_boxes in zip(
         [pg_1_text_fields, pg_2_text_fields, pg_3_text_fields],
         [pg_1_text_boxes, pg_2_text_boxes, pg_3_text_boxes],
     ):
-        for n, (x, y, w, h, flags, text) in enumerate(
-            common_text_fields + page_text_fields
-        ):
+        for n, (x, y, w, h, flags, text) in enumerate(common_text_fields):
             form.textfield(
-                name=f"text_field_{n}",
+                name=f"header_{n}",
                 tooltip="Text Field",
                 value=text,
                 x=x,
@@ -78,6 +84,23 @@ def _create_annotations(
                 forceBorder=False,
                 fieldFlags=flags,
             )
+        for n, (x, y, w, h, flags, text) in enumerate(page_text_fields):
+            form.textfield(
+                name=f"text_field_{unique_counter}",
+                tooltip="Text Field",
+                value=text,
+                x=x,
+                y=y,
+                width=w,
+                height=h,
+                fontSize=8,
+                borderWidth=0,
+                fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                fieldFlags=flags,
+            )
+            unique_counter += 1
         for n, (x, y, fs, text) in enumerate(page_text_boxes):
             c.setFont("Helvetica", fs)
             c.drawString(x, y, text)
@@ -107,48 +130,32 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def _get_details(data: Dict):
-    """
-    The genotype-phenotype associations are as follows:
-        NM: *1/*1
-        RM: *1/*17
-        IM: any combinations of either *1/*2, *1/*3, *2/*17, or *3/*17
-        PM: any of *2/*2, *3/*3, or *2/*3.
-    Note:
-        NM = Normal metabolizer
-        RM = Rapid Metabolizer
-        IM = Intermediate Metabolizer
-        PM = Poor Metabolizer.
-    """
-    alleles = data["alleles"]
-    phenotypes = data["phenotypes"]
-
-    if all([a == "*1" for a in alleles]):
-        return "NM", "*1/*1", "Normal metabolizer", "PK V1", "PGKB DB VX"
-    elif "Intermediate Metabolizer" in phenotypes:
-        return (
-            "IM",
-            "/".join(alleles),
-            "Intermediate Metabolizer",
-            "PK V1",
-            "PGKB DB VX",
-        )
-    elif "Rapid Metabolizer" in phenotypes:
-        return "RapidM", "/".join(alleles), "Rapid Metabolizer", "PK V1", "PGKB DB VX"
-    elif "Poor Metabolizer" in phenotypes:
-        return "PoorM", "/".join(alleles), "Poor Metabolizer", "PK V1", "PGKB DB VX"
-
-
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, data=None):
-    assert all([pii_name, pii_dob, pii_gender]), "Missing required fields"
+def generate(
+    *,
+    pii_name=None,
+    pii_dob=None,
+    pii_gender=None,
+    phenotype=None,
+    alleles=None,
+    versions=None,
+):
     module_dir = Path(__file__).parent
-    kind, diplotype, phenotype, pk_v, pkdb_v = _get_details(data)
+    kind = "".join([x[0] for x in phenotype.split(" ")])
+
+    # diplotype, phenotype = _get_details(phenotype,alleles)
     annotated = "/tmp/annotations.pdf"
     template = f"{module_dir}/{kind}.pdf"
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
 
     _create_annotations(
-        annotated, pii_name, pii_dob, pii_gender, diplotype, phenotype, pk_v, pkdb_v
+        annotated,
+        pii_name,
+        pii_dob,
+        pii_gender,
+        alleles,
+        phenotype,
+        versions["pharmcat_version"],
+        versions["pharmgkb_version"],
     )
     _overlay_pdf_with_annotations(annotated, template, output_file_name)
     os.remove(annotated)
@@ -158,4 +165,26 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, data=None):
 
 
 if __name__ == "__main__":
-    generate(pii_name="John Doe", pii_dob="01/01/1900", pii_gender="Male", data=dict())
+    alleles = "*38,*38"
+    phenotype = "Normal Metabolizer"
+    versions = {
+        "gnomad_version": "v4.1.0",
+        "sift_version": "5.2.2",
+        "dbsnp_version": "b156",
+        "gnomad_1KG_version": "v3.1.2",
+        "gnomad_constraints_version": "v3.1.2",
+        "snp_eff_version": "N/A",
+        "snp_sift_version": "N/A",
+        "polyphen2_version": "N/A",
+        "omim_version": "N/A",
+        "pharmcat_version": "3.0.0",
+        "pharmgkb_version": "2025-03-07-16-38",
+    }
+    generate(
+        pii_name="John Doe",
+        pii_dob="01/01/1900",
+        pii_gender="Male",
+        phenotype=phenotype,
+        alleles=alleles,
+        versions=versions,
+    )

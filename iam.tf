@@ -731,3 +731,25 @@ data "aws_iam_policy_document" "lambda-generateReports" {
     ]
   }
 }
+
+# 
+# dynamodb locks table access
+# 
+data "aws_iam_policy_document" "dataportal-locks-access" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:BatchGetItem",
+    ]
+    resources = [
+      aws_dynamodb_table.dataportal_locks_table.arn,
+    ]
+  }
+}

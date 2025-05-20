@@ -818,7 +818,11 @@ module "lambda-generateReports" {
   attach_policy_jsons    = true
   number_of_policy_jsons = 1
 
-  tags = var.common-tags
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer,
+    local.binaries_layer,
+  ]
 }
 
 #

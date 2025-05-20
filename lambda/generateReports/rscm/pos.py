@@ -15,8 +15,6 @@ except:
 def generate(
     *, pii_name=None, pii_dob=None, pii_gender=None, variants=None, versions=None
 ):
-    assert all([pii_name, pii_dob, pii_gender, variants]), "Missing required fields"
-
     # Generate the first stage of the report
     summary_pdf, results_pdf = generate_pos_stage_1(variants=variants)
 

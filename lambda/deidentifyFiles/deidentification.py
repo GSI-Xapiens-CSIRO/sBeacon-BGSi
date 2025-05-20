@@ -1,5 +1,6 @@
 import argparse
 import csv
+import io
 import json
 import os
 import re
@@ -74,6 +75,15 @@ ANY_PII_PATTERN = re.compile(
         + [f"(?i:{pattern})" for pattern in CASE_INSENSITIVE_PII_PATTERNS]
     )
 )
+INDIVIDUAL_MARKER_FIELDS = {
+    "age",
+    "ethnicity",
+    "karyotypicsex",
+    "sex",
+}  # What we use to know we can use NAME_PATTERN to remove any name fields
+NAME_PATTERN = re.compile(
+    r"(?i)name"
+)  # Very broad - need to know we're dealing with an individual to use this
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
@@ -630,12 +640,16 @@ def process_tabular(input_path, output_path, delimiter):
     with open(input_path, "r", newline="", encoding="utf-8") as infile:
         reader = csv.reader(infile, delimiter=delimiter)
         header = next(reader)
+        is_individual = any(
+            col_name.casefold() in INDIVIDUAL_MARKER_FIELDS for col_name in header
+        )
         columns_to_keep = [
             idx
             for idx, col_name in enumerate(header)
             if not any(
                 re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS
             )
+            and not (is_individual and NAME_PATTERN.search(col_name))
         ]
         with open(output_path, "w", newline="", encoding="utf-8") as outfile:
             writer = csv.writer(outfile, delimiter=delimiter)
@@ -645,6 +659,21 @@ def process_tabular(input_path, output_path, delimiter):
             for row in reader:
                 filtered_row = [anonymise(row[idx]) for idx in columns_to_keep]
                 writer.writerow(filtered_row)
+
+
+def outfile_after_element(stack, outfile):
+    if stack:
+        if "stored_outfile" in stack[-1]:
+            stack[-1].setdefault("name_strings", []).append(
+                outfile.getvalue().strip(",")
+            )
+            outfile.close()
+            outfile = stack[-1].pop("stored_outfile")
+        if stack[-1].get("skip_first"):
+            del stack[-1]["skip_first"]
+        else:
+            stack[-1]["first"] = False
+    return outfile
 
 
 def process_json(input_path, output_path):
@@ -675,10 +704,13 @@ def process_json(input_path, output_path):
                 stack.append({"type": "object", "first": True, "pending_key": False})
 
             elif event == "end_map":
+                if "name_strings" in stack[-1] and not stack[-1].get("is_individual"):
+                    if not stack[-1]["first"]:
+                        outfile.write(",")
+                    outfile.write(",".join(stack[-1].pop("name_strings")))
                 outfile.write("}")
                 stack.pop()
-                if stack:
-                    stack[-1]["first"] = False
+                outfile = outfile_after_element(stack, outfile)
 
             elif event == "start_array":
                 if stack:
@@ -693,21 +725,24 @@ def process_json(input_path, output_path):
             elif event == "end_array":
                 outfile.write("]")
                 stack.pop()
-                if stack:
-                    stack[-1]["first"] = False
+                outfile = outfile_after_element(stack, outfile)
 
             elif event == "map_key":
+                if value.casefold() in INDIVIDUAL_MARKER_FIELDS:
+                    stack[-1]["is_individual"] = True
                 # If the key matches a PII pattern, set the keybuffer to skip its subtree.
                 if any(
                     re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
                     keybuffer = f"{prefix}.{value}"
                     continue
+                if NAME_PATTERN.search(value):
+                    stack[-1]["stored_outfile"] = outfile
+                    outfile = io.StringIO()
+                    stack[-1]["skip_first"] = True
                 if stack and stack[-1]["type"] == "object":
                     if not stack[-1]["first"]:
                         outfile.write(",")
-                    else:
-                        stack[-1]["first"] = False
                     outfile.write(json.dumps(value))
                     stack[-1]["pending_key"] = True
 
@@ -719,12 +754,11 @@ def process_json(input_path, output_path):
                     elif stack[-1]["type"] == "array":
                         if not stack[-1]["first"]:
                             outfile.write(",")
-                        else:
-                            stack[-1]["first"] = False
                 if event == "string":
                     outfile.write(json.dumps(anonymise(value)))
                 else:
                     outfile.write(json.dumps(value))
+                outfile = outfile_after_element(stack, outfile)
 
         outfile.write("\n")
 

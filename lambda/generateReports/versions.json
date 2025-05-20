@@ -7,5 +7,7 @@
   "snp_eff_version": "N/A",
   "snp_sift_version": "N/A",
   "polyphen2_version": "N/A",
-  "omim_version": "N/A"
+  "omim_version": "N/A",
+  "pharmcat_version": "3.0.0",
+  "pharmgkb_version": "2025-03-07-16-38"
 }

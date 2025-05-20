@@ -34,28 +34,30 @@ def list_jobs(event, context):
         ProjectUsers.get(project, sub)
         # get project
         Projects.get(project)
-        # get jobs
 
+        # get jobs
         if search_term or job_status:
             scan_params = {
                 "limit": int(limit),
                 "last_evaluated_key": json.loads(last_evaluated_key),
             }
 
-            filter_condition = None
+            # Initialize filter condition with project
+            filter_condition = ClinicJobs.project_name == project
 
+            # Add search term filter if present
             if search_term:
-                filter_condition = ClinicJobs.job_name_lower.contains(
+                search_condition = ClinicJobs.job_name_lower.contains(
                     search_term.lower()
                 )
+                filter_condition = filter_condition & search_condition
 
+            # Add job status filter if present
             if job_status:
                 status_condition = ClinicJobs.job_status.contains(job_status)
-                if filter_condition is not None:
-                    filter_condition = filter_condition & status_condition
-                else:
-                    filter_condition = status_condition
+                filter_condition = filter_condition & status_condition
 
+            # Scan with combined filters
             jobs = ClinicJobs.scan(
                 filter_condition=filter_condition,
                 **scan_params,
@@ -403,6 +405,42 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "kind": "pos",
                     "variants": variants,
+                }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
+            }
+        if HUB_NAME == "RSPON":
+            if not variants:
+                return {
+                    "success": False,
+                    "message": "Report cannot be generated without variants",
+                }
+            else:
+                # phenotype validation
+                phenotype = ",".join((variants[0]["Phenotypes"]))
+                if phenotype not in [
+                    "Normal Metabolizer",
+                    "Intermediate Metabolizer",
+                    "Poor Metabolizer",
+                    "Rapid Metabolizer",
+                ]:
+                    return {
+                        "success": False,
+                        "message": "Invalid phenotype",
+                    }
+                for ph in variants[1:]:
+                    if ",".join((ph["Phenotypes"])) != phenotype:
+                        return {
+                            "success": False,
+                            "message": "Phenotype mismatch",
+                        }
+
+                payload = {
+                    "lab": HUB_NAME,
+                    "phenotype": phenotype,
+                    "alleles": ",".join((variants[0]["Alleles"])),
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             response = {

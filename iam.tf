@@ -624,8 +624,28 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
+        "s3:ListBucket"
+    ]
+    resources = [
+        var.svep-temp-arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${var.svep-temp-arn}/*",
+    ]
+  }
+
+  statement {
+    actions = [
       "s3:DeleteObject",
       "s3:GetObject",
+      "s3:ListBucket"
     ]
 
     resources = [
@@ -718,5 +738,27 @@ data "aws_iam_policy_document" "lambda-generateReports" {
       "s3:PutObject"
     ]
     resources = ["*"]
+  }
+}
+
+# 
+# dynamodb locks table access
+# 
+data "aws_iam_policy_document" "dataportal-locks-access" {
+  statement {
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:BatchGetItem",
+    ]
+    resources = [
+      aws_dynamodb_table.dataportal_locks_table.arn,
+    ]
   }
 }

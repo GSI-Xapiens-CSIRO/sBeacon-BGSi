@@ -264,6 +264,10 @@ class DynamoDBEnvironment:
     def DYNAMO_QUOTA_USER_TABLE(self):
         return os.environ["DYNAMO_QUOTA_USER_TABLE"]
 
+    @property
+    def DYNAMO_DATAPORTAL_LOCKS_TABLE(self):
+        return os.environ["DYNAMO_DATAPORTAL_LOCKS_TABLE"]
+
 
 # class SnsEnvironment:
 #     @property

@@ -10,6 +10,7 @@ import boto3
 from shared.dynamodb import Descendants, Anscestors, Ontology
 from shared.ontoutils import request_hierarchy
 from shared.utils import ENV_ATHENA
+from shared.dynamodb.locks import release_lock
 from ctas_queries import QUERY as CTAS_TEMPLATE
 from generate_query_index import QUERY as INDEX_QUERY
 from generate_query_terms import QUERY as TERMS_QUERY
@@ -300,6 +301,11 @@ def lambda_handler(event, context):
     print("Backend Event Received: {}".format(json.dumps(event)))
     re_index_tables = event.get("reIndexTables", True)
     re_index_ontology_tables = event.get("reIndexOntologyTerms", False)
+    owner_id = event.get("ownerId", None)
+
+    if not owner_id:
+        print("No ownerId provided, exiting")
+        return
 
     # re-index all tables using CTAS
     if re_index_tables:
@@ -335,6 +341,19 @@ def lambda_handler(event, context):
         index_thread.join()
         relations_thread.join()
 
+    try:
+        # release the lock
+        released = release_lock(
+            lock_id="sbeacon-indexer",
+            owner_id=owner_id,
+        )
+        if released:
+            print("Lock released successfully")
+        else:
+            print("Failed to release lock")
+    except Exception as e:
+        print(f"Error releasing lock: {e}")
+        
     print("Indexing complete!")
 
 

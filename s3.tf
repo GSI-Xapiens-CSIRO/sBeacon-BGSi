@@ -237,3 +237,4 @@ resource "null_resource" "upload_report_templates" {
 
   depends_on = [aws_s3_bucket.report-template-bucket]
 }
+

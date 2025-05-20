@@ -1,2 +1,3 @@
 from .ontologies import Anscestors, Descendants, Ontology
-from .quota import Quota, UsageMap, get_user_quota
+from .quota import Quota, UsageMap
+from .locks import acquire_lock, release_lock

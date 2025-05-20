@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import boto3
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
@@ -9,14 +10,17 @@ from utils.cognito import get_user_from_attribute, get_user_attribute, list_user
 from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_manager
 from shared.apiutils import LambdaRouter, PortalError
-
+from shared.dynamodb.locks import acquire_lock
+from utils.models import (
+    ClinicJobs,
+)
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-
+TEMP_BUCKET = os.environ.get("SVEP_TEMP_ARN") 
 
 #
 # Files' Admin Functions
@@ -360,10 +364,51 @@ def un_ingest_dataset_from_sbeacon(event, context):
 
 @router.attach("/dportal/admin/sbeacon/index", "post", authenticate_manager)
 def index_sbeacon(event, context):
+    request_id = event["requestContext"]["requestId"]
     payload = {
         "reIndexTables": True,
         "reIndexOntologyTerms": True,
+        "ownerId": request_id,
     }
-    invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
 
-    return {"success": True, "message": "Indexing started asynchonously"}
+    try:
+        lock = acquire_lock(
+            lock_id="sbeacon-indexer",
+            owner_id=request_id,
+            ttl_seconds=600,
+        )
+        if not lock:
+            return {
+                "success": False,
+                "message": "Unable to acquire lock. Another indexing process is already running.",
+            }
+        else:
+            invoke_lambda_function(INDEXER_LAMBDA, payload, event=True)
+            return {"success": True, "message": "Indexing started asynchonously"}
+    except Exception as e:
+        print(f"Error acquiring lock: {e}")
+        return {
+            "success": False,
+            "message": "Unable to initiate indexing, please try again.",
+        }
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/delete-job/{job_id}",
+    "delete",
+)
+def delete_jobid(event, context):
+    DPORTAL_BUCKET_TEMP = match = re.search(r"(svep-[\w\-]+)", TEMP_BUCKET).group(1)
+    selectedJOB = event["pathParameters"]["job_id"]
+    project_name = event["pathParameters"]["project"]
+    
+    try:
+        job = ClinicJobs.get(selectedJOB)
+        job.delete()
+        # delete file from temp data 
+        keys = list_s3_prefix(DPORTAL_BUCKET_TEMP, selectedJOB)
+        deleted = delete_s3_objects(DPORTAL_BUCKET_TEMP, keys)
+    except ClinicJobs.DoesNotExist:
+        raise PortalError(404, f"Job with ID {selectedJOB} not found")
+
+    return {"success": True, "message": f"Deleted job {selectedJOB} from project {project_name}"}

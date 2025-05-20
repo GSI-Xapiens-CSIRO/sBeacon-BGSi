@@ -11,23 +11,29 @@ DYNAMO_SVEP_REFERENCES_TABLE = os.environ.get(
 
 
 def get_all_versions():
-    client = boto3.client("dynamodb")
-    response = client.scan(TableName=DYNAMO_SVEP_REFERENCES_TABLE)
-    items = response["Items"]
-    versions = {}
+    try:
+        client = boto3.client("dynamodb")
+        response = client.scan(TableName=DYNAMO_SVEP_REFERENCES_TABLE)
+        items = response["Items"]
+        versions = {}
 
-    while "LastEvaluatedKey" in response:
-        response = client.scan(
-            TableName=DYNAMO_SVEP_REFERENCES_TABLE,
-            ExclusiveStartKey=response["LastEvaluatedKey"],
-        )
-        items.extend(response["Items"])
+        while "LastEvaluatedKey" in response:
+            response = client.scan(
+                TableName=DYNAMO_SVEP_REFERENCES_TABLE,
+                ExclusiveStartKey=response["LastEvaluatedKey"],
+            )
+            items.extend(response["Items"])
 
-    for item in items:
-        version = item["version"]["S"]
-        tool = item["id"]["S"]
-        versions[tool] = version
+        for item in items:
+            version = item["version"]["S"]
+            tool = item["id"]["S"]
+            versions[tool] = version
+    except Exception as e:
+        print("Error fetching versions from DynamoDB: ", e)
+        versions = {}
+    
     versions = {**versions, **json.load(open("versions.json"))}
+
     return versions
 
 
@@ -41,11 +47,7 @@ def lambda_handler(event, context):
         "pii_gender": "",
     }
 
-    try:
-        versions = get_all_versions()
-    except Exception as e:
-        print("Error fetching versions: ", e)
-        versions = defaultdict(lambda: "ERRORED")
+    versions = get_all_versions()
 
     # RSCM
     match event["lab"]:
@@ -72,7 +74,11 @@ def lambda_handler(event, context):
         case "RSPON":
             from rspon import generate
 
-            res = generate(**data, data=data)
+            phenotype = event["phenotype"]
+            alleles = event["alleles"]
+            res = generate(
+                **data, phenotype=phenotype, alleles=alleles, versions=versions
+            )
         case "RSJPD":
             from rsjpd import generate
 

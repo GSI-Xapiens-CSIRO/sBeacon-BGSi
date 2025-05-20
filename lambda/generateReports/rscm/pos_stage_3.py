@@ -5,6 +5,9 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from shared.utils import download_from_s3
+
+REPORT_TEMPLATE_BUCKET = os.environ["PDF_TEMPLATE_BUCKEET"]
 
 
 def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_num_pos):

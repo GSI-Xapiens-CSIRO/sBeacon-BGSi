@@ -1,5 +1,7 @@
 import os
 import uuid
+import boto3
+
 from datetime import datetime
 from pathlib import Path
 
@@ -7,6 +9,10 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from shared.utils import download_from_s3
+
+s3 = boto3.client("s3")
+REPORT_TEMPLATE_BUCKET = os.environ["PDF_TEMPLATE_BUCKEET"]
 
 
 def _create_annotations(
@@ -135,15 +141,15 @@ def _create_annotations(
         if n == 2:
             versions_pos = [
                 # left col
-                (180, 570+15, 12, versions["snp_eff_version"]),
-                (180, 556+15, 12, versions["snp_sift_version"]),
-                (180, 542+15, 12, versions["clinvar_version"]),
-                (180, 528+15, 12, versions["omim_version"]),
+                (180, 570 + 15, 12, versions["snp_eff_version"]),
+                (180, 556 + 15, 12, versions["snp_sift_version"]),
+                (180, 542 + 15, 12, versions["clinvar_version"]),
+                (180, 528 + 15, 12, versions["omim_version"]),
                 # right col
-                (480-20, 570+15, 12, versions["gnomad_version"]),
-                (480-20, 556+15, 12, versions["dbsnp_version"]),
-                (480-20, 542+15, 12, versions["sift_version"]),
-                (480-20, 528+15, 12, versions["polyphen2_version"]),
+                (480 - 20, 570 + 15, 12, versions["gnomad_version"]),
+                (480 - 20, 556 + 15, 12, versions["dbsnp_version"]),
+                (480 - 20, 542 + 15, 12, versions["sift_version"]),
+                (480 - 20, 528 + 15, 12, versions["polyphen2_version"]),
             ]
             for pos in versions_pos:
                 x, y, fs, text = pos
@@ -178,9 +184,12 @@ def _overlay_pdf_with_annotations(src, dest, output):
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
     assert all([pii_name, pii_dob, pii_gender]), "Missing required fields."
 
-    module_dir = Path(__file__).parent
+    # module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
-    input_pdf_path = f"{module_dir}/neg.pdf"
+    template_pdf_path = "/tmp/neg.pdf"
+    s3_key = "templates/rscm/neg.pdf"
+
+    input_pdf_path = download_from_s3(REPORT_TEMPLATE_BUCKET, s3_key, template_pdf_path)
 
     # x, y, h, text
     date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")

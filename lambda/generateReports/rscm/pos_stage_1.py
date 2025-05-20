@@ -12,6 +12,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from shared.utils import download_from_s3
+
+REPORT_TEMPLATE_BUCKET = os.environ["PDF_TEMPLATE_BUCKEET"]
 
 
 def _generate_row_data(
@@ -212,10 +215,14 @@ def _overlay_template_with_table(src, dest, output):
 
 def generate(*, variants=None):
     assert all([variants]), "Missing required fields"
-    module_dir = Path(__file__).parent
 
     output_pdf_annotations = "/tmp/annotations.pdf"
-    input_pdf_path = f"{module_dir}/blank.pdf"
+
+    # module_dir = Path(__file__).parent
+    template_pdf_path = "/tmp/neg.pdf"
+    s3_key = "templates/rscm/blank.pdf"
+
+    input_pdf_path = download_from_s3(REPORT_TEMPLATE_BUCKET, s3_key, template_pdf_path)
 
     rows = []
     headers = [

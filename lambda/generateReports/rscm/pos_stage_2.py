@@ -7,6 +7,9 @@ from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from shared.utils import download_from_s3
+
+REPORT_TEMPLATE_BUCKET = os.environ["PDF_TEMPLATE_BUCKEET"]
 
 
 def _create_annotations(
@@ -153,9 +156,13 @@ def _overlay_pdf_with_annotations(src, dest, output):
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
     assert all([pii_name, pii_dob, pii_gender]), "Missing required fields."
 
-    module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
-    input_pdf_path = f"{module_dir}/pos.pdf"
+
+    # module_dir = Path(__file__).parent
+    template_pdf_path = "/tmp/neg.pdf"
+    s3_key = "templates/rscm/pos.pdf"
+
+    input_pdf_path = download_from_s3(REPORT_TEMPLATE_BUCKET, s3_key, template_pdf_path)
 
     # x, y, fs, text
     date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")

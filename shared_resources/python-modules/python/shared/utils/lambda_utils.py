@@ -339,3 +339,24 @@ ENV_DYNAMO = DynamoDBEnvironment()
 ENV_CONFIG = ConfigEnvironment()
 ENV_COGNITO = CognitoEnvironment()
 ENV_SES = SesEnvironment()
+
+
+# This function downloads a file from S3 to a lambda local path.
+# It checks if the file already exists in the local path before downloading.
+def download_from_s3(bucket_name, s3_key, local_file_path):
+    s3 = boto3.client("s3")
+
+    # Check if the file already exists in /tmp
+    if os.path.exists(local_file_path):
+        print(f"File already exists: {local_file_path}. Using the cached file.")
+        return local_file_path
+
+    try:
+        print(f"Downloading {s3_key} from bucket {bucket_name} to {local_file_path}...")
+        s3.download_file(bucket_name, s3_key, local_file_path)
+        print("Download complete.")
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+        raise
+
+    return local_file_path

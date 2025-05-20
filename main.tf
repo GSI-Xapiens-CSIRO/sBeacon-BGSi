@@ -811,7 +811,6 @@ module "lambda-generateReports" {
     {
       PDF_TEMPLATE_BUCKEET         = aws_s3_bucket.report-template-bucket.bucket,
       DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
-
     }
   )
 

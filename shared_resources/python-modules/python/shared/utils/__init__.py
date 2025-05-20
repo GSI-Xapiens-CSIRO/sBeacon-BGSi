@@ -12,5 +12,6 @@ from .lambda_utils import (
     ENV_SES,
     make_temp_file,
     clear_tmp,
+    download_from_s3,
 )
 from .lambda_utils import LambdaClient

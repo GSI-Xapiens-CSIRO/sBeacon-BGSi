@@ -154,11 +154,8 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 
 def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
-    assert all([pii_name, pii_dob, pii_gender]), "Missing required fields."
-
     output_pdf_path = "/tmp/annotations.pdf"
 
-    # module_dir = Path(__file__).parent
     template_pdf_path = "/tmp/neg.pdf"
     s3_key = "templates/rscm/pos.pdf"
 

@@ -20,7 +20,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-TEMP_BUCKET = os.environ.get("SVEP_TEMP_ARN") 
+# TEMP_BUCKET = os.environ.get("SVEP_TEMP_ARN") 
 
 #
 # Files' Admin Functions
@@ -398,7 +398,7 @@ def index_sbeacon(event, context):
     "delete",
 )
 def delete_jobid(event, context):
-    DPORTAL_BUCKET_TEMP = match = re.search(r"(svep-[\w\-]+)", TEMP_BUCKET).group(1)
+    DPORTAL_BUCKET_TEMP = ""
     selectedJOB = event["pathParameters"]["job_id"]
     project_name = event["pathParameters"]["project"]
     

@@ -212,3 +212,9 @@ resource "aws_s3_bucket_notification" "updateFiles" {
     aws_lambda_permission.S3deidentifyFiles,
   ]
 }
+
+resource "aws_s3_bucket" "svep-temp" {
+  bucket_prefix = "svep-backend-temp-"
+  force_destroy = true
+  tags          = var.common-tags
+}

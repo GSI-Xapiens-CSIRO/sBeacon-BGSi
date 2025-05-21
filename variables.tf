@@ -266,8 +266,3 @@ variable "svep-references-table-name" {
   type        = string
   description = "Name of the references table"
 }
-
-variable "svep-temp-arn" {
-  type        = string
-  description = "Svep temp bucket arn from module svep"
-}

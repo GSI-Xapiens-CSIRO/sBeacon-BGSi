@@ -266,3 +266,14 @@ variable "svep-references-table-name" {
   type        = string
   description = "Name of the references table"
 }
+
+# external s3 buckets
+variable "clinic-temp-bucket-name" {
+  type        = string
+  description = "Name of the temporary bucket for clinic jobs"
+}
+
+variable "clinic-temp-bucket-arn" {
+  type        = string
+  description = "ARN of the temporary bucket for clinic jobs"
+}

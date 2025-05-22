@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import boto3
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
@@ -10,13 +11,16 @@ from utils.lambda_util import invoke_lambda_function
 from shared.cognitoutils import authenticate_manager
 from shared.apiutils import LambdaRouter, PortalError
 from shared.dynamodb.locks import acquire_lock
+from utils.models import (
+    ClinicJobs,
+)
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-
+TEMP_BUCKET = os.environ.get("SVEP_TEMP_NAME") 
 
 #
 # Files' Admin Functions
@@ -391,3 +395,40 @@ def index_sbeacon(event, context):
             "success": False,
             "message": "Unable to initiate indexing, please try again.",
         }
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}",
+    "delete",
+)
+def delete_jobid(event, context):
+    selectedJOB = event["pathParameters"]["job_id"]
+    project_name = event["pathParameters"]["project"]
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    
+    try:
+        #check is user registered in project
+        ProjectUsers.get(project_name, sub) 
+
+        job = ClinicJobs.get(selectedJOB) 
+        if job.job_status.lower() != "failed":
+            return {
+                "success": False,
+                "message": f"Job {selectedJOB} is not in a failed status.",
+            }
+        job.delete()
+        # delete file from temp data 
+        keys = list_s3_prefix(TEMP_BUCKET, selectedJOB)
+        delete_s3_objects(TEMP_BUCKET, keys)
+    except ClinicJobs.DoesNotExist:
+        return {
+            "success": False,
+            "message": f"Job with ID {selectedJOB} not found",
+        }
+    except ProjectUsers.DoesNotExist:
+        return {
+            "success": False,
+            "message": "User not registered in project.",
+        }
+
+    return {"success": True, "message": f"Deleted job {selectedJOB} from project {project_name}"}

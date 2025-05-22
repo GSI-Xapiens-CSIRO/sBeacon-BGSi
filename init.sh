@@ -2,9 +2,26 @@
 # argument optional, will be passed into add_compile_options()
 # e.g ./init.sh '-march=ivybridge'
 
-# 
+#
 # Housekeeping and cleanups
-# 
+#
+
+if command -v pip3 >/dev/null 2>&1; then
+    PIP_CMD=pip3
+elif command -v pip >/dev/null 2>&1; then
+    PIP_CMD=pip
+elif [ -x "/usr/bin/pip3" ]; then
+    PIP_CMD=/usr/bin/pip3
+elif [ -x "/usr/bin/pip" ]; then
+    PIP_CMD=/usr/bin/pip
+elif [ -x "/usr/local/bin/pip3" ]; then
+    PIP_CMD=/usr/local/bin/pip3
+elif [ -x "/usr/local/bin/pip" ]; then
+    PIP_CMD=/usr/local/bin/pip
+else
+    echo "Error: pip not found"
+    exit 1
+fi
 
 set -ex
 REPOSITORY_DIRECTORY="${PWD}"
@@ -60,7 +77,7 @@ mkdir -p layers/binaries/bin
 ldd ${SOURCE}/samtools-1.21/samtools | awk 'NF == 4 { system("cp " $3 " ./layers/binaries/lib") }'
 cp ${SOURCE}/samtools-1.21/samtools ./layers/binaries/bin/
 
-# libmagic 
+# libmagic
 cd ${SOURCE}
 wget https://github.com/file/file/archive/refs/tags/FILE5_46.tar.gz
 tar -xf FILE5_46.tar.gz
@@ -71,15 +88,15 @@ cp ${SOURCE}/file-FILE5_46/src/.libs/libmagic.so.1 ./layers/binaries/lib/
 
 # python libraries layer
 cd ${REPOSITORY_DIRECTORY}
-pip install ijson==3.3.0 --target layers/python_libraries/python
-pip install jsons==1.6.3 --target layers/python_libraries/python
-pip install jsonschema==4.18.0 --target layers/python_libraries/python
-pip install markupsafe==2.0.1 --target layers/python_libraries/python
-pip install pydantic==2.0.2 --target layers/python_libraries/python
-pip install pyhumps==3.8.0 --target layers/python_libraries/python
-pip install pynamodb==6.0.0 --target layers/python_libraries/python
-pip install pyorc==0.9.0 --target layers/python_libraries/python
-pip install requests==2.31.0 --target layers/python_libraries/python
-pip install smart_open==7.0.4 --target layers/python_libraries/python
-pip install strenum==0.4.15 --target layers/python_libraries/python
-pip install python-magic==0.4.27 --target layers/python_libraries/python
+$PIP_CMD install ijson==3.3.0 --target layers/python_libraries/python
+$PIP_CMD install jsons==1.6.3 --target layers/python_libraries/python
+$PIP_CMD install jsonschema==4.18.0 --target layers/python_libraries/python
+$PIP_CMD install markupsafe==2.0.1 --target layers/python_libraries/python
+$PIP_CMD install pydantic==2.0.2 --target layers/python_libraries/python
+$PIP_CMD install pyhumps==3.8.0 --target layers/python_libraries/python
+$PIP_CMD install pynamodb==6.0.0 --target layers/python_libraries/python
+$PIP_CMD install pyorc==0.9.0 --target layers/python_libraries/python
+$PIP_CMD install requests==2.31.0 --target layers/python_libraries/python
+$PIP_CMD install smart_open==7.0.4 --target layers/python_libraries/python
+$PIP_CMD install strenum==0.4.15 --target layers/python_libraries/python
+$PIP_CMD install python-magic==0.4.27 --target layers/python_libraries/python

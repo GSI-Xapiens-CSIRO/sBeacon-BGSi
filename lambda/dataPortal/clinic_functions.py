@@ -42,7 +42,7 @@ def list_jobs(event, context):
                 "last_evaluated_key": json.loads(last_evaluated_key),
             }
 
-            filter_condition = None
+            filter_condition = ClinicJobs.project_name == project
 
             if search_term:
                 filter_condition = ClinicJobs.job_name_lower.contains(

@@ -747,7 +747,7 @@ module "lambda-data-portal" {
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
-      SVEP_TEMP_ARN                     = var.svep-temp-arn
+      SVEP_TEMP_NAME                     = var.clinic-temp-bucket-name
     },
   )
 

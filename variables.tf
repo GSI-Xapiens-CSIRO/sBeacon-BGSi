@@ -267,7 +267,13 @@ variable "svep-references-table-name" {
   description = "Name of the references table"
 }
 
-variable "svep-temp-arn" {
+# external s3 buckets
+variable "clinic-temp-bucket-name" {
   type        = string
-  description = "Svep temp bucket arn from module svep"
+  description = "Name of the temporary bucket for clinic jobs"
+}
+
+variable "clinic-temp-bucket-arn" {
+  type        = string
+  description = "ARN of the temporary bucket for clinic jobs"
 }

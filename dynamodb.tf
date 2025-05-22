@@ -238,3 +238,22 @@ resource "aws_dynamodb_table" "dataportal_locks_table" {
     enabled        = true
   }
 }
+
+
+# dataportal pricing cache table
+resource "aws_dynamodb_table" "dataportal_pricing_cache" {
+  name           = "sbeacon-dataportal-pricing-cache"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "resource"
+  tags           = var.common-tags
+
+  attribute {
+    name = "resource"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "ExpirationTime"
+    enabled        = true
+  }
+}

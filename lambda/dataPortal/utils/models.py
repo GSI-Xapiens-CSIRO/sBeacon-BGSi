@@ -173,3 +173,13 @@ class SavedQueries(Model):
     name = UnicodeAttribute(range_key=True)
     description = UnicodeAttribute(default_for_new="")
     savedQuery = UnicodeAttribute(attr_name="query")
+
+
+class PricingCache(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_PRICING_CACHE_TABLE")
+        region = REGION
+
+    resource = UnicodeAttribute(hash_key=True)
+    pricing = NumberAttribute()
+    expiration = NumberAttribute(attr_name="ExpirationTime")

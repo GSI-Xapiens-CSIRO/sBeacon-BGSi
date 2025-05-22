@@ -636,28 +636,8 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
-        "s3:ListBucket"
-    ]
-    resources = [
-        var.clinic-temp-bucket-arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      "${var.clinic-temp-bucket-arn}/*",
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:DeleteObject",
       "s3:GetObject",
-      "s3:ListBucket"
     ]
 
     resources = [

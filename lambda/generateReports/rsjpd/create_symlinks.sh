@@ -1,3 +1,3 @@
 for file in ../../../../report_templates/rsjpd/*.pdf; do
-  ln -s "$file" "$(basename "$file")"
+  cp "$file" "$(basename "$file")"
 done

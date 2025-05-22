@@ -56,7 +56,7 @@ resource "aws_dynamodb_table" "projects" {
 }
 
 locals {
-  project_users_uid_index        = "uid-index"
+  project_users_uid_index = "uid-index"
   clinic_jobs_project_name_index = "project-name-index"
 }
 # User Projects Table
@@ -108,26 +108,26 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
 resource "aws_dynamodb_table" "clinic_jobs" {
   name         = "sbeacon-dataportal-clinic-jobs"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "job_id"
-  tags         = var.common-tags
-
+  hash_key = "job_id"
+  tags = var.common-tags
+  
   attribute {
     name = "job_id"
     type = "S"
   }
-
+  
   attribute {
     name = "project_name"
     type = "S"
   }
-
+  
   global_secondary_index {
-    name            = local.clinic_jobs_project_name_index
-    hash_key        = "project_name"
-    projection_type = "ALL"
+    name            = local.clinic_jobs_project_name_index 
+    hash_key        = "project_name" 
+    projection_type = "ALL" 
   }
-
-  stream_enabled   = true
+  
+  stream_enabled = true
   stream_view_type = "NEW_AND_OLD_IMAGES"
 }
 
@@ -230,6 +230,25 @@ resource "aws_dynamodb_table" "dataportal_locks_table" {
 
   attribute {
     name = "LockId"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "ExpirationTime"
+    enabled        = true
+  }
+}
+
+
+# dataportal pricing cache table
+resource "aws_dynamodb_table" "dataportal_pricing_cache" {
+  name           = "sbeacon-dataportal-pricing-cache"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "resource"
+  tags           = var.common-tags
+
+  attribute {
+    name = "resource"
     type = "S"
   }
 

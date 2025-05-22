@@ -40,8 +40,6 @@ def generate(
     pii_name=None,
     pii_dob=None,
 ):
-    assert all([pii_name, pii_dob]), "Missing required fields."
-
     # x, y, fs, text
     footer_name_pos = (146, 50, 12, pii_name)
     footer_dob_pos = (146, 38, 12, pii_dob)

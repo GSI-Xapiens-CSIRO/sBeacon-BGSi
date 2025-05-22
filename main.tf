@@ -645,7 +645,7 @@ module "lambda-deidentifyFiles" {
   description            = "Deidentifies files before moving them to the dataportal bucket"
   handler                = "lambda_function.lambda_handler"
   runtime                = "python3.12"
-  memory_size            = 4096
+  memory_size            = var.region == "ap-southeast-3" ? 3008 : 4096
   timeout                = 900
   ephemeral_storage_size = 2560
   attach_policy_json     = true
@@ -735,6 +735,7 @@ module "lambda-data-portal" {
       DYNAMO_CLINIC_JOBS_TABLE          = aws_dynamodb_table.clinic_jobs.name
       DYNAMO_CLINICAL_ANNOTATIONS_TABLE = aws_dynamodb_table.clinical_annotations.name
       DYNAMO_CLINICAL_VARIANTS_TABLE    = aws_dynamodb_table.clinical_variants.name
+      DYNAMO_PRICING_CACHE_TABLE        = aws_dynamodb_table.dataportal_pricing_cache.name
       JUPYTER_INSTACE_ROLE_ARN          = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       JUPYTER_LIFECYCLE_CONFIG_NAME     = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
       USER_POOL_ID                      = var.cognito-user-pool-id,
@@ -746,7 +747,6 @@ module "lambda-data-portal" {
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
-      SVEP_TEMP_ARN                     = var.svep-temp-arn
     },
   )
 
@@ -827,7 +827,7 @@ module "lambda-generateCohortVCfs" {
   description         = "Backend function to generate reports."
   runtime             = "python3.12"
   handler             = "lambda_function.lambda_handler"
-  memory_size         = 3000
+  memory_size         = var.region == "ap-southeast-3" ? 3008 : 4096
   timeout             = 60
   source_path         = "${path.module}/lambda/generateCohortVCfs"
   attach_policy_jsons = true

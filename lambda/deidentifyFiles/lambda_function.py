@@ -167,6 +167,17 @@ def remove_file(object_key):
     return
 
 
+def get_object_uploader(object_key):
+    try:
+        response = s3.head_object(Bucket=DPORTAL_BUCKET, Key=object_key)
+        metadata = response.get("Metadata", {})
+        uploader_sub = metadata.get("username")
+        return uploader_sub
+    except ClientError as e:
+        print(f"Error getting {e}")
+        return None
+
+
 def lambda_handler(event, context):
     print(f"Backend Event Received: {json.dumps(event)}")
     input_bucket_name = event["Records"][0]["s3"]["bucket"]["name"]
@@ -182,6 +193,11 @@ def lambda_handler(event, context):
     all_project_files = get_all_project_files(project_prefix)
     update_project(project, all_project_files)
     if event_name.startswith("ObjectCreated:"):
+        user_sub = get_object_uploader(object_key)
+        if user_sub is None:
+            print(f'File owner for "{file_name}" of project "{project}" not found')
+        else:
+            print(f'File owner for "{file_name}" of project "{project}" is "{user_sub}"')
         log_deidentification_status(PROJECTS_TABLE, project, file_name, "Pending")
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
             print(f"{object_key} is an index file, moving directly")

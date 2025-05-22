@@ -411,6 +411,7 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
     actions = [
       "s3:GetObject",
       "s3:DeleteObject",
+      "s3:HeadObject",
     ]
 
     resources = [

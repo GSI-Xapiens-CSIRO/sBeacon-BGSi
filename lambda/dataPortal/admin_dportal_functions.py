@@ -201,6 +201,10 @@ def update_project(event, context):
         Projects.pending_files.delete(deleted_files),
     # update entry
     project.update(actions=actions)
+    if len(deleted_files) > 0:
+        print(
+            f'Deleting {",".join(deleted_files)} from project "{name}" by user "{event["requestContext"]["authorizer"]["claims"]["email"]}"'
+        )
     # delete file diff
     delete_s3_objects(
         DPORTAL_BUCKET,

@@ -117,11 +117,6 @@ resource "aws_dynamodb_table" "clinic_jobs" {
   }
 
   attribute {
-    name = "job_name"
-    type = "S"
-  }
-
-  attribute {
     name = "project_name"
     type = "S"
   }
@@ -228,10 +223,10 @@ resource "aws_dynamodb_table" "saved_queries" {
 
 # dataportal locks table
 resource "aws_dynamodb_table" "dataportal_locks_table" {
-  name           = "sbeacon-dataportal-mutex-locks"
-  billing_mode   = "PAY_PER_REQUEST" # On-demand capacity
-  hash_key       = "LockId"
-  tags           = var.common-tags
+  name         = "sbeacon-dataportal-mutex-locks"
+  billing_mode = "PAY_PER_REQUEST" # On-demand capacity
+  hash_key     = "LockId"
+  tags         = var.common-tags
 
   attribute {
     name = "LockId"
@@ -247,10 +242,10 @@ resource "aws_dynamodb_table" "dataportal_locks_table" {
 
 # dataportal pricing cache table
 resource "aws_dynamodb_table" "dataportal_pricing_cache" {
-  name           = "sbeacon-dataportal-pricing-cache"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "resource"
-  tags           = var.common-tags
+  name         = "sbeacon-dataportal-pricing-cache"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "resource"
+  tags         = var.common-tags
 
   attribute {
     name = "resource"

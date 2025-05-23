@@ -25,12 +25,14 @@ class Quota(Model):
     uid = UnicodeAttribute(hash_key=True)
     CostEstimation = NumberAttribute()
     Usage = UsageMap()
+    NotebookRole = UnicodeAttribute()
 
     def to_dict(self):
         return {
             "uid": self.uid,
             "CostEstimation": self.CostEstimation,
             "Usage": self.Usage.as_dict(),
+            "NotebookRole": self.NotebookRole,
         }
     
     def increment_quota(self):

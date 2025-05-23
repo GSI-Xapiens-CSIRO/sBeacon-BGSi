@@ -411,6 +411,7 @@ data "aws_iam_policy_document" "lambda-deidentifyFiles" {
     actions = [
       "s3:GetObject",
       "s3:DeleteObject",
+      "s3:HeadObject",
     ]
 
     resources = [
@@ -545,7 +546,18 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.clinical_annotations.arn,
       aws_dynamodb_table.clinic_jobs.arn,
       aws_dynamodb_table.clinical_variants.arn,
+      aws_dynamodb_table.dataportal_pricing_cache.arn,
     ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "pricing:*",
+    ]
+
+    resources = ["*"]
   }
 
   statement {
@@ -624,28 +636,8 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
-        "s3:ListBucket"
-    ]
-    resources = [
-        var.svep-temp-arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      "${var.svep-temp-arn}/*",
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:DeleteObject",
       "s3:GetObject",
-      "s3:ListBucket"
     ]
 
     resources = [
@@ -661,6 +653,25 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
     resources = [
       "${aws_s3_bucket.dataportal-bucket.arn}/private/*",
+    ]
+  }
+
+    statement {
+    actions = [
+        "s3:ListBucket"
+    ]
+    resources = [
+        var.clinic-temp-bucket-arn,
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3:DeleteObject",
+    ]
+
+    resources = [
+      "${var.clinic-temp-bucket-arn}/*",
     ]
   }
 

@@ -7,19 +7,21 @@ from route_individuals_id import route as route_individuals_id
 from route_individuals_id_g_variants import route as route_individuals_id_g_variants
 from route_individuals_id_biosamples import route as route_individuals_id_biosamples
 from route_individuals_filtering_terms import route as route_individuals_filtering_terms
-from shared.dynamodb import get_user_quota
+from shared.dynamodb import Quota
 
 
 def lambda_handler(event, context):
     print("Event Received: {}".format(json.dumps(event)))
     request_params, errors, status = parse_request(event)
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    user_has_quota = get_user_quota(sub)
+    quota = Quota.get(sub)
 
-    if not user_has_quota:
+    if not quota.user_has_quota():
         return bundle_response(
             403, {"error": "User has exceeded quota", "code": "QUOTA_EXCEEDED"}
         )
+    else:
+        quota.increment_quota()
 
     if errors:
         return bundle_response(status, errors)

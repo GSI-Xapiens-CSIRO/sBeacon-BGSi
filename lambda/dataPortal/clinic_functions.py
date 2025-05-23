@@ -386,11 +386,7 @@ def generate_report(event, context):
         raise PortalError(404, "Variants collection not found")
 
     try:
-        if HUB_NAME not in ["RSCM", "RSPON", "RSSARJITO", "RSJPD", "IGNG"]:
-            response = {
-                "success": False,
-                "message": "Lab not configured. Please contact administrator.",
-            }
+        if HUB_NAME not in ["RSCM", "RSPON", "RSSARJITO", "RSJPD", "RSIGNG"]:
             raise KeyError("Lab not configured")
         if HUB_NAME == "RSCM":
             if not variants:
@@ -440,6 +436,16 @@ def generate_report(event, context):
                     "phenotype": phenotype,
                     "alleles": ",".join((variants[0]["Alleles"])),
                 }
+            response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+            response = {
+                "success": True,
+                "content": response["body"],
+            }
+        elif HUB_NAME == "RSIGNG":
+            payload = {
+                "lab": HUB_NAME,
+                "variants": variants,
+            }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             response = {
                 "success": True,

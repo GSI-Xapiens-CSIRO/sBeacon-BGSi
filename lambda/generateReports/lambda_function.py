@@ -65,8 +65,8 @@ def lambda_handler(event, context):
 
             variants = event["variants"]
             res = generate(**data, variants=variants, versions=versions)
-        case "RSSARJITO":
-            from rssarjito import get_report_generator
+        case "RSSARDJITO":
+            from rssardjito import get_report_generator
 
             variants = event.get("variants", [])
             generator = get_report_generator(

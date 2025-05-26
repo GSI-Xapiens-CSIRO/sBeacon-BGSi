@@ -2,7 +2,12 @@ import os
 
 import boto3
 from pynamodb.models import Model
-from pynamodb.attributes import NumberAttribute, UnicodeAttribute, MapAttribute
+from pynamodb.attributes import (
+    NumberAttribute,
+    UnicodeAttribute,
+    MapAttribute,
+    StringAttribute,
+)
 from shared.utils import ENV_DYNAMO
 
 
@@ -15,6 +20,7 @@ class UsageMap(MapAttribute):
     quotaQueryCount = NumberAttribute(attr_name="quotaQueryCount", default=0)
     usageSize = NumberAttribute(attr_name="usageSize", default=0)
     usageCount = NumberAttribute(attr_name="usageCount", default=0)
+    notebookRole = StringAttribute(attr_name="notebookRole", default="")
 
 
 class Quota(Model):

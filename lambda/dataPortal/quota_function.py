@@ -29,7 +29,6 @@ def store_quota(event, context):
     IdentityUser = body.get("IdentityUser")
     CostEstimation = body.get("CostEstimation")
     Usage = body.get("Usage", {})
-    NotebookRole = body.get("NotebookRole")
 
     try:
         quota = Quota.get(IdentityUser)
@@ -53,7 +52,6 @@ def store_quota(event, context):
             uid=IdentityUser,
             CostEstimation=CostEstimation,
             Usage=Usage,
-            NotebookRole=NotebookRole,
         )
         quota.save()
 

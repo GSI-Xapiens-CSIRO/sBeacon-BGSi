@@ -71,9 +71,22 @@ def _create_annotations(
     )
 
     # Date
-    x, y, fs, text = (365, 197, 12, datetime.now().strftime("%d/%m/%Y"))
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text)
+    x, y, fs = (364, 195, 12)
+    form.textfield(
+        name="Tanggal validasi",
+        tooltip="Tanggal validasi",
+        value=f"",
+        x=x,
+        y=y,
+        width=165,
+        height=fs,
+        fontSize=fs-2,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
     c.showPage()
 
     c.save()

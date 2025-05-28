@@ -401,11 +401,11 @@ def generate_report(event, context):
                     "variants": variants,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-            response = {
+            return {
                 "success": True,
                 "content": response["body"],
             }
-        if HUB_NAME == "RSPON":
+        elif HUB_NAME == "RSPON":
             if not variants:
                 return {
                     "success": False,
@@ -437,17 +437,78 @@ def generate_report(event, context):
                     "alleles": ",".join((variants[0]["Alleles"])),
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-            response = {
+            return {
                 "success": True,
                 "content": response["body"],
             }
+        elif HUB_NAME == "RSJPD":
+            try:
+                # validations
+                if len(list(filter(lambda x: x["Gene"] == "SLCO1B1", variants))) > 1:
+                    print(
+                        "SLCO1B1 gene not found or multiple entries found in variants"
+                    )
+                    return {
+                        "success": False,
+                        "message": "SLCO1B1 gene must be present at most once.",
+                    }
+                if len(list(filter(lambda x: x["Gene"] == "APOE", variants))) > 1:
+                    print("APOE gene not found or multiple entries found in variants")
+                    return {
+                        "success": False,
+                        "message": "APOE gene must be present at most once.",
+                    }
+                slco1b1_variant = [v for v in variants if v["Gene"] == "SLCO1B1"]
+                if slco1b1_variant:
+                    slco1b1_variant = slco1b1_variant[0]  # Get the first match
+                    slco1b1 = {
+                        "diplotype": ",".join(slco1b1_variant["Alleles"]),
+                        "phenotype": ",".join(slco1b1_variant["Phenotypes"]),
+                        "genotype": "-",
+                    }
+                else:
+                    slco1b1 = {
+                        "diplotype": "-",
+                        "phenotype": "-",
+                        "genotype": "-",
+                    }
+                apoe_variant = [v for v in variants if v["Gene"] == "APOE"]
+                if apoe_variant:
+                    apoe_variant = apoe_variant[0]  # Get the first match
+                    apoe = {
+                        "diplotype": apoe_variant["Alleles"],
+                        "phenotype": apoe_variant["Phenotype Categories"],
+                        "genotype": apoe_variant["Zygosity"],
+                    }
+                else:
+                    apoe = {
+                        "diplotype": "-",
+                        "phenotype": "-",
+                        "genotype": "-",
+                    }
+                payload = {
+                    "lab": HUB_NAME,
+                    "slco1b1": slco1b1,
+                    "apoe": apoe,
+                }
+                response = invoke_lambda_function(REPORTS_LAMBDA, payload)
+                return {
+                    "success": True,
+                    "content": response["body"],
+                }
+            except Exception as e:
+                print(f"Error processing variant: {e}")
+                return {
+                    "success": False,
+                    "message": "Invalid data in selection.",
+                }
         elif HUB_NAME == "RSIGNG":
             payload = {
                 "lab": HUB_NAME,
                 "variants": variants,
             }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-            response = {
+            return {
                 "success": True,
                 "content": response["body"],
             }
@@ -468,26 +529,24 @@ def generate_report(event, context):
                     "variants": variants,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
-            response = {
+            return {
                 "success": True,
                 "content": response["body"],
             }
         else:
-            response = {
+            return {
                 "success": False,
                 "message": "Lab is not ready for reporting.",
             }
     except KeyError as e:
         print(f"Error invoking lambda function: missing key: {e}")
-        response = {
+        return {
             "success": False,
             "message": "Lab not configured. Please contact administrator.",
         }
     except Exception as e:
         print(f"Error invoking lambda function: {e}")
-        response = {
+        return {
             "success": False,
             "message": "Error generating report",
         }
-    finally:
-        return response

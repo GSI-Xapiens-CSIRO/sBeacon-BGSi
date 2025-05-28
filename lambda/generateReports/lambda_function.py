@@ -92,7 +92,7 @@ def lambda_handler(event, context):
                 "apoe": event.get("apoe", None),
                 "slco1b1": event.get("slco1b1", None),
             }
-            res = generate(**data)
+            res = generate(**data, versions=versions)
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

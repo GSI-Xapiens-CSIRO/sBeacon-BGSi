@@ -21,8 +21,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-TEMP_BUCKET = os.environ.get("TEMP_BUCKET_NAME") 
-
+TEMP_BUCKET = os.environ.get("CLINIC_TEMP_ARN") 
 
 #
 # Files' Admin Functions

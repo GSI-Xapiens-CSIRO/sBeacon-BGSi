@@ -138,6 +138,13 @@ resource "aws_s3_bucket" "dataportal-bucket" {
   tags          = var.common-tags
 }
 
+resource "aws_s3_bucket_versioning" "dataportal-bucket" {
+  bucket = aws_s3_bucket.dataportal-bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_ownership_controls" "dataportal_bucket_ownership_controls" {
   bucket = aws_s3_bucket.dataportal-bucket.id
   rule {
@@ -165,6 +172,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "staging_bucket_lifecycle" {
 
     expiration {
       days = 3
+    }
+  }
+
+  rule {
+    id = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter {
+      prefix = "staging/"
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 1
     }
   }
 }

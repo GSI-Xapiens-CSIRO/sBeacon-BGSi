@@ -31,7 +31,7 @@ def get_all_versions():
     except Exception as e:
         print("Error fetching versions from DynamoDB: ", e)
         versions = {}
-    
+
     versions = {**versions, **json.load(open("versions.json"))}
 
     return versions
@@ -60,8 +60,13 @@ def lambda_handler(event, context):
                 assert len(event["variants"]) > 0, "Variants not provided"
                 variants = event.get("variants", [])
                 res = generate_pos(**data, variants=variants, versions=versions)
-        case "RSSARJITO":
-            from rssarjito import get_report_generator
+        case "RSIGNG":
+            from igng import generate
+
+            variants = event["variants"]
+            res = generate(**data, variants=variants, versions=versions)
+        case "RSSARDJITO":
+            from rssardjito import get_report_generator
 
             variants = event.get("variants", [])
             generator = get_report_generator(

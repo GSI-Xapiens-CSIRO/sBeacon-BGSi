@@ -9,19 +9,44 @@ from reportlab.lib import colors
 
 def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_num_pos):
     c = canvas.Canvas(filename, pagesize=letter)
+    form = c.acroForm
 
     for p in range(pages):
         # footer name
         x, y, fs, text = footer_name_pos
-        c.setFont("Helvetica", fs)
-        c.setFillColor(colors.HexColor("#156082"))
-        c.drawString(x, y, text)
+        form.textfield(
+            name="name",
+            tooltip="Name",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=200,
+            height=12,
+            fontSize=8,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
+            fieldFlags=0,
+        )
 
         # footer dob
         x, y, fs, text = footer_dob_pos
-        c.setFont("Helvetica", fs)
-        c.setFillColor(colors.HexColor("#156082"))
-        c.drawString(x, y, text)
+        form.textfield(
+            name="dob",
+            tooltip="Date of Birth",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=100,
+            height=12,
+            fontSize=8,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
+            fieldFlags=0,
+        )
 
         # page num
         x, y = page_num_pos
@@ -41,8 +66,8 @@ def generate(
     pii_dob=None,
 ):
     # x, y, fs, text
-    footer_name_pos = (146, 50, 12, pii_name)
-    footer_dob_pos = (146, 38, 12, pii_dob)
+    footer_name_pos = (146, 48, 12, pii_name)
+    footer_dob_pos = (146, 36, 12, pii_dob)
     page_num_pos = (500, 70)
 
     output_pdf_path = "/tmp/annotations.pdf"

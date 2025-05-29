@@ -35,7 +35,7 @@ def _create_annotations(
         value=f"{text}",
         x=x,
         y=y,
-        width=100,
+        width=200,
         height=fs,
         fontSize=8,
         borderWidth=0,
@@ -157,8 +157,8 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
 
     # x, y, fs, text
     date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
-    name_pos = (192, 568, 12, pii_name)
-    dob_pos = (192, 552, 12, pii_dob)
+    name_pos = (192, 564, 12, pii_name)
+    dob_pos = (192, 550, 12, pii_dob)
     rekam_medis_pos = (192, 538, 12, f"")
     gender_pos = (192, 524, 12, pii_gender)
     symptoms_pos = (192, 492, 12, f"")

@@ -84,6 +84,7 @@ def list_jobs(event, context):
                 "job_status": job.job_status,
                 "failed_step": job.failed_step,
                 "error_message": job.error_message,
+                "created_at": job.created_at,
             }
             for job in jobs
         ],

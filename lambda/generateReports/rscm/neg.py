@@ -37,7 +37,7 @@ def _create_annotations(
         value=f"{text}",
         x=x,
         y=y,
-        width=100,
+        width=200,
         height=12,
         fontSize=8,
         borderWidth=0,
@@ -123,15 +123,39 @@ def _create_annotations(
     for n in range(3):
         # footer name
         x, y, fs, text = footer_name_pos
-        c.setFont("Helvetica", fs)
-        c.setFillColor(colors.HexColor("#156082"))
-        c.drawString(x, y, text)
+        form.textfield(
+            name="name",
+            tooltip="Name",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=200,
+            height=12,
+            fontSize=8,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
+            fieldFlags=0,
+        )
 
         # footer dob
         x, y, fs, text = footer_dob_pos
-        c.setFont("Helvetica", fs)
-        c.setFillColor(colors.HexColor("#156082"))
-        c.drawString(x, y, text)
+        form.textfield(
+            name="dob",
+            tooltip="Date of Birth",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=100,
+            height=12,
+            fontSize=8,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=None,
+            forceBorder=False,
+            fieldFlags=0,
+        )
         if n == 2:
             versions_pos = [
                 # left col
@@ -182,12 +206,12 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
 
     # x, y, h, text
     date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
-    name_pos = (192, 568, 12, pii_name)
-    dob_pos = (192, 552, 12, pii_dob)
+    name_pos = (192, 564, 12, pii_name)
+    dob_pos = (192, 550, 12, pii_dob)
     rekam_medis_pos = (192, 538, 12, f"")
     gender_pos = (192, 524, 12, pii_gender)
     symptoms_pos = (192, 492, 12, f"")
-    footer_name_pos = (146, 50, 12, pii_name)
+    footer_name_pos = (146, 46, 12, pii_name)
     footer_dob_pos = (146, 38, 12, pii_dob)
 
     _create_annotations(

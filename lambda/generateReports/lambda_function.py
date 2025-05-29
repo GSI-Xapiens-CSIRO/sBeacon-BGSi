@@ -44,7 +44,7 @@ def lambda_handler(event, context):
     data = {
         "pii_name": "",
         "pii_dob": "",
-        "pii_gender": "",
+        "pii_gender": "Male",
     }
 
     versions = get_all_versions()

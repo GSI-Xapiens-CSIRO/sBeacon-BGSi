@@ -6,7 +6,6 @@ from pynamodb.attributes import (
     NumberAttribute,
     UnicodeAttribute,
     MapAttribute,
-    UnicodeAttribute,
 )
 from shared.utils import ENV_DYNAMO
 

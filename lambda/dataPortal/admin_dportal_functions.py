@@ -21,7 +21,8 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-TEMP_BUCKET = os.environ.get("CLINIC_TEMP_ARN") 
+TEMP_BUCKET = os.environ.get("CLINIC_TEMP_NAME") 
+REGION_BUCKET = os.environ.get("CLINIC_REGION_NAME") 
 
 #
 # Files' Admin Functions
@@ -423,6 +424,12 @@ def delete_jobid(event, context):
         # delete file from temp data 
         keys = list_s3_prefix(TEMP_BUCKET, selectedJOB)
         delete_s3_objects(TEMP_BUCKET, keys)
+        
+        #delete file from regions data
+        regionKeys = list_s3_prefix(REGION_BUCKET, selectedJOB)
+        delete_s3_objects(REGION_BUCKET, regionKeys)
+        print(regionKeys)
+        
     except ClinicJobs.DoesNotExist:
         return {
             "success": False,

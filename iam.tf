@@ -681,6 +681,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
     resources = [
       var.clinic-temp-bucket-arn,
+      var.clinic-region-bucket-arn,
     ]
   }
 
@@ -691,6 +692,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
     resources = [
       "${var.clinic-temp-bucket-arn}/*",
+      "${var.clinic-region-bucket-arn}/*",
     ]
   }
 

@@ -428,7 +428,6 @@ def delete_jobid(event, context):
         #delete file from regions data
         regionKeys = list_s3_prefix(REGION_BUCKET, selectedJOB)
         delete_s3_objects(REGION_BUCKET, regionKeys)
-        print(regionKeys)
         
     except ClinicJobs.DoesNotExist:
         return {

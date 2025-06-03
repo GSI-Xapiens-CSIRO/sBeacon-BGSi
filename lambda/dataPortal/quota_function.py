@@ -29,6 +29,7 @@ def store_quota(event, context):
     IdentityUser = body.get("IdentityUser")
     CostEstimation = body.get("CostEstimation")
     Usage = body.get("Usage", {})
+
     try:
         quota = Quota.get(IdentityUser)
         actions = []

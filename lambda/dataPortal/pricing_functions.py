@@ -120,6 +120,37 @@ class AWSPricingHelper:
             print("Error fetching SageMaker pricing:", e)
             return None
 
+    def get_ebs_volume_pricing(self, volume_type, volume_size):
+        cache_key = f"ebs_{volume_type}_{volume_size}_ap-southeast-3"
+        cached = self.lookup_cache(cache_key)
+
+        if cached is not None:
+            return cached
+
+        params = {
+            "ServiceCode": "AmazonEC2",
+            "MaxResults": 100,
+            "Filters": [
+                {"Type": "TERM_MATCH", "Field": "productFamily", "Value": "Storage"},
+                {
+                    "Type": "TERM_MATCH",
+                    "Field": "regionCode",
+                    "Value": "ap-southeast-3",
+                },
+                {"Type": "TERM_MATCH", "Field": "volumeApiName", "Value": volume_type},
+            ],
+        }
+
+        try:
+            data = self.pricing.get_products(**params)
+            price = self.parse_storage_pricing_data(data, volume_size)
+
+            self.save_to_cache(cache_key, price)
+            return price
+        except Exception as e:
+            print("Error fetching EBS volume pricing:", e)
+            return None
+
     def get_volume_pricing(self, volume_size):
         cache_key = f"s3_{volume_size}_ap-southeast-3"
         cached = self.lookup_cache(cache_key)
@@ -189,7 +220,7 @@ def get_resource_pricing(event, context):
             "message": "Failed to fetch instance pricing.",
         }
 
-    if not (volume_price := pricing.get_volume_pricing(volume_size)):
+    if not (volume_price := pricing.get_ebs_volume_pricing("gp2", volume_size)):
         return {
             "success": False,
             "message": "Failed to fetch volume pricing.",

@@ -2,7 +2,11 @@ import os
 
 import boto3
 from pynamodb.models import Model
-from pynamodb.attributes import NumberAttribute, UnicodeAttribute, MapAttribute
+from pynamodb.attributes import (
+    NumberAttribute,
+    UnicodeAttribute,
+    MapAttribute,
+)
 from shared.utils import ENV_DYNAMO
 
 
@@ -15,6 +19,7 @@ class UsageMap(MapAttribute):
     quotaQueryCount = NumberAttribute(attr_name="quotaQueryCount", default=0)
     usageSize = NumberAttribute(attr_name="usageSize", default=0)
     usageCount = NumberAttribute(attr_name="usageCount", default=0)
+    notebookRole = UnicodeAttribute(attr_name="notebookRole", default="")
 
 
 class Quota(Model):
@@ -32,7 +37,7 @@ class Quota(Model):
             "CostEstimation": self.CostEstimation,
             "Usage": self.Usage.as_dict(),
         }
-    
+
     def increment_quota(self):
         self.update(actions=[Quota.Usage.usageCount.add(1)])
 

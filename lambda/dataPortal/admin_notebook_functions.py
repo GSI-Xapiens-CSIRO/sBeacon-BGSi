@@ -39,7 +39,7 @@ def list_notebooks(event, context):
             notebook["userFirstName"] = get_user_attribute(user, "given_name")
             notebook["userLastName"] = get_user_attribute(user, "family_name")
             notebook["userEmail"] = get_user_attribute(user, "email")
-        except PortalError:
+        except (PortalError, KeyError):
             notebook["userFirstName"] = "Unassigned"
             notebook["userLastName"] = "Unassigned"
             notebook["userEmail"] = "Unassigned"

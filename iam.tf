@@ -363,6 +363,26 @@ data "aws_iam_policy_document" "admin-lambda-access" {
   }
   statement {
     actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:DeleteItem",
+    ]
+    resources = [
+      aws_dynamodb_table.juptyer_notebooks.arn,
+    ]
+  }
+  statement {
+    actions = [
+      "sagemaker:DescribeNotebookInstance",
+      "sagemaker:StopNotebookInstance",
+    ]
+    resources = [
+      "arn:aws:sagemaker:${var.region}:${data.aws_caller_identity.this.account_id}:notebook-instance/*"
+    ]
+  }
+  statement {
+    actions = [
       "lambda:InvokeFunction",
     ]
     resources = [

@@ -8,13 +8,16 @@ from markupsafe import escape
 
 from shared.cognitoutils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
-from shared.utils.lambda_utils import ENV_COGNITO
+from shared.utils.lambda_utils import ENV_COGNITO, ENV_DYNAMO
 from shared.dynamodb import Quota, UsageMap
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
 COGNITO_REGISTRATION_EMAIL_LAMBDA = ENV_COGNITO.COGNITO_REGISTRATION_EMAIL_LAMBDA
+DYNAMO_JUPYTER_INSTANCES_TABLE = ENV_DYNAMO.DYNAMO_JUPYTER_INSTANCES_TABLE
 cognito_client = boto3.client("cognito-idp")
 lambda_client = boto3.client("lambda")
+dynamodb_client = boto3.client("dynamodb")
+sagemaker_client = boto3.client("sagemaker")
 router = LambdaRouter()
 
 
@@ -130,13 +133,13 @@ def add_user(event, context):
 
     res = {"success": True}
 
-    user_sub = next(
+    sub = next(
         attr["Value"]
         for attr in cognito_user["User"]["Attributes"]
         if attr["Name"] == "sub"
     )
-    if user_sub:
-        res["uid"] = user_sub
+    if sub:
+        res["uid"] = sub
 
     print(f"User {email} created successfully!")
     return res
@@ -206,7 +209,59 @@ def delete_user(event, context):
         print(
             f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves."
         )
-        return {"success": False}
+        return {"success": False, "message": "Administrators cannot delete themselves."}
+    
+    response = cognito_client.admin_get_user(
+        UserPoolId=USER_POOL_ID,
+        Username=username,
+    )
+    for attr in response['UserAttributes']:
+        if attr["Name"] == "sub":
+            sub = attr["Value"]
+    if not sub:
+        print("User sub not found")
+        return {"success": False, "message": "There was a problem retrieving the user's ID."}
+    response = dynamodb_client.scan(
+        TableName=DYNAMO_JUPYTER_INSTANCES_TABLE,
+        FilterExpression="uid = :uid",
+        ExpressionAttributeValues={
+            ":uid": {"S": sub}
+        }
+    )
+    notebook_responses = []
+    for item in response.get("Items", []):
+        notebook_name = item["instanceName"]["S"]
+        notebook_id = f"{notebook_name}-{sub}"
+        try:
+            response = sagemaker_client.describe_notebook_instance(
+                NotebookInstanceName=notebook_id
+            )
+            notebook_responses.append(response)
+        except ClientError as e:
+            if e.response['Error']['Message'] == 'RecordNotFound':
+                print(f"Instance {notebook_id} not found, cleaning up DynamoDB entry.")
+                dynamodb_client.delete_item(
+                    TableName=DYNAMO_JUPYTER_INSTANCES_TABLE,
+                    Key={
+                        "instanceName": {"S": notebook_name},
+                        "uid": {"S": sub},
+                    }
+                )
+            else:
+                print(f"Error retrieving instance {notebook_id}: {e}")
+                return {"success": False, "message": "There was a problem retrieving the user's active notebook instances."}
+    if any(notebook["NotebookInstanceStatus"] == "Pending" for notebook in notebook_responses):
+        return {"success": False, "message": "Some notebook instances are still pending. Please wait for them to start before deleting the user."}
+    for notebook in notebook_responses:
+        if notebook["NotebookInstanceStatus"] == "InService":
+            try:
+                sagemaker_client.stop_notebook_instance(
+                    NotebookInstanceName=notebook["NotebookInstanceName"]
+                )
+                print(f"Stopped notebook instance {notebook['NotebookInstanceName']}")
+            except ClientError as e:
+                print(f"Error stopping instance {notebook_id}: {e}")
+                return {"success": False, "message": "There was a problem stopping the user's active notebook instances."}
 
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 

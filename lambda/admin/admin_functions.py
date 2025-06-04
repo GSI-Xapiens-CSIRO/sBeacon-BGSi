@@ -167,41 +167,38 @@ def get_users(event, context):
     users = response.get("Users", [])
 
     keys = []
-    try:
-        for user in users:
-            user_id = next(
-                attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub"
-            )
-            user["uid"] = user_id
-            keys.append(user_id)
+    for user in users:
+        user_id = next(
+            attr["Value"] for attr in user["Attributes"] if attr["Name"] == "sub"
+        )
+        user["uid"] = user_id
+        keys.append(user_id)
 
-        quota_data = Quota.batch_get(items=keys)
-        dynamo_quota_map = {
-            quota.to_dict()["uid"]: quota.to_dict()["Usage"] for quota in quota_data
-        }
-        data = []
+    quota_data = Quota.batch_get(items=keys)
+    dynamo_quota_map = {
+        quota.to_dict()["uid"]: quota.to_dict()["Usage"] for quota in quota_data
+    }
+    data = []
 
-        for user in users:
-            # get quota
-            uid = user["uid"]
-            usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
-            user["Usage"] = usage_data
-            # get MFA
-            try:
-                mfa = cognito_client.admin_get_user(
-                    UserPoolId=USER_POOL_ID, Username=user["Username"]
-                ).get("UserMFASettingList", [])
-            except cognito_client.exceptions.UserNotFoundException:
-                continue
+    for user in users:
+        # get quota
+        uid = user["uid"]
+        usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
+        user["Usage"] = usage_data
+        # get MFA
+        try:
+            mfa = cognito_client.admin_get_user(
+                UserPoolId=USER_POOL_ID, Username=user["Username"]
+            ).get("UserMFASettingList", [])
+        except cognito_client.exceptions.UserNotFoundException:
+            continue
 
-            user["MFA"] = mfa
-            data.append(user)
+        user["MFA"] = mfa
+        data.append(user)
 
-        next_pagination_token = response.get("PaginationToken", None)
+    next_pagination_token = response.get("PaginationToken", None)
 
-        return {"users": data, "pagination_token": next_pagination_token}
-    except cognito_client.exceptions.UserNotFoundException:
-        return {"users": [], "pagination_token": None}
+    return {"users": data, "pagination_token": next_pagination_token}
 
 
 @router.attach("/admin/users/{email}", "delete", authenticate_admin)

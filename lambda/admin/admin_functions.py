@@ -18,6 +18,28 @@ lambda_client = boto3.client("lambda")
 router = LambdaRouter()
 
 
+def get_user_info_by_email(email):
+    response = cognito_client.list_users(
+        UserPoolId=USER_POOL_ID, Filter=f'email = "{email}"', Limit=1
+    )
+
+    if not response.get("Users"):
+        raise Exception(f"User with email {email} not found")
+
+    user = response["Users"][0]
+    username = user["Username"]
+    attributes = {attr["Name"]: attr["Value"] for attr in user.get("Attributes", [])}
+    uid = attributes.get("sub")
+
+    if not uid:
+        raise Exception(f"User with email {email} does not have 'sub' attribute")
+
+    return {
+        "username": username,
+        "uid": uid,
+    }
+
+
 def get_username_by_email(email):
     response = cognito_client.list_users(
         UserPoolId=USER_POOL_ID, Filter=f'email = "{email}"', Limit=1
@@ -201,20 +223,19 @@ def get_users(event, context):
 def delete_user(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
-    uid = event["requestContext"]["authorizer"]["claims"]["sub"]
 
-    username = get_username_by_email(email)
-    authorizer = get_username_by_email(authorizer_email)
+    user = get_user_info_by_email(email)
+    authorizer = get_user_info_by_email(authorizer_email)
 
-    if username == authorizer:
+    if user["username"] == authorizer["username"]:
         print(
             f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves."
         )
         return {"success": False}
 
-    cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
+    cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=user["username"])
 
-    quota = Quota.get(uid)
+    quota = Quota.get(user["uid"])
     quota.delete()
 
     print(f"User with email {email} removed successfully!")

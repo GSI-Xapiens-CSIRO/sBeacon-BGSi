@@ -192,7 +192,7 @@ def get_users(event, context):
                     UserPoolId=USER_POOL_ID, Username=user["Username"]
                 ).get("UserMFASettingList", [])
             except cognito_client.exceptions.UserNotFoundException:
-                mfa = []
+                continue
 
             user["MFA"] = mfa
             data.append(user)

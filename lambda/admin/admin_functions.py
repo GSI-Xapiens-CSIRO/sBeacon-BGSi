@@ -186,9 +186,13 @@ def get_users(event, context):
         usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
         user["Usage"] = usage_data
         # get MFA
-        mfa = cognito_client.admin_get_user(
-            UserPoolId=USER_POOL_ID, Username=user["Username"]
-        ).get("UserMFASettingList", [])
+        try:
+            mfa = cognito_client.admin_get_user(
+                UserPoolId=USER_POOL_ID, Username=user["Username"]
+            ).get("UserMFASettingList", [])
+        except cognito_client.exceptions.UserNotFoundException:
+            continue
+
         user["MFA"] = mfa
         data.append(user)
 
@@ -210,23 +214,29 @@ def delete_user(event, context):
             f"Unsuccessful deletion of {email}. Administrators are unable to delete themselves."
         )
         return {"success": False, "message": "Administrators cannot delete themselves."}
-    
+
     response = cognito_client.admin_get_user(
         UserPoolId=USER_POOL_ID,
         Username=username,
     )
-    for attr in response['UserAttributes']:
+    for attr in response["UserAttributes"]:
         if attr["Name"] == "sub":
             sub = attr["Value"]
     if not sub:
         print("User sub not found")
-        return {"success": False, "message": "There was a problem retrieving the user's ID."}
+        return {
+            "success": False,
+            "message": "There was a problem retrieving the user's ID.",
+        }
+
+    # delete user quota
+    quota = Quota.get(sub)
+    quota.delete()
+
     response = dynamodb_client.scan(
         TableName=DYNAMO_JUPYTER_INSTANCES_TABLE,
         FilterExpression="uid = :uid",
-        ExpressionAttributeValues={
-            ":uid": {"S": sub}
-        }
+        ExpressionAttributeValues={":uid": {"S": sub}},
     )
     notebook_responses = []
     for item in response.get("Items", []):
@@ -238,20 +248,29 @@ def delete_user(event, context):
             )
             notebook_responses.append(response)
         except ClientError as e:
-            if e.response['Error']['Message'] == 'RecordNotFound':
+            if e.response["Error"]["Message"] == "RecordNotFound":
                 print(f"Instance {notebook_id} not found, cleaning up DynamoDB entry.")
                 dynamodb_client.delete_item(
                     TableName=DYNAMO_JUPYTER_INSTANCES_TABLE,
                     Key={
                         "instanceName": {"S": notebook_name},
                         "uid": {"S": sub},
-                    }
+                    },
                 )
             else:
                 print(f"Error retrieving instance {notebook_id}: {e}")
-                return {"success": False, "message": "There was a problem retrieving the user's active notebook instances."}
-    if any(notebook["NotebookInstanceStatus"] == "Pending" for notebook in notebook_responses):
-        return {"success": False, "message": "Some notebook instances are still pending. Please wait for them to start before deleting the user."}
+                return {
+                    "success": False,
+                    "message": "There was a problem retrieving the user's active notebook instances.",
+                }
+    if any(
+        notebook["NotebookInstanceStatus"] == "Pending"
+        for notebook in notebook_responses
+    ):
+        return {
+            "success": False,
+            "message": "Some notebook instances are still pending. Please wait for them to start before deleting the user.",
+        }
     for notebook in notebook_responses:
         if notebook["NotebookInstanceStatus"] == "InService":
             try:
@@ -261,7 +280,10 @@ def delete_user(event, context):
                 print(f"Stopped notebook instance {notebook['NotebookInstanceName']}")
             except ClientError as e:
                 print(f"Error stopping instance {notebook_id}: {e}")
-                return {"success": False, "message": "There was a problem stopping the user's active notebook instances."}
+                return {
+                    "success": False,
+                    "message": "There was a problem stopping the user's active notebook instances.",
+                }
 
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 

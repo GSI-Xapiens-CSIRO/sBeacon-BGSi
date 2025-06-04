@@ -415,10 +415,10 @@ def delete_jobid(event, context):
         ProjectUsers.get(project_name, sub) 
 
         job = ClinicJobs.get(selectedJOB) 
-        if job.job_status.lower() != "failed":
+        if job.job_status.lower() not in ["failed", "expired"]:
             return {
                 "success": False,
-                "message": f"Job {selectedJOB} is not in a failed status.",
+                "message": f"Job {selectedJOB} is not in a failed/expired status.",
             }
         job.delete()
         # delete file from temp data 

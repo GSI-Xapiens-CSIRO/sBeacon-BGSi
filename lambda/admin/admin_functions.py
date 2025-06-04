@@ -187,9 +187,13 @@ def get_users(event, context):
             usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
             user["Usage"] = usage_data
             # get MFA
-            mfa = cognito_client.admin_get_user(
-                UserPoolId=USER_POOL_ID, Username=user["Username"]
-            ).get("UserMFASettingList", [])
+            try:
+                mfa = cognito_client.admin_get_user(
+                    UserPoolId=USER_POOL_ID, Username=user["Username"]
+                ).get("UserMFASettingList", [])
+            except cognito_client.exceptions.UserNotFoundException:
+                mfa = []
+
             user["MFA"] = mfa
             data.append(user)
 

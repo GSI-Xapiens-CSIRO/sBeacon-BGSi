@@ -276,3 +276,13 @@ variable "clinic-temp-bucket-arn" {
   type        = string
   description = "ARN of the clinic temp bucket"
 }
+
+variable "clinic-region-bucket-name" {
+  type        = string
+  description = "Name of the clinic regions bucket"
+}
+
+variable "clinic-region-bucket-arn" {
+  type        = string
+  description = "ARN of the clinic regions bucket"
+}

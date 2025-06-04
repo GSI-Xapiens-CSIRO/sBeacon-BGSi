@@ -279,6 +279,15 @@ def anonymise(input_string):
     return ANY_PII_PATTERN.sub(MASK, input_string)
 
 
+def remove_nested_angle_brackets(header_line):
+    match = re.search(r'^(##\w+)=<(.+)>$', header_line)
+    if not match:
+        return header_line
+    prefix, inner = match.groups()
+    flattened_inner = inner.replace('<', '').replace('>', '')
+    return f"{prefix}=<{flattened_inner}>"
+
+
 def get_structured_meta_values(value):
     if not (value.startswith("<") and value.endswith(">")):
         raise ParsingError(f"Meta information line is formatted correctly:\n{value}")
@@ -395,7 +404,7 @@ def process_header(file_path):
             info_attributes = get_structured_meta_values(line[7:])
             if info_attributes.get("Type", "String") != "String":
                 info_whitelist.add(info_attributes.get("ID"))
-        new_line = anonymise_header_line(line)
+        new_line = anonymise_header_line(remove_nested_angle_brackets(line))
         header_lines.append(new_line)
         if new_line != line:
             header_changes = True

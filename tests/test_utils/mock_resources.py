@@ -8,15 +8,6 @@ from moto import mock_aws
 from .env import keys  # to inject keys into the environment
 
 
-def mock_make_api_call(self, operation_name, kwarg):
-    if operation_name == "CreatePresignedNotebookInstanceUrl":
-        return {
-            "AuthorizedUrl": f"https://notebook-url.aws.amazon.com/sagemaker/{kwarg['NotebookInstanceName']}?token=1234",
-        }
-
-    return orig(self, operation_name, kwarg)
-
-
 @mock_aws
 def setup_resources():
     from shared.dynamodb import Quota, UsageMap

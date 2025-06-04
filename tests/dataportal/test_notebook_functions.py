@@ -4,10 +4,21 @@ import sys
 from unittest.mock import patch
 
 import boto3
+import botocore
 import pytest
 from moto import mock_aws
 
-from test_utils.mock_resources import mock_make_api_call
+
+orig = botocore.client.BaseClient._make_api_call
+
+
+def mock_make_api_call(self, operation_name, kwarg):
+    if operation_name == "CreatePresignedNotebookInstanceUrl":
+        return {
+            "AuthorizedUrl": f"https://notebook-url.aws.amazon.com/sagemaker/{kwarg['NotebookInstanceName']}?token=1234",
+        }
+
+    return orig(self, operation_name, kwarg)
 
 
 @pytest.mark.dependency(name="test_create_notebook")

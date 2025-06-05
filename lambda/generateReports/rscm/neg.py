@@ -159,15 +159,15 @@ def _create_annotations(
         if n == 2:
             versions_pos = [
                 # left col
-                (180, 570+15, 12, versions["snp_eff_version"]),
-                (180, 556+15, 12, versions["snp_sift_version"]),
-                (180, 542+15, 12, versions["clinvar_version"]),
-                (180, 528+15, 12, versions["omim_version"]),
+                (180, 570+15, 11, versions["snp_eff_version"]),
+                (180, 556+15, 11, versions["snp_sift_version"]),
+                (180, 542+15, 11, versions["clinvar_version"]),
+                (180, 528+15, 11, versions["omim_version"]),
                 # right col
-                (480-20, 570+15, 12, versions["gnomad_version"]),
-                (480-20, 556+15, 12, versions["dbsnp_version"]),
-                (480-20, 542+15, 12, versions["sift_version"]),
-                (480-20, 528+15, 12, versions["polyphen2_version"]),
+                (450-20, 570+15, 11, versions["gnomad_version"]),
+                (450-20, 556+15, 11, versions["dbsnp_version"]),
+                (450-20, 542+15, 11, versions["sift_version"]),
+                (450-20, 528+15, 11, versions["polyphen2_version"]),
             ]
             for pos in versions_pos:
                 x, y, fs, text = pos
@@ -211,8 +211,8 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
     rekam_medis_pos = (192, 538, 12, f"")
     gender_pos = (192, 524, 12, pii_gender)
     symptoms_pos = (192, 492, 12, f"")
-    footer_name_pos = (146, 46, 12, pii_name)
-    footer_dob_pos = (146, 38, 12, pii_dob)
+    footer_name_pos = (146, 48, 12, pii_name)
+    footer_dob_pos = (146, 36, 12, pii_dob)
 
     _create_annotations(
         date_pos,

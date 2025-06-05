@@ -167,15 +167,15 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
 
     versions_pos = [
         # left col
-        (180, 570, 12, versions["snp_eff_version"]),
-        (180, 556, 12, versions["snp_sift_version"]),
-        (180, 542, 12, versions["clinvar_version"]),
-        (180, 528, 12, versions["omim_version"]),
+        (180, 570, 11, versions["snp_eff_version"]),
+        (180, 556, 11, versions["snp_sift_version"]),
+        (180, 542, 11, versions["clinvar_version"]),
+        (180, 528, 11, versions["omim_version"]),
         # right col
-        (480, 570, 12, versions["gnomad_version"]),
-        (480, 556, 12, versions["dbsnp_version"]),
-        (480, 542, 12, versions["sift_version"]),
-        (480, 528, 12, versions["polyphen2_version"]),
+        (450, 570, 11, versions["gnomad_version"]),
+        (450, 556, 11, versions["dbsnp_version"]),
+        (450, 542, 11, versions["sift_version"]),
+        (450, 528, 11, versions["polyphen2_version"]),
     ]
 
     _create_annotations(

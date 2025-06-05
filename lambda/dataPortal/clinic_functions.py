@@ -465,7 +465,7 @@ def generate_report(event, context):
                     slco1b1 = {
                         "diplotype": ",".join(slco1b1_variant["Alleles"]),
                         "phenotype": ",".join(slco1b1_variant["Phenotypes"]),
-                        "genotype": "-",
+                        "genotype": ",".join(slco1b1_variant["Zygosity"]),
                     }
                 else:
                     slco1b1 = {

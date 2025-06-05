@@ -21,7 +21,8 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-TEMP_BUCKET = os.environ.get("CLINIC_TEMP_ARN") 
+TEMP_BUCKET = os.environ.get("CLINIC_TEMP_NAME") 
+REGION_BUCKET = os.environ.get("CLINIC_REGION_NAME") 
 
 #
 # Files' Admin Functions
@@ -414,15 +415,20 @@ def delete_jobid(event, context):
         ProjectUsers.get(project_name, sub) 
 
         job = ClinicJobs.get(selectedJOB) 
-        if job.job_status.lower() != "failed":
+        if job.job_status.lower() not in ["failed", "expired"]:
             return {
                 "success": False,
-                "message": f"Job {selectedJOB} is not in a failed status.",
+                "message": f"Job {selectedJOB} is not in a failed/expired status.",
             }
         job.delete()
         # delete file from temp data 
         keys = list_s3_prefix(TEMP_BUCKET, selectedJOB)
         delete_s3_objects(TEMP_BUCKET, keys)
+        
+        #delete file from regions data
+        regionKeys = list_s3_prefix(REGION_BUCKET, selectedJOB)
+        delete_s3_objects(REGION_BUCKET, regionKeys)
+        
     except ClinicJobs.DoesNotExist:
         return {
             "success": False,

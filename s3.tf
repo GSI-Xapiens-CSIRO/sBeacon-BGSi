@@ -45,9 +45,7 @@ resource "aws_s3_bucket" "metadata-bucket" {
   bucket_prefix = var.metadata-bucket-prefix
   force_destroy = true
 
-  tags = merge(var.common-tags, {
-    backup = "true"
-  })
+  tags = merge(var.common-tags, var.common-tags-backup)
 }
 
 resource "aws_s3_bucket_ownership_controls" "metadata_bucket_ownership_controls" {
@@ -139,9 +137,7 @@ resource "aws_s3_bucket" "dataportal-bucket" {
   bucket_prefix = var.dataportal-bucket-prefix
   force_destroy = true
 
-  tags = merge(var.common-tags, {
-    backup = "true"
-  })
+  tags = merge(var.common-tags, var.common-tags-backup)
 }
 
 resource "aws_s3_bucket_versioning" "dataportal-bucket" {

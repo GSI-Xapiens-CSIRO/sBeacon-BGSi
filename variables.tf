@@ -10,6 +10,11 @@ variable "common-tags" {
   description = "A set of tags to attach to every created resource."
 }
 
+variable "common-tags-backup" {
+  type        = map(string)
+  description = "Tags needed to enable and configure backups."
+}
+
 # Beacon variables
 variable "beacon-id" {
   type        = string

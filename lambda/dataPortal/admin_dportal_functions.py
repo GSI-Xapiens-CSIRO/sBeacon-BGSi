@@ -21,8 +21,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 ATHENA_METADATA_BUCKET = os.environ.get("ATHENA_METADATA_BUCKET")
 SUBMIT_LAMBDA = os.environ.get("SUBMIT_LAMBDA")
 INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
-TEMP_BUCKET = os.environ.get("CLINIC_TEMP_NAME") 
-REGION_BUCKET = os.environ.get("CLINIC_REGION_NAME") 
+
 
 #
 # Files' Admin Functions
@@ -397,47 +396,3 @@ def index_sbeacon(event, context):
             "success": False,
             "message": "Unable to initiate indexing, please try again.",
         }
-        
-        
-
-@router.attach(
-    "/dportal/projects/{project}/clinical-workflows/{job_id}",
-    "delete",
-)
-def delete_jobid(event, context):
-    # DPORTAL_BUCKET_TEMP = match = re.search(r"(svep-[\w\-]+)", TEMP_BUCKET).group(1)
-    selectedJOB = event["pathParameters"]["job_id"]
-    project_name = event["pathParameters"]["project"]
-    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-
-    try:
-        #check is user registered in project
-        ProjectUsers.get(project_name, sub) 
-
-        job = ClinicJobs.get(selectedJOB) 
-        if job.job_status.lower() not in ["failed", "expired"]:
-            return {
-                "success": False,
-                "message": f"Job {selectedJOB} is not in a failed/expired status.",
-            }
-        job.delete()
-        # delete file from temp data 
-        keys = list_s3_prefix(TEMP_BUCKET, selectedJOB)
-        delete_s3_objects(TEMP_BUCKET, keys)
-        
-        #delete file from regions data
-        regionKeys = list_s3_prefix(REGION_BUCKET, selectedJOB)
-        delete_s3_objects(REGION_BUCKET, regionKeys)
-        
-    except ClinicJobs.DoesNotExist:
-        return {
-            "success": False,
-            "message": f"Job with ID {selectedJOB} not found",
-        }
-    except ProjectUsers.DoesNotExist:
-        return {
-            "success": False,
-            "message": "User not registered in project.",
-        }
-
-    return {"success": True, "message": f"Deleted job {selectedJOB} from project {project_name}"}

@@ -9,11 +9,13 @@ from utils.models import (
     ClinicalAnnotations,
     ClinicalVariants,
 )
+from utils.s3_util import list_s3_prefix, delete_s3_objects
 from utils.cognito import get_user_from_attribute, get_user_attribute
 from utils.lambda_util import invoke_lambda_function
 
 router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
+CLINIC_TEMP_BUCKET_NAMES = os.environ.get("CLINIC_TEMP_BUCKET_NAMES").split(",")
 REPORTS_LAMBDA = os.environ.get("REPORTS_LAMBDA")
 HUB_NAME = os.environ.get("HUB_NAME")
 
@@ -91,6 +93,49 @@ def list_jobs(event, context):
         "last_evaluated_key": (
             json.dumps(jobs.last_evaluated_key) if jobs.last_evaluated_key else None
         ),
+    }
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}",
+    "delete",
+)
+def delete_jobid(event, context):
+    selected_job = event["pathParameters"]["job_id"]
+    project_name = event["pathParameters"]["project"]
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+
+    try:
+        # check is user registered in project
+        ProjectUsers.get(project_name, sub)
+
+        job = ClinicJobs.get(selected_job)
+        if job.job_status.lower() not in ["failed", "expired"]:
+            return {
+                "success": False,
+                "message": f"Job {selected_job} is not in a failed/expired status.",
+            }
+        job.delete()
+
+        # delete files from temp buckets
+        for bucket in CLINIC_TEMP_BUCKET_NAMES:
+            keys = list_s3_prefix(bucket, selected_job)
+            delete_s3_objects(bucket, keys)
+
+    except ClinicJobs.DoesNotExist:
+        return {
+            "success": False,
+            "message": f"Job with ID {selected_job} not found",
+        }
+    except ProjectUsers.DoesNotExist:
+        return {
+            "success": False,
+            "message": "User not registered in project.",
+        }
+
+    return {
+        "success": True,
+        "message": f"Deleted job {selected_job} from project {project_name}",
     }
 
 

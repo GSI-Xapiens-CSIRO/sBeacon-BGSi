@@ -267,22 +267,12 @@ variable "svep-references-table-name" {
   description = "Name of the references table"
 }
 
-variable "clinic-temp-bucket-name" {
-  type        = string
-  description = "Name of the clinic temp bucket"
+variable "clinic-temp-bucket-names" {
+  type        = list(string)
+  description = "List of clinic bucket names containing temp files to clear"
 }
 
-variable "clinic-temp-bucket-arn" {
-  type        = string
-  description = "ARN of the clinic temp bucket"
-}
-
-variable "clinic-region-bucket-name" {
-  type        = string
-  description = "Name of the clinic regions bucket"
-}
-
-variable "clinic-region-bucket-arn" {
-  type        = string
-  description = "ARN of the clinic regions bucket"
+variable "clinic-temp-bucket-arns" {
+  type        = list(string)
+  description = "List of clinic bucket arns containing temp files to clear"
 }

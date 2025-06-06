@@ -748,8 +748,7 @@ module "lambda-data-portal" {
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
-      CLINIC_TEMP_NAME                  = var.clinic-temp-bucket-name
-      CLINIC_REGION_NAME                = var.clinic-region-bucket-name
+      CLINIC_TEMP_BUCKET_NAMES          = join(",", var.clinic-temp-bucket-names)
     },
   )
 

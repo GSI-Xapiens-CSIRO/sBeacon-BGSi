@@ -229,10 +229,6 @@ def delete_user(event, context):
             "message": "There was a problem retrieving the user's ID.",
         }
 
-    # delete user quota
-    quota = Quota.get(sub)
-    quota.delete()
-
     response = dynamodb_client.scan(
         TableName=DYNAMO_JUPYTER_INSTANCES_TABLE,
         FilterExpression="uid = :uid",
@@ -284,6 +280,10 @@ def delete_user(event, context):
                     "success": False,
                     "message": "There was a problem stopping the user's active notebook instances.",
                 }
+
+    # delete user quota
+    quota = Quota.get(sub)
+    quota.delete()
 
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 

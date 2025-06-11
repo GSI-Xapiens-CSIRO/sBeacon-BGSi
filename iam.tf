@@ -370,6 +370,7 @@ data "aws_iam_policy_document" "admin-lambda-access" {
     ]
     resources = [
       aws_dynamodb_table.juptyer_notebooks.arn,
+      aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
     ]
   }
   statement {

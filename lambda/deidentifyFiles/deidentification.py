@@ -280,11 +280,11 @@ def anonymise(input_string):
 
 
 def remove_nested_angle_brackets(header_line):
-    match = re.search(r'^(##\w+)=<(.+)>$', header_line)
+    match = re.search(r"^(##\w+)=<(.+)>$", header_line)
     if not match:
         return header_line
     prefix, inner = match.groups()
-    flattened_inner = inner.replace('<', '').replace('>', '')
+    flattened_inner = inner.replace("<", "").replace(">", "")
     return f"{prefix}=<{flattened_inner}>"
 
 
@@ -618,7 +618,7 @@ def anonymise_vcf(input_path, output_path):
             reheader_process.check()
         if output_type in "zb":
             index_process = CheckedProcess(
-                args=["bcftools", "index", output_path],
+                args=["bcftools", "index", "--force", output_path],
                 error_message="Indexing anonymised file failed",
             )
             index_process.check()
@@ -636,7 +636,7 @@ def anonymise_vcf(input_path, output_path):
         files_to_move = [input_path]
         if output_type in "zb":
             index_process = CheckedProcess(
-                args=["bcftools", "index", input_path],
+                args=["bcftools", "index", "--force", input_path],
                 error_message="Indexing original file failed",
             )
             index_process.check()

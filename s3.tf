@@ -48,6 +48,13 @@ resource "aws_s3_bucket" "metadata-bucket" {
   tags = merge(var.common-tags, var.common-tags-backup)
 }
 
+resource "aws_s3_bucket_versioning" "metadata-bucket" {
+  bucket = aws_s3_bucket.metadata-bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_ownership_controls" "metadata_bucket_ownership_controls" {
   bucket = aws_s3_bucket.metadata-bucket.id
   rule {
@@ -88,6 +95,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "metadata_bucket_lifecycle" {
 
     expiration {
       days = 2
+    }
+  }
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter { }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 1
     }
   }
 }

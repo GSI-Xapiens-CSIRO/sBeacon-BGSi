@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 
 from deidentification import deidentify, log_deidentification_status
 from launch_ec2 import launch_deidentification_ec2
+from shared.utils import clear_tmp
 
 dynamodb = boto3.client("dynamodb")
 s3 = boto3.client("s3")
@@ -197,12 +198,16 @@ def lambda_handler(event, context):
         if user_sub is None:
             print(f'File owner for "{file_name}" of project "{project}" not found')
         else:
-            print(f'File owner for "{file_name}" of project "{project}" is "{user_sub}"')
+            print(
+                f'File owner for "{file_name}" of project "{project}" is "{user_sub}"'
+            )
         log_deidentification_status(PROJECTS_TABLE, project, file_name, "Pending")
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
             print(f"{object_key} is an index file, moving directly")
             move_file(object_key)
-            log_deidentification_status(PROJECTS_TABLE, project, file_name, "Anonymised")
+            log_deidentification_status(
+                PROJECTS_TABLE, project, file_name, "Anonymised"
+            )
             return
         else:
             print(f"{object_key} is a genomic or metadata file, deidentifying")
@@ -217,6 +222,7 @@ def lambda_handler(event, context):
                     file_name=file_name,
                     object_key=object_key,
                 )
+                clear_tmp()
             else:
                 launch_deidentification_ec2(
                     input_bucket=DPORTAL_BUCKET,

@@ -32,7 +32,7 @@ def get_all_versions():
         print("Error fetching versions from DynamoDB: ", e)
         versions = {}
 
-    versions = {**versions, **json.load(open("versions.json"))}
+    versions = {**json.load(open("versions.json")), **versions}
 
     return versions
 

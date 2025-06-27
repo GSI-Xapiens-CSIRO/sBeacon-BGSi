@@ -284,14 +284,14 @@ def save_variants(event, context):
         collection_name = event["requestContext"]["requestId"]
         comment = body["comment"]
         variants = body["variants"]
-        variants_annotations = [None for _ in variants]
+        variants_annotations = [[] for _ in variants]
         annotations = ClinicalAnnotations.query(f"{project}:{job_id}")
 
         for annot in annotations:
             annotated_variants = json.loads(annot.variants)
             for idx, var in enumerate(variants):
                 if var in annotated_variants:
-                    variants_annotations[idx] = annot.annotation
+                    variants_annotations[idx].append(annot.annotation)
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except Projects.DoesNotExist:

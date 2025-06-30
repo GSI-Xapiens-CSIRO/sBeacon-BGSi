@@ -49,7 +49,16 @@ def update_schemas():
     )
 
 
+def clean_hashbuster():
+    if os.path.isfile(f"{DIRECTORY}/hash.txt"):
+        os.remove(f"{DIRECTORY}/hash.txt")
+
+
 if __name__ == "__main__":
     update_shared()
     update_schemas()
-    print(f""" {{ "hash": "{hash_dir(DIRECTORY)}" }} """)
+    clean_hashbuster()
+    hash = hash_dir(DIRECTORY)
+    with open(f"{DIRECTORY}/hash.txt", "w") as f:
+        f.write(hash)
+    print(f""" {{ "hash": "{hash}" }} """)

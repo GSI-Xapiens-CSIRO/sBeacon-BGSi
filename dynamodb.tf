@@ -201,6 +201,25 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
   }
 }
 
+resource "aws_dynamodb_table" "sbeacon-dataportal-users-info" {
+  name         = "sbeacon-dataportal-users-info"
+  billing_mode = "PAY_PER_REQUEST" # on demand
+  #read_capacity  = 5
+  #write_capacity = 5
+  hash_key = "uid"
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  tags = {
+    Owner       = "gaspi"
+    Environment = "dev"
+    Name        = "sbeacon-backend"
+  }
+}
+
 # saved queries trable
 # this stores the saved queries of the users
 resource "aws_dynamodb_table" "saved_queries" {

@@ -227,11 +227,7 @@ resource "aws_dynamodb_table" "sbeacon_dataportal_users_info" {
     type = "S"
   }
 
-  tags = {
-    Owner       = "gaspi"
-    Environment = "dev"
-    Name        = "sbeacon-backend"
-  }
+  tags = merge(var.common-tags, var.common-tags-backup)
 }
 
 # saved queries trable

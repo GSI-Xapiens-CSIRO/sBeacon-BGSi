@@ -215,7 +215,7 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
   )
 }
 
-resource "aws_dynamodb_table" "sbeacon-dataportal-users-info" {
+resource "aws_dynamodb_table" "sbeacon_dataportal_users_info" {
   name         = "sbeacon-dataportal-users-info"
   billing_mode = "PAY_PER_REQUEST" # on demand
   #read_capacity  = 5

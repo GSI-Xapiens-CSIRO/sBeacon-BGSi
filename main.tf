@@ -76,6 +76,7 @@ locals {
     DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
     DYNAMO_DATAPORTAL_LOCKS_TABLE  = aws_dynamodb_table.dataportal_locks_table.name
     DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
+    DYNAMO_USER_INFO_TABLE         = aws_dynamodb_table.user_info.name
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"

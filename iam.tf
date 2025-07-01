@@ -568,6 +568,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       aws_dynamodb_table.clinic_jobs.arn,
       aws_dynamodb_table.clinical_variants.arn,
       aws_dynamodb_table.sbeacon_dataportal_users_info.arn,
+      aws_dynamodb_table.dataportal_pricing_cache.arn,
     ]
   }
 

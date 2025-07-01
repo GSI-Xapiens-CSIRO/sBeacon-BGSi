@@ -15,18 +15,18 @@ def store_user_info(event, context):
             body = event["body"]
 
         uid = body.get("uid")
-        institutionName = body.get("institutionName", "")
+        institutionType = body.get("institutionType", "")
 
         if not uid:
             return {"success": False, "message": "Missing 'uid' in request body."}
 
         try:
             user_info = UserInfo.get(uid)
-            user_info.update(actions=[UserInfo.institutionName.set(institutionName)])
+            user_info.update(actions=[UserInfo.institutionType.set(institutionType)])
         except UserInfo.DoesNotExist:
             user_info = UserInfo(
                 uid=uid,
-                institutionName=institutionName,
+                institutionType=institutionType,
             )
             user_info.save()
 

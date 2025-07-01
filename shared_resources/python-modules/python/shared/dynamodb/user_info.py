@@ -18,10 +18,10 @@ class UserInfo(Model):
         region = REGION
 
     uid = UnicodeAttribute(hash_key=True)
-    institutionName = UnicodeAttribute(attr_name="institutionName", default="")
+    institutionType = UnicodeAttribute(attr_name="institutionType", default="")
 
     def to_dict(self):
         return {
             "uid": self.uid,
-            "institutionName": self.institutionName,
+            "institutionType": self.institutionType,
         }

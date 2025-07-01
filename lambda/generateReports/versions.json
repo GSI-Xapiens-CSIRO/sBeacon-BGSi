@@ -9,5 +9,6 @@
   "polyphen2_version": "N/A",
   "omim_version": "N/A",
   "pharmcat_version": "3.0.0",
-  "pharmgkb_version": "2025-03-07-16-38"
+  "pharmgkb_version": "2025-03-07-16-38",
+  "lookup_version": "N/A"
 }

@@ -269,7 +269,7 @@ if __name__ == "__main__":
         "slco1b1": {
             "diplotype": "*1,*40",
             "phenotype": "Indeterminate",
-            "genotype": "-",
+            "genotype": "0/1",
         },
         "apoe": {"diplotype": "CC", "phenotype": "Efficacy", "genotype": "1/0"},
         "versions": {

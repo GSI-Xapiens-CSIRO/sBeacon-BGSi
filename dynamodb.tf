@@ -6,7 +6,8 @@ resource "aws_dynamodb_table" "ontologies" {
   billing_mode = "PAY_PER_REQUEST"
   name         = "sbeacon-Ontologies"
   hash_key     = "id"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "id"
@@ -18,7 +19,8 @@ resource "aws_dynamodb_table" "descendant_terms" {
   billing_mode = "PAY_PER_REQUEST"
   name         = "sbeacon-Descendants"
   hash_key     = "term"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "term"
@@ -30,7 +32,8 @@ resource "aws_dynamodb_table" "anscestor_terms" {
   billing_mode = "PAY_PER_REQUEST"
   name         = "sbeacon-Anscestors"
   hash_key     = "term"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "term"
@@ -47,7 +50,8 @@ resource "aws_dynamodb_table" "projects" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "name"
   name         = "sbeacon-dataportal-projects"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "name"
@@ -65,7 +69,8 @@ resource "aws_dynamodb_table" "project_users" {
   hash_key     = "name"
   range_key    = "uid"
   name         = "sbeacon-dataportal-project-users"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "name"
@@ -91,7 +96,8 @@ resource "aws_dynamodb_table" "juptyer_notebooks" {
   hash_key     = "uid"
   range_key    = "instanceName"
   name         = "sbeacon-dataportal-juptyer-notebooks"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "uid"
@@ -109,7 +115,8 @@ resource "aws_dynamodb_table" "clinic_jobs" {
   name         = "sbeacon-dataportal-clinic-jobs"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "job_id"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "job_id"
@@ -138,6 +145,8 @@ resource "aws_dynamodb_table" "clinical_annotations" {
   hash_key     = "project_job"
   range_key    = "annotation_name"
 
+  tags = merge(var.common-tags, var.common-tags-backup)
+
   attribute {
     name = "project_job"
     type = "S"
@@ -156,6 +165,8 @@ resource "aws_dynamodb_table" "clinical_variants" {
   hash_key     = "project_job"
   range_key    = "collection_name"
 
+  tags = merge(var.common-tags, var.common-tags-backup)
+
   attribute {
     name = "project_job"
     type = "S"
@@ -173,7 +184,8 @@ resource "aws_dynamodb_table" "vcfs" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "vcfLocation"
   name         = "sbeacon-vcfs"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "vcfLocation"
@@ -194,11 +206,13 @@ resource "aws_dynamodb_table" "sbeacon-dataportal-users-quota" {
     type = "S"
   }
 
-  tags = {
+  tags = merge({
     Owner       = "gaspi"
     Environment = "dev"
     Name        = "sbeacon-backend"
-  }
+    },
+    var.common-tags-backup
+  )
 }
 
 resource "aws_dynamodb_table" "sbeacon-dataportal-users-info" {
@@ -227,7 +241,8 @@ resource "aws_dynamodb_table" "saved_queries" {
   hash_key     = "uid"
   range_key    = "name"
   name         = "sbeacon-dataportal-saved-queries"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "uid"
@@ -245,7 +260,8 @@ resource "aws_dynamodb_table" "dataportal_locks_table" {
   name         = "sbeacon-dataportal-mutex-locks"
   billing_mode = "PAY_PER_REQUEST" # On-demand capacity
   hash_key     = "LockId"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "LockId"
@@ -264,7 +280,8 @@ resource "aws_dynamodb_table" "dataportal_pricing_cache" {
   name         = "sbeacon-dataportal-pricing-cache"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "resource"
-  tags         = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 
   attribute {
     name = "resource"

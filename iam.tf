@@ -370,6 +370,7 @@ data "aws_iam_policy_document" "admin-lambda-access" {
     ]
     resources = [
       aws_dynamodb_table.juptyer_notebooks.arn,
+      aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
     ]
   }
   statement {
@@ -656,25 +657,6 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
 
   statement {
     actions = [
-      "s3:ListBucket"
-    ]
-    resources = [
-      var.clinic-temp-bucket-arn,
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      "${var.clinic-temp-bucket-arn}/*",
-    ]
-  }
-
-  statement {
-    actions = [
       "s3:DeleteObject",
       "s3:GetObject",
     ]
@@ -699,10 +681,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     actions = [
       "s3:ListBucket"
     ]
-    resources = [
-      var.clinic-temp-bucket-arn,
-      var.clinic-region-bucket-arn,
-    ]
+    resources = var.clinic-temp-bucket-arns
   }
 
   statement {
@@ -711,8 +690,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
 
     resources = [
-      "${var.clinic-temp-bucket-arn}/*",
-      "${var.clinic-region-bucket-arn}/*",
+      for arn in var.clinic-temp-bucket-arns : "${arn}/*"
     ]
   }
 

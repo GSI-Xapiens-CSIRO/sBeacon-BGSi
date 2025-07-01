@@ -4,7 +4,7 @@ data "archive_file" "binaries_layer" {
   type        = "zip"
   source_dir  = "${path.module}/layers/binaries/"
   output_path = "${path.module}/binaries.zip"
-  
+
   depends_on = [null_resource.init_script]
 }
 

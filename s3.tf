@@ -44,7 +44,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "variants_bucket_lifecycle" {
 resource "aws_s3_bucket" "metadata-bucket" {
   bucket_prefix = var.metadata-bucket-prefix
   force_destroy = true
-  tags          = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+}
+
+resource "aws_s3_bucket_versioning" "metadata-bucket" {
+  bucket = aws_s3_bucket.metadata-bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_ownership_controls" "metadata_bucket_ownership_controls" {
@@ -87,6 +95,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "metadata_bucket_lifecycle" {
 
     expiration {
       days = 2
+    }
+  }
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 1
     }
   }
 }
@@ -135,7 +154,8 @@ resource "aws_s3_bucket_acl" "lambda-layers" {
 resource "aws_s3_bucket" "dataportal-bucket" {
   bucket_prefix = var.dataportal-bucket-prefix
   force_destroy = true
-  tags          = var.common-tags
+
+  tags = merge(var.common-tags, var.common-tags-backup)
 }
 
 resource "aws_s3_bucket_versioning" "dataportal-bucket" {
@@ -176,7 +196,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "staging_bucket_lifecycle" {
   }
 
   rule {
-    id = "expire-noncurrent-versions"
+    id     = "expire-noncurrent-versions"
     status = "Enabled"
 
     filter {

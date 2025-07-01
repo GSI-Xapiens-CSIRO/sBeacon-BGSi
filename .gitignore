@@ -10,6 +10,7 @@ remote_state.tf
 *.pyc
 build
 libraries
+.hash.txt
 
 # csi/tbi files from tests
 *.csi

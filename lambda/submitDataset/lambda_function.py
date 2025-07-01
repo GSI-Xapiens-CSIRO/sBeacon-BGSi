@@ -167,7 +167,10 @@ def lambda_handler(event, context):
     except ValueError:
         return {"success": False, "message": "Invalid payload"}
     except KeyError:
-        return {"success": False, "message": "Invalid payload. Required fields are missing"}
+        return {
+            "success": False,
+            "message": "Invalid payload. Required fields are missing",
+        }
     except Exception:
         return {"success": False, "message": str(e)}
 

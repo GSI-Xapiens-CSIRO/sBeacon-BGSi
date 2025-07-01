@@ -9,8 +9,7 @@ import pytest
 from moto import mock_aws
 
 
-@pytest.mark.dependency(name="test_create_notebook")
-def test_create_notebook(resources_dict):
+def test_get_datasets(resources_dict):
     import lambda_function
 
     event = {

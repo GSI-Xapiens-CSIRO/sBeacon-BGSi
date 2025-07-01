@@ -69,6 +69,8 @@ keys = {
     "COGNITO_REGISTRATION_EMAIL_LAMBDA": "COGNITO_REGISTRATION_EMAIL_LAMBDA",
     # fan outs
     "SPLIT_QUERY_LAMBDA": "SPLIT_QUERY_LAMBDA",
+    # s3
+    "CLINIC_TEMP_BUCKET_NAMES": "A,B,C",
 }
 
 # Set environment variables for testing

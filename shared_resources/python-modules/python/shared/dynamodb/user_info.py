@@ -19,9 +19,11 @@ class UserInfo(Model):
 
     uid = UnicodeAttribute(hash_key=True)
     institutionType = UnicodeAttribute(attr_name="institutionType", default="")
+    institutionName = UnicodeAttribute(attr_name="institutionName", default="")
 
     def to_dict(self):
         return {
             "uid": self.uid,
             "institutionType": self.institutionType,
+            "institutionName": self.institutionName,
         }

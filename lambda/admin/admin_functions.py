@@ -191,7 +191,13 @@ def get_users(event, context):
         # get quota and user info
         uid = user["uid"]
         usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
-        userinfo_data = userinfo_map.get(uid, {"institutionType": ""})
+        userinfo_data = userinfo_map.get(
+            uid,
+            {
+                "institutionType": "",
+                "institutionName": "",
+            },
+        )
 
         user["UserInfo"] = userinfo_data
         user["Usage"] = usage_data

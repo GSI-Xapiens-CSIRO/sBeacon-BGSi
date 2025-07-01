@@ -102,7 +102,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "metadata_bucket_lifecycle" {
     id     = "expire-noncurrent-versions"
     status = "Enabled"
 
-    filter { }
+    filter {}
 
     noncurrent_version_expiration {
       noncurrent_days = 1

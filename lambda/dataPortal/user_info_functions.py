@@ -1,6 +1,6 @@
 import json
 
-from shared.apiutils import PortalError, LambdaRouter
+from shared.apiutils import LambdaRouter
 from shared.dynamodb import UserInfo
 
 router = LambdaRouter()
@@ -43,9 +43,13 @@ def get_user_info(event, context):
     try:
         user_info = UserInfo.get(uid)
     except UserInfo.DoesNotExist:
-        raise PortalError(
-            error_code=409,
-            error_message=f"User not found.",
-        )
+        return {
+            "success": False,
+            "message": f"User not found.",
+        }
 
-    return user_info.to_dict()
+    return {
+        "success": True,
+        "message": "",
+        "data": user_info.to_dict(),
+    }

@@ -188,12 +188,12 @@ def get_users(event, context):
     data = []
 
     for user in users:
-        # get quota
+        # get quota and user info
         uid = user["uid"]
         usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
         userinfo_data = userinfo_map.get(uid, {"institutionType": ""})
 
-        user["institutionType"] = userinfo_data.get("institutionType", "")
+        user["UserInfo"] = userinfo_data
         user["Usage"] = usage_data
         # get MFA
         try:

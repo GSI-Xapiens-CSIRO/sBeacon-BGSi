@@ -267,10 +267,14 @@ class DynamoDBEnvironment:
     @property
     def DYNAMO_DATAPORTAL_LOCKS_TABLE(self):
         return os.environ["DYNAMO_DATAPORTAL_LOCKS_TABLE"]
-    
+
     @property
     def DYNAMO_JUPYTER_INSTANCES_TABLE(self):
         return os.environ["DYNAMO_JUPYTER_INSTANCES_TABLE"]
+
+    @property
+    def DYNAMO_USER_INFO_TABLE(self):
+        return os.environ["DYNAMO_USER_INFO_TABLE"]
 
 
 # class SnsEnvironment:

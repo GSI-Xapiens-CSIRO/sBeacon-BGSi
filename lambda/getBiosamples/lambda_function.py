@@ -15,14 +15,19 @@ def lambda_handler(event, context):
     print("Event Received: {}".format(json.dumps(event)))
     request_params, errors, status = parse_request(event)
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    quota = Quota.get(sub)
+    try:
+        quota = Quota.get(sub)
 
-    if not quota.user_has_quota():
+        if not quota.user_has_quota():
+            return bundle_response(
+                403, {"error": "User has exceeded quota", "code": "QUOTA_EXCEEDED"}
+            )
+        else:
+            quota.increment_quota()
+    except Quota.DoesNotExist:
         return bundle_response(
-            403, {"error": "User has exceeded quota", "code": "QUOTA_EXCEEDED"}
+            403, {"error": "User does not have a quota", "code": "NO_QUOTA"}
         )
-    else:
-        quota.increment_quota()
 
     if errors:
         return bundle_response(status, errors)

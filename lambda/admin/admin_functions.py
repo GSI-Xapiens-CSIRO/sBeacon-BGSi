@@ -10,6 +10,7 @@ from shared.cognitoutils import authenticate_admin
 from shared.apiutils import BeaconError, LambdaRouter
 from shared.utils.lambda_utils import ENV_COGNITO, ENV_DYNAMO
 from shared.dynamodb import Quota, UsageMap
+from shared.dynamodb import UserInfo
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
 COGNITO_REGISTRATION_EMAIL_LAMBDA = ENV_COGNITO.COGNITO_REGISTRATION_EMAIL_LAMBDA
@@ -178,12 +179,27 @@ def get_users(event, context):
     dynamo_quota_map = {
         quota.to_dict()["uid"]: quota.to_dict()["Usage"] for quota in quota_data
     }
+
+    userinfo_data = UserInfo.batch_get(items=keys)
+    userinfo_map = {
+        userinfo.to_dict()["uid"]: userinfo.to_dict() for userinfo in userinfo_data
+    }
+
     data = []
 
     for user in users:
-        # get quota
+        # get quota and user info
         uid = user["uid"]
         usage_data = dynamo_quota_map.get(uid, UsageMap().as_dict())
+        userinfo_data = userinfo_map.get(
+            uid,
+            {
+                "institutionType": "",
+                "institutionName": "",
+            },
+        )
+
+        user["UserInfo"] = userinfo_data
         user["Usage"] = usage_data
         # get MFA
         try:

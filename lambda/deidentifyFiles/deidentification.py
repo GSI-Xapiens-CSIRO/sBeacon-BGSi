@@ -221,7 +221,12 @@ class Viewer:
     def _print(self, lines):
         if not self.started:
             self._start()
-        print("\n".join(lines), file=self.view_process.stdin)
+        try:
+            print("\n".join(lines), file=self.view_process.stdin)
+        except BrokenPipeError:
+            self.view_process.check()
+            # If that's not the cause, raise for further inspection
+            raise
 
     def _start(self):
         self.view_process = CheckedProcess(

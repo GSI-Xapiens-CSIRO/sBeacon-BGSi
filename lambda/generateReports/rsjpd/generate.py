@@ -8,7 +8,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def _create_annotations(filename, slco1b1, apoe):
+def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_version, lookup_version):
     c = canvas.Canvas(filename, pagesize=letter)
     c.showPage()
     form = c.acroForm
@@ -214,6 +214,11 @@ def _create_annotations(filename, slco1b1, apoe):
             forceBorder=False,
             fieldFlags=flags,
         )
+    c.setFont("Helvetica-Bold", 10)
+    c.setFillColor(colors.black)
+    c.drawString(57, 295, f"PharmCAT version: {pharmcat_version}")
+    c.drawString(57, 275, f"PharmGKB version: {pharmgkb_version}")
+    c.drawString(57, 255, f"Lookup version: {lookup_version}")
     c.save()
 
 
@@ -249,7 +254,7 @@ def generate(
 ):
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
-    _create_annotations("/tmp/annotations.pdf", slco1b1, apoe)
+    _create_annotations("/tmp/annotations.pdf", slco1b1, apoe, versions["pharmcat_version"], versions["pharmgkb_version"], versions["lookup_version"])
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/template.pdf",
@@ -273,17 +278,9 @@ if __name__ == "__main__":
         },
         "apoe": {"diplotype": "CC", "phenotype": "Efficacy", "genotype": "1/0"},
         "versions": {
-            "gnomad_version": "v4.1.0",
-            "sift_version": "5.2.2",
-            "dbsnp_version": "b156",
-            "gnomad_1KG_version": "v3.1.2",
-            "gnomad_constraints_version": "v3.1.2",
-            "snp_eff_version": "N/A",
-            "snp_sift_version": "N/A",
-            "polyphen2_version": "N/A",
-            "omim_version": "N/A",
             "pharmcat_version": "3.0.0",
             "pharmgkb_version": "2025-03-07-16-38",
+            "lookup_version": "2025-03-07-16-38",
         },
     }
     generate(**payload)

@@ -3,7 +3,13 @@ import boto3
 SESSION = boto3.session.Session()
 REGION = SESSION.region_name
 
-s3 = boto3.client("s3", region_name=REGION, config=boto3.session.Config(signature_version="s3v4", s3={"addressing_style": "virtual"}))
+s3 = boto3.client(
+    "s3",
+    region_name=REGION,
+    config=boto3.session.Config(
+        signature_version="s3v4", s3={"addressing_style": "virtual"}
+    ),
+)
 
 
 def list_s3_prefix(bucket, prefix):
@@ -76,3 +82,7 @@ def get_presigned_url(bucket, key):
         Params={"Bucket": bucket, "Key": key},
         ExpiresIn=3600,
     )
+
+
+def get_upload_presigned_url(bucket, key):
+    return s3.generate_presigned_post(Bucket=bucket, Key=key, ExpiresIn=3600)

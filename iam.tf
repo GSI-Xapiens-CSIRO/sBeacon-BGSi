@@ -672,6 +672,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
   statement {
     actions = [
       "s3:DeleteObject",
+      "s3:PutObject",
     ]
 
     resources = [

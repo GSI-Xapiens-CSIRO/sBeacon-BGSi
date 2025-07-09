@@ -403,6 +403,11 @@ def process_header(file_path):
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
     for line in view_process.stdout:
+        full_length = len(line)
+        line = line.rstrip("\r\n")
+        if len(line) == full_length:
+            # No line ending, has view_process crashed?
+            view_process.check()
         line = line.rstrip("\r\n")
         if line.startswith("##INFO=<"):
             # INFO line, add to whitelist if Type is not "String"
@@ -447,6 +452,11 @@ def process_records(file_path, header_lines, info_whitelist):
         "Creating deidentified records failed",
     )
     for line in view_process.stdout:
+        full_length = len(line)
+        line = line.rstrip("\r\n")
+        if len(line) == full_length:
+            # No line ending, has view_process crashed?
+            view_process.check()
         line = line.rstrip("\r\n")
         new_line = anonymise_vcf_record(line, info_whitelist)
         if new_line is not None:

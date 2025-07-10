@@ -39,7 +39,7 @@ def create_notebook(event, context):
         SecurityGroupIds=[
             "sg-07fb4f3e6f0d78dca",
         ],
-        DirectInternetAccess="Enabled",
+        DirectInternetAccess="Disabled",
     )
     entry = JupyterInstances(sub, notebook_name)
     entry.save()

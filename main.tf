@@ -807,12 +807,6 @@ module "lambda-generateReports" {
   timeout       = 60
   source_path   = "${path.module}/lambda/generateReports"
 
-  attach_policy_jsons = true
-  policy_jsons = [
-    data.aws_iam_policy_document.lambda-generateReports.json,
-  ]
-  number_of_policy_jsons = 1
-
   environment_variables = {
     DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
   }

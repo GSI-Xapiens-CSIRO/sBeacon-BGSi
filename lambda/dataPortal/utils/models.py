@@ -110,6 +110,7 @@ class ClinicJobs(Model):
     failed_step = UnicodeAttribute(default="")
     error_message = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
+    reference_versions = MapAttribute(default=dict)
     project_index = ClinicJobsProjectNameIndex()
 
     def save(self, *args, **kwargs):

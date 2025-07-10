@@ -1,40 +1,6 @@
 import os
 import base64
 import json
-from collections import defaultdict
-
-import boto3
-
-DYNAMO_SVEP_REFERENCES_TABLE = os.environ.get(
-    "DYNAMO_SVEP_REFERENCES_TABLE", "svep-references"
-)
-
-
-def get_all_versions():
-    try:
-        client = boto3.client("dynamodb")
-        response = client.scan(TableName=DYNAMO_SVEP_REFERENCES_TABLE)
-        items = response["Items"]
-        versions = {}
-
-        while "LastEvaluatedKey" in response:
-            response = client.scan(
-                TableName=DYNAMO_SVEP_REFERENCES_TABLE,
-                ExclusiveStartKey=response["LastEvaluatedKey"],
-            )
-            items.extend(response["Items"])
-
-        for item in items:
-            version = item["version"]["S"]
-            tool = item["id"]["S"]
-            versions[tool] = version
-    except Exception as e:
-        print("Error fetching versions from DynamoDB: ", e)
-        versions = {}
-
-    versions = {**json.load(open("versions.json")), **versions}
-
-    return versions
 
 
 def lambda_handler(event, context):
@@ -47,7 +13,7 @@ def lambda_handler(event, context):
         "pii_gender": "Male",
     }
 
-    versions = get_all_versions()
+    versions = {**json.load(open("versions.json")), **event["versions"]}
 
     # RSCM
     match event["lab"]:

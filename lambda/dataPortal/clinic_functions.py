@@ -424,8 +424,16 @@ def generate_report(event, context):
             print("Generating report with no variants")
         else:
             print(f"Generating report with {len(variants)} variants")
+        job = ClinicJobs.get(job_id)
+        versions = {
+            k: v
+            for k, v in job.reference_versions.as_dict().items()
+            if k.endswith("_version")
+        }
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
+    except ClinicJobs.DoesNotExist:
+        raise PortalError(404, "Job not found")
     except Projects.DoesNotExist:
         raise PortalError(404, "Project not found")
     except ClinicalVariants.DoesNotExist:
@@ -439,12 +447,14 @@ def generate_report(event, context):
                 payload = {
                     "lab": HUB_NAME,
                     "kind": "neg",
+                    "versions": versions,
                 }
             else:
                 payload = {
                     "lab": HUB_NAME,
                     "kind": "pos",
                     "variants": variants,
+                    "versions": versions,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {
@@ -481,6 +491,7 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "phenotype": phenotype,
                     "alleles": ",".join((variants[0]["Alleles"])),
+                    "versions": versions,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {
@@ -536,6 +547,7 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "slco1b1": slco1b1,
                     "apoe": apoe,
+                    "versions": versions,
                 }
                 response = invoke_lambda_function(REPORTS_LAMBDA, payload)
                 return {
@@ -552,6 +564,7 @@ def generate_report(event, context):
             payload = {
                 "lab": HUB_NAME,
                 "variants": variants,
+                "versions": versions,
             }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {
@@ -565,6 +578,7 @@ def generate_report(event, context):
                     "kind": "neg",
                     "lang": body["lang"],
                     "mode": body["mode"],
+                    "versions": versions,
                 }
             else:
                 payload = {
@@ -573,6 +587,7 @@ def generate_report(event, context):
                     "lang": body["lang"],
                     "mode": body["mode"],
                     "variants": variants,
+                    "versions": versions,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {

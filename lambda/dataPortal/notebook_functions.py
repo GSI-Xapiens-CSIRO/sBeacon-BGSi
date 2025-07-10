@@ -32,10 +32,14 @@ def create_notebook(event, context):
         InstanceType=instance_type,
         VolumeSizeInGB=int(volume_size),
         RoleArn=os.getenv("JUPYTER_INSTACE_ROLE_ARN"),
-        DirectInternetAccess="Enabled",
         RootAccess="Disabled",
         Tags=[{"Key": "IdentityId", "Value": identity_id}],
         LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME"),
+        SubnetId="subnet-0ed79c11bf7be4e8a",
+        SecurityGroupIds=[
+            "sg-07fb4f3e6f0d78dca",
+        ],
+        DirectInternetAccess="Disabled",
     )
     entry = JupyterInstances(sub, notebook_name)
     entry.save()

@@ -1,6 +1,7 @@
 import os
 import base64
 import json
+from datetime import datetime
 
 import boto3
 
@@ -23,6 +24,7 @@ def lambda_handler(event, context):
     report_id = event["report_id"]
     project = event["project"]
     job_id = event["job_id"]
+    event["timestamp"] = str(datetime.now())
 
     # RSCM
     match event["lab"]:

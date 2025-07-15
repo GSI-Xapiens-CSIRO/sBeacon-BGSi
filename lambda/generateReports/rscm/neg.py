@@ -20,6 +20,7 @@ def _create_annotations(
     footer_dob_pos,
     filename,
     versions,
+    report_id,
 ):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
@@ -121,6 +122,9 @@ def _create_annotations(
     )
 
     for n in range(3):
+        x, y, fs, text = (5, 780, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
         # footer name
         x, y, fs, text = footer_name_pos
         form.textfield(
@@ -159,15 +163,15 @@ def _create_annotations(
         if n == 2:
             versions_pos = [
                 # left col
-                (180, 570+15, 11, versions["snp_eff_version"]),
-                (180, 556+15, 11, versions["snp_sift_version"]),
-                (180, 542+15, 11, versions["clinvar_version"]),
-                (180, 528+15, 11, versions["omim_version"]),
+                (180, 570 + 15, 11, versions["snp_eff_version"]),
+                (180, 556 + 15, 11, versions["snp_sift_version"]),
+                (180, 542 + 15, 11, versions["clinvar_version"]),
+                (180, 528 + 15, 11, versions["omim_version"]),
                 # right col
-                (450-20, 570+15, 11, versions["gnomad_version"]),
-                (450-20, 556+15, 11, versions["dbsnp_version"]),
-                (450-20, 542+15, 11, versions["sift_version"]),
-                (450-20, 528+15, 11, versions["polyphen2_version"]),
+                (450 - 20, 570 + 15, 11, versions["gnomad_version"]),
+                (450 - 20, 556 + 15, 11, versions["dbsnp_version"]),
+                (450 - 20, 542 + 15, 11, versions["sift_version"]),
+                (450 - 20, 528 + 15, 11, versions["polyphen2_version"]),
             ]
             for pos in versions_pos:
                 x, y, fs, text = pos
@@ -199,7 +203,9 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
+def generate(
+    *, pii_name=None, pii_dob=None, pii_gender=None, versions=None, report_id=None
+):
     module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/neg.pdf"
@@ -225,6 +231,7 @@ def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
         footer_dob_pos,
         output_pdf_path,
         versions,
+        report_id,
     )
     output_file_name = f"/tmp/{str(uuid.uuid4())}.pdf"
     _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
@@ -252,4 +259,5 @@ if __name__ == "__main__":
             "polyphen2_version": "N/A",
             "omim_version": "N/A",
         },
+        report_id=str(uuid.uuid4()),
     )

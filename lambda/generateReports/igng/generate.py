@@ -13,7 +13,13 @@ except:
 
 
 def generate(
-    *, pii_name=None, pii_dob=None, pii_gender=None, variants=None, versions=None
+    *,
+    pii_name=None,
+    pii_dob=None,
+    pii_gender=None,
+    variants=None,
+    versions=None,
+    report_id=None
 ):
     # Generate the first stage of the report
     table_pdf = generate_pos_stage_1(variants=variants)
@@ -25,7 +31,7 @@ def generate(
 
     # Generate the third stage of the report
     report = generate_pos_stage_3(
-        table_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob
+        table_pdf, annots_pdf, pii_name=pii_name, pii_dob=pii_dob, report_id=report_id
     )
 
     os.remove(table_pdf)
@@ -35,6 +41,8 @@ def generate(
 
 
 if __name__ == "__main__":
+    import uuid
+
     # Example usage - for testing includes made up data
     generate(
         pii_name="John Doe",
@@ -92,4 +100,5 @@ if __name__ == "__main__":
                 "Phenotype Categories": "Efficacy",
             },
         ],
+        report_id=str(uuid.uuid4()),
     )

@@ -3,13 +3,13 @@ import uuid
 from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def _create_annotations(filename, pages, page_num_pos):
-    c = canvas.Canvas(filename, pagesize=letter)
+def _create_annotations(filename, pages, page_num_pos, report_id=None):
+    c = canvas.Canvas(filename, pagesize=A4)
     form = c.acroForm
 
     text_boxes = [
@@ -47,6 +47,9 @@ def _create_annotations(filename, pages, page_num_pos):
         c.setFont("Helvetica", 11)
         c.setFillColor(colors.HexColor("#828282"))
         c.drawString(x, y, f"Halaman  {p+1} dari {pages}")
+        x, y, fs, text = (5, 830, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
 
         for n, (x, y, w, fs) in enumerate(text_boxes):
             form.textfield(
@@ -80,6 +83,7 @@ def generate(
     pii_name=None,
     pii_dob=None,
     pii_gender=None,
+    report_id=None,
 ):
     # x, y, fs, text
     page_num_pos = (500, 50)
@@ -90,7 +94,7 @@ def generate(
 
     total_pages = len(pdf_body.pages) + len(pdf_table.pages)
 
-    _create_annotations(output_pdf_path, total_pages, page_num_pos)
+    _create_annotations(output_pdf_path, total_pages, page_num_pos, report_id)
 
     writer = PdfWriter()
     pages = []

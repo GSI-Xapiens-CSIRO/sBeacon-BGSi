@@ -65,6 +65,7 @@ def _create_annotations(
     pii_dob,
     pii_gender,
     versions,
+    report_id,
     filename,
 ):
     _text_field_positions_page_1 = [
@@ -115,6 +116,9 @@ def _create_annotations(
         (_text_field_positions_page_3, _static_text_page_3),
         (_text_field_positions_page_4, _static_text_page_4),
     ]:
+        x, y, fs, text = (5, 780, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
         for n, pos in enumerate(page_poses_tf):
             x, y, w, h, fs, text, flags = pos
             c.setFont("Helvetica", fs)
@@ -166,10 +170,14 @@ def _overlay_pdf_with_annotations(src, dest, output):
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
+def generate(
+    *, pii_name=None, pii_dob=None, pii_gender=None, versions=None, report_id=None
+):
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
-    _create_annotations(pii_name, pii_dob, pii_gender, versions, "/tmp/annotations.pdf")
+    _create_annotations(
+        pii_name, pii_dob, pii_gender, versions, report_id, "/tmp/annotations.pdf"
+    )
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/EN_Genome Report_No Finding_MD.pdf",
@@ -199,6 +207,7 @@ if __name__ == "__main__":
             "polyphen2_version": "N/A",
             "omim_version": "N/A",
         },
+        "report_id": str(uuid.uuid4()),
     }
 
     generate(**data)

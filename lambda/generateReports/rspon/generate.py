@@ -19,6 +19,7 @@ def _create_annotations(
     phenotype,
     pharmcat_version,
     pharmgkb_version,
+    report_id,
 ):
     YT = 695
     # x, y, w, h, flags, text
@@ -68,6 +69,9 @@ def _create_annotations(
         [pg_1_text_fields, pg_2_text_fields, pg_3_text_fields],
         [pg_1_text_boxes, pg_2_text_boxes, pg_3_text_boxes],
     ):
+        x, y, fs, text = (5, 780, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
         for n, (x, y, w, h, flags, text) in enumerate(common_text_fields):
             form.textfield(
                 name=f"header_{n}",
@@ -138,6 +142,7 @@ def generate(
     phenotype=None,
     alleles=None,
     versions=None,
+    report_id=None,
 ):
     module_dir = Path(__file__).parent
     kind = "".join([x[0] for x in phenotype.split(" ")])
@@ -156,6 +161,7 @@ def generate(
         phenotype,
         versions["pharmcat_version"],
         versions["pharmgkb_version"],
+        report_id,
     )
     _overlay_pdf_with_annotations(annotated, template, output_file_name)
     os.remove(annotated)
@@ -187,4 +193,5 @@ if __name__ == "__main__":
         phenotype=phenotype,
         alleles=alleles,
         versions=versions,
+        report_id=str(uuid.uuid4()),
     )

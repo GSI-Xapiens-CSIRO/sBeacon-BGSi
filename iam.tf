@@ -768,3 +768,15 @@ data "aws_iam_policy_document" "dataportal-locks-access" {
     ]
   }
 }
+
+# generateReports lambda access
+data "aws_iam_policy_document" "lambda-generateReports" {
+  statement {
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/clinical-workflows/*/reports/*",
+    ]
+  }
+}

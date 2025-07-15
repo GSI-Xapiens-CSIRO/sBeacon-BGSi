@@ -430,6 +430,9 @@ def generate_report(event, context):
             for k, v in job.reference_versions.as_dict().items()
             if k.endswith("_version")
         }
+        request_id = event["requestContext"]["requestId"]
+        vcf = job.input_vcf
+        job_name = job.job_name
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except ClinicJobs.DoesNotExist:
@@ -445,12 +448,24 @@ def generate_report(event, context):
         if HUB_NAME == "RSCM":
             if not variants:
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "kind": "neg",
                     "versions": versions,
                 }
             else:
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "kind": "pos",
                     "variants": variants,
@@ -488,6 +503,12 @@ def generate_report(event, context):
                         }
 
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "phenotype": phenotype,
                     "alleles": ",".join((variants[0]["Alleles"])),
@@ -544,6 +565,12 @@ def generate_report(event, context):
                         "genotype": "-",
                     }
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "slco1b1": slco1b1,
                     "apoe": apoe,
@@ -562,6 +589,12 @@ def generate_report(event, context):
                 }
         elif HUB_NAME == "RSIGNG":
             payload = {
+                "report_id": request_id,
+                "job_id": job_id,
+                "job_name": job_name,
+                "reporter_sub": sub,
+                "project": project,
+                "vcf": vcf,
                 "lab": HUB_NAME,
                 "variants": variants,
                 "versions": versions,
@@ -574,6 +607,12 @@ def generate_report(event, context):
         elif HUB_NAME == "RSSARDJITO":
             if not variants:
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "kind": "neg",
                     "lang": body["lang"],
@@ -582,6 +621,12 @@ def generate_report(event, context):
                 }
             else:
                 payload = {
+                    "report_id": request_id,
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "reporter_sub": sub,
+                    "project": project,
+                    "vcf": vcf,
                     "lab": HUB_NAME,
                     "kind": "pos",
                     "lang": body["lang"],

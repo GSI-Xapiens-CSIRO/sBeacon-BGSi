@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime, timezone
 
 from shared.apiutils import LambdaRouter, PortalError
 from utils.models import (
@@ -339,6 +340,9 @@ def get_variants(event, context):
             "name": var.collection_name,
             "comment": var.comment,
             "createdAt": var.created_at,
+            "validatedByMedicalDirector": var.validatedByMedicalDirector,
+            "validationComment": var.validationComment,
+            "validatedAt": var.validatedAt,
             "variants": json.loads(var.variants),
             "annotations": json.loads(var.variants_annotations),
         }
@@ -349,6 +353,14 @@ def get_variants(event, context):
                 "lastName": get_user_attribute(user, "family_name"),
                 "email": get_user_attribute(user, "email"),
             }
+
+            if var.validatedByMedicalDirector:
+                user = get_user_from_attribute("sub", var.validatorSub)
+                entry["validator"] = {
+                    "firstName": get_user_attribute(user, "given_name"),
+                    "lastName": get_user_attribute(user, "family_name"),
+                    "email": get_user_attribute(user, "email"),
+                }
         except PortalError:
             user = None
         finally:
@@ -388,6 +400,94 @@ def delete_variants(event, context):
         raise PortalError(400, "Missing required field")
 
     return {"success": True, "message": "Variants collection deleted"}
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants/{name}/validation",
+    "post",
+)
+def validate_variants(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    is_medical_director = event["requestContext"]["authorizer"]["claims"].get(
+        "custom:is_medical_director", False
+    )
+
+    if not is_medical_director:
+        raise PortalError(403, "User is not a medical director")
+
+    body = json.loads(event["body"])
+    project = event["pathParameters"]["project"]
+    job_id = event["pathParameters"]["job_id"]
+    name = event["pathParameters"]["name"]
+    comment = body.get("comment", "")
+
+    try:
+        # ensure user has access to project
+        ProjectUsers.get(project, sub)
+        # get project
+        Projects.get(project)
+        # get variants
+        annot = ClinicalVariants(f"{project}:{job_id}", name)
+        annot.update(actions=[
+            ClinicalVariants.validatedByMedicalDirector.set(True),
+            ClinicalVariants.validationComment.set(comment),
+            ClinicalVariants.validatedAt.set(datetime.now(timezone.utc)),
+            ClinicalVariants.validatorSub.set(sub),
+        ])
+    except ProjectUsers.DoesNotExist:
+        raise PortalError(404, "User not found in project")
+    except Projects.DoesNotExist:
+        raise PortalError(404, "Project not found")
+    except ClinicalVariants.DoesNotExist:
+        raise PortalError(404, "Variants collection not found")
+    except KeyError:
+        raise PortalError(400, "Missing required field")
+
+    return {"success": True, "message": "Variants collection validated"}
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants/{name}/validation",
+    "delete",
+)
+def invalidate_variants(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    is_medical_director = event["requestContext"]["authorizer"]["claims"].get(
+        "custom:is_medical_director", False
+    )
+
+    if not is_medical_director:
+        raise PortalError(403, "User is not a medical director")
+
+    project = event["pathParameters"]["project"]
+    job_id = event["pathParameters"]["job_id"]
+    name = event["pathParameters"]["name"]
+
+    try:
+        # ensure user has access to project
+        ProjectUsers.get(project, sub)
+        # get project
+        Projects.get(project)
+        # get variants
+        annot = ClinicalVariants(f"{project}:{job_id}", name)
+        annot.update(
+            actions=[
+                ClinicalVariants.validatedByMedicalDirector.set(False),
+                ClinicalVariants.validationComment.remove(),
+                ClinicalVariants.validatedAt.remove(),
+                ClinicalVariants.validatorSub.remove(),
+            ]
+        )
+    except ProjectUsers.DoesNotExist:
+        raise PortalError(404, "User not found in project")
+    except Projects.DoesNotExist:
+        raise PortalError(404, "Project not found")
+    except ClinicalVariants.DoesNotExist:
+        raise PortalError(404, "Variants collection not found")
+    except KeyError:
+        raise PortalError(400, "Missing required field")
+
+    return {"success": True, "message": "Variants collection unvalidated"}
 
 
 @router.attach("/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post")

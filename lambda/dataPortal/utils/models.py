@@ -12,6 +12,7 @@ from pynamodb.attributes import (
     MapAttribute,
     ListAttribute,
     UTCDateTimeAttribute,
+    BooleanAttribute,
 )
 
 
@@ -143,6 +144,10 @@ class ClinicalVariants(Model):
     variants = UnicodeAttribute(default="")
     variants_annotations = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
+    validatedByMedicalDirector = BooleanAttribute(default=False)
+    validationComment = UnicodeAttribute(null=True)
+    validatorSub = UnicodeAttribute(null=True)
+    validatedAt = UTCDateTimeAttribute(null=True)
     created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
 
 

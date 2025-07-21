@@ -341,10 +341,25 @@ def user_groups(event, context):
     response = cognito_client.admin_list_groups_for_user(
         Username=username, UserPoolId=USER_POOL_ID
     )
-
+    user = cognito_client.admin_get_user(
+        UserPoolId=USER_POOL_ID,
+        Username=username,
+    )
+    is_medical_director = [
+        attr["Value"]
+        for attr in user.get("UserAttributes", [])
+        if attr["Name"] == "custom:is_medical_director"
+    ]
+    is_medical_director = is_medical_director[0] if is_medical_director else False
     groups = response.get("Groups", [])
     print(f"User with email {email} has {len(groups)} groups")
-    return {"groups": groups, "user": username, "authorizer": authorizer}
+
+    return {
+        "groups": groups,
+        "user": username,
+        "attributes": {"isMedicalDirector": is_medical_director},
+        "authorizer": authorizer,
+    }
 
 
 @router.attach("/admin/users/{email}/groups", "post", authenticate_admin)
@@ -352,6 +367,7 @@ def update_user_groups(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
     body_dict = json.loads(event.get("body"))
+    attributes = body_dict.get("attributes", {})
     chosen_groups = []
     removed_groups = []
 
@@ -364,6 +380,27 @@ def update_user_groups(event, context):
 
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)
+
+    # update user attributes
+    if 'isMedicalDirector' in attributes:
+        is_medical_director = attributes['isMedicalDirector']
+        if is_medical_director:
+            cognito_client.admin_update_user_attributes(
+                UserPoolId=USER_POOL_ID,
+                Username=username,
+                UserAttributes=[
+                    {
+                        "Name": "custom:is_medical_director",
+                        "Value": "true",
+                    }
+                ],
+            )
+        else:
+            cognito_client.admin_delete_user_attributes(
+                UserPoolId=USER_POOL_ID,
+                Username=username,
+                UserAttributeNames=["custom:is_medical_director"],
+            )
 
     # admin cannot remove themself from administrators group
     if username == authorizer and "administrators" in removed_groups:

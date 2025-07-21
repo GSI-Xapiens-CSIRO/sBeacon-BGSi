@@ -47,7 +47,7 @@ def list_jobs(event, context):
             filter_condition = ClinicJobs.project_name == project
 
             if search_term:
-                filter_condition = ClinicJobs.job_name_lower.contains(
+                filter_condition &= ClinicJobs.job_name_lower.contains(
                     search_term.lower()
                 )
 

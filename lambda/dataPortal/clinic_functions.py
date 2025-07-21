@@ -37,38 +37,27 @@ def list_jobs(event, context):
         # get project
         Projects.get(project)
         # get jobs
-
+        common_params = {
+            "limit": int(limit),
+            "last_evaluated_key": json.loads(last_evaluated_key),
+        }
         if search_term or job_status:
-            scan_params = {
-                "limit": int(limit),
-                "last_evaluated_key": json.loads(last_evaluated_key),
-            }
-
             filter_condition = ClinicJobs.project_name == project
-
             if search_term:
                 filter_condition &= ClinicJobs.job_name_lower.contains(
                     search_term.lower()
                 )
-
             if job_status:
-                status_condition = ClinicJobs.job_status.contains(job_status)
-                if filter_condition is not None:
-                    filter_condition = filter_condition & status_condition
-                else:
-                    filter_condition = status_condition
-
+                filter_condition &= ClinicJobs.job_status.contains(job_status)
             jobs = ClinicJobs.scan(
                 filter_condition=filter_condition,
-                **scan_params,
+                **common_params,
             )
         else:
             jobs = ClinicJobs.project_index.query(
                 project,
-                limit=int(limit),
-                last_evaluated_key=json.loads(last_evaluated_key),
+                **common_params,
             )
-
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except Projects.DoesNotExist:

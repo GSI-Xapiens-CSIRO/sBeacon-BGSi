@@ -408,8 +408,11 @@ def delete_variants(event, context):
 )
 def validate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = event["requestContext"]["authorizer"]["claims"].get(
-        "custom:is_medical_director", False
+    is_medical_director = (
+        event["requestContext"]["authorizer"]["claims"].get(
+            "custom:is_medical_director", "false"
+        )
+        == "true"
     )
 
     if not is_medical_director:
@@ -428,12 +431,14 @@ def validate_variants(event, context):
         Projects.get(project)
         # get variants
         annot = ClinicalVariants(f"{project}:{job_id}", name)
-        annot.update(actions=[
-            ClinicalVariants.validatedByMedicalDirector.set(True),
-            ClinicalVariants.validationComment.set(comment),
-            ClinicalVariants.validatedAt.set(datetime.now(timezone.utc)),
-            ClinicalVariants.validatorSub.set(sub),
-        ])
+        annot.update(
+            actions=[
+                ClinicalVariants.validatedByMedicalDirector.set(True),
+                ClinicalVariants.validationComment.set(comment),
+                ClinicalVariants.validatedAt.set(datetime.now(timezone.utc)),
+                ClinicalVariants.validatorSub.set(sub),
+            ]
+        )
     except ProjectUsers.DoesNotExist:
         raise PortalError(404, "User not found in project")
     except Projects.DoesNotExist:
@@ -452,11 +457,14 @@ def validate_variants(event, context):
 )
 def invalidate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = event["requestContext"]["authorizer"]["claims"].get(
-        "custom:is_medical_director", False
+    is_medical_director = (
+        event["requestContext"]["authorizer"]["claims"].get(
+            "custom:is_medical_director", "false"
+        )
+        == "true"
     )
 
-    if not is_medical_director:
+    if is_medical_director:
         raise PortalError(403, "User is not a medical director")
 
     project = event["pathParameters"]["project"]
@@ -508,6 +516,7 @@ def generate_report(event, context):
             variant
             for entry in ClinicalVariants.query(f"{project}:{job_id}")
             for variant in json.loads(entry.variants)
+            if entry.validatedByMedicalDirector
         ]
         if len(variants) == 0:
             print("Generating report with no variants")

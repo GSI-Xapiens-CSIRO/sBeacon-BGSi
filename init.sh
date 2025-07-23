@@ -69,6 +69,13 @@ cd ${REPOSITORY_DIRECTORY}
 mkdir -p layers/binaries/lib
 cp ${SOURCE}/file-FILE5_46/src/.libs/libmagic.so.1 ./layers/binaries/lib/
 
+# Clean up the python layers directory
+if [ -d "${REPOSITORY_DIRECTORY}/layers/python_libraries/python" ]
+  then
+    rm -rf "${REPOSITORY_DIRECTORY}/layers/python_libraries/python"
+fi
+mkdir -p "${REPOSITORY_DIRECTORY}/layers/python_libraries/python"
+
 # python libraries layer
 cd ${REPOSITORY_DIRECTORY}
 pip install ijson==3.3.0 --target layers/python_libraries/python

@@ -112,6 +112,10 @@ class ClinicJobs(Model):
     error_message = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
     reference_versions = MapAttribute(default=dict)
+    validatedByMedicalDirector = BooleanAttribute(default=False)
+    validationComment = UnicodeAttribute(null=True)
+    validatorSub = UnicodeAttribute(null=True)
+    validatedAt = UTCDateTimeAttribute(null=True)
     project_index = ClinicJobsProjectNameIndex()
 
     def save(self, *args, **kwargs):

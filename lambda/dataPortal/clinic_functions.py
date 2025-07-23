@@ -88,6 +88,53 @@ def list_jobs(event, context):
 
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}",
+    "get",
+)
+def get_job(event, context):
+    selected_job = event["pathParameters"]["job_id"]
+    project_name = event["pathParameters"]["project"]
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+
+    try:
+        # check is user registered in project
+        ProjectUsers.get(project_name, sub)
+
+        job = ClinicJobs.get(selected_job)
+        if job.job_status.lower() in ["failed", "expired"]:
+            return {
+                "success": False,
+                "message": f"Job {selected_job} is a failed/expired status.",
+            }
+        entry = dict()
+        entry["job_id"] = job.job_id
+        entry["job_name"] = job.job_name
+        entry["validatedByMedicalDirector"] = job.validatedByMedicalDirector or False
+        entry["validationComment"] = job.validationComment or ""
+        entry["validatedAt"] = job.validatedAt or None
+
+        if job.validatedByMedicalDirector:
+            user = get_user_from_attribute("sub", job.validatorSub)
+            entry["validator"] = {
+                "firstName": get_user_attribute(user, "given_name"),
+                "lastName": get_user_attribute(user, "family_name"),
+                "email": get_user_attribute(user, "email"),
+            }
+
+        return {"success": True, "job": entry}
+    except ClinicJobs.DoesNotExist:
+        return {
+            "success": False,
+            "message": f"Job with ID {selected_job} not found",
+        }
+    except ProjectUsers.DoesNotExist:
+        return {
+            "success": False,
+            "message": "User not registered in project.",
+        }
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}",
     "delete",
 )
 def delete_jobid(event, context):
@@ -100,10 +147,10 @@ def delete_jobid(event, context):
         ProjectUsers.get(project_name, sub)
 
         job = ClinicJobs.get(selected_job)
-        if job.job_status.lower() not in ["failed", "expired"]:
+        if job.job_status.lower() in ["failed", "expired"]:
             return {
                 "success": False,
-                "message": f"Job {selected_job} is not in a failed/expired status.",
+                "message": f"Job {selected_job} is a failed/expired status.",
             }
         job.delete()
 
@@ -498,6 +545,106 @@ def invalidate_variants(event, context):
     return {"success": True, "message": "Variants collection unvalidated"}
 
 
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/validation",
+    "post",
+)
+def validate_job_for_negative_reporting(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    is_medical_director = (
+        event["requestContext"]["authorizer"]["claims"].get(
+            "custom:is_medical_director", "false"
+        )
+        == "true"
+    )
+
+    if not is_medical_director:
+        raise PortalError(403, "User is not a medical director")
+
+    body = json.loads(event["body"])
+    project = event["pathParameters"]["project"]
+    job_id = event["pathParameters"]["job_id"]
+    comment = body.get("comment", "")
+
+    try:
+        # check is user registered in project
+        ProjectUsers.get(project, sub)
+        job = ClinicJobs.get(job_id)
+        job.update(
+            actions=[
+                ClinicJobs.validatedByMedicalDirector.set(True),
+                ClinicJobs.validationComment.set(comment),
+                ClinicJobs.validatedAt.set(datetime.now(timezone.utc)),
+                ClinicJobs.validatorSub.set(sub),
+            ]
+        )
+
+    except ClinicJobs.DoesNotExist:
+        return {
+            "success": False,
+            "message": f"Job not found",
+        }
+    except ProjectUsers.DoesNotExist:
+        return {
+            "success": False,
+            "message": "User not registered in project.",
+        }
+
+    return {
+        "success": True,
+        "message": f"Validated job for negative reporting",
+    }
+
+
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/validation",
+    "delete",
+)
+def invalidate_job_for_negative_reporting(event, context):
+    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
+    is_medical_director = (
+        event["requestContext"]["authorizer"]["claims"].get(
+            "custom:is_medical_director", "false"
+        )
+        == "true"
+    )
+
+    if not is_medical_director:
+        raise PortalError(403, "User is not a medical director")
+
+    project = event["pathParameters"]["project"]
+    job_id = event["pathParameters"]["job_id"]
+
+    try:
+        # check is user registered in project
+        ProjectUsers.get(project, sub)
+        job = ClinicJobs.get(job_id)
+        job.update(
+            actions=[
+                ClinicJobs.validatedByMedicalDirector.set(False),
+                ClinicJobs.validationComment.remove(),
+                ClinicJobs.validatedAt.remove(),
+                ClinicJobs.validatorSub.remove(),
+            ]
+        )
+
+    except ClinicJobs.DoesNotExist:
+        return {
+            "success": False,
+            "message": f"Job not found",
+        }
+    except ProjectUsers.DoesNotExist:
+        return {
+            "success": False,
+            "message": "User not registered in project.",
+        }
+
+    return {
+        "success": True,
+        "message": f"Invalidated job for negative reporting",
+    }
+
+
 @router.attach("/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post")
 def generate_report(event, context):
     print(f"Generating report for lab: {HUB_NAME}")
@@ -507,6 +654,8 @@ def generate_report(event, context):
     body = json.loads(event["body"])
 
     try:
+        # get job
+        job = ClinicJobs.get(job_id)
         # ensure user has access to project
         ProjectUsers.get(project, sub)
         # get project
@@ -519,10 +668,14 @@ def generate_report(event, context):
             if entry.validatedByMedicalDirector
         ]
         if len(variants) == 0:
+            if not job.validatedByMedicalDirector:
+                return {
+                    "success": False,
+                    "message": "Negative report cannot be generated without validation.",
+                }
             print("Generating report with no variants")
         else:
             print(f"Generating report with {len(variants)} variants")
-        job = ClinicJobs.get(job_id)
         versions = {
             k: v
             for k, v in job.reference_versions.as_dict().items()

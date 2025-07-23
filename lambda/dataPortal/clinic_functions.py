@@ -667,6 +667,18 @@ def generate_report(event, context):
             for variant in json.loads(entry.variants)
             if entry.validatedByMedicalDirector
         ]
+        variantValidations = [
+            {
+                "variant": variant,
+                "validatedByMedicalDirector": entry.validatedByMedicalDirector,
+                "validationComment": entry.validationComment,
+                "validatedAt": str(entry.validatedAt),
+                "validatorSub": entry.validatorSub,
+            }
+            for entry in ClinicalVariants.query(f"{project}:{job_id}")
+            for variant in json.loads(entry.variants)
+            if entry.validatedByMedicalDirector
+        ]
         if len(variants) == 0:
             if not job.validatedByMedicalDirector:
                 return {
@@ -707,6 +719,10 @@ def generate_report(event, context):
                     "vcf": vcf,
                     "lab": HUB_NAME,
                     "kind": "neg",
+                    "validatedByMedicalDirector": job.validatedByMedicalDirector,
+                    "validationComment": job.validationComment,
+                    "validatedAt": str(job.validatedAt),
+                    "validatorSub": job.validatorSub,
                     "versions": versions,
                 }
             else:
@@ -720,6 +736,7 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "kind": "pos",
                     "variants": variants,
+                    "variantValidations": variantValidations,
                     "versions": versions,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
@@ -762,6 +779,8 @@ def generate_report(event, context):
                     "vcf": vcf,
                     "lab": HUB_NAME,
                     "phenotype": phenotype,
+                    "variants": variants,
+                    "variantValidations": variantValidations,
                     "alleles": ",".join((variants[0]["Alleles"])),
                     "versions": versions,
                 }
@@ -825,6 +844,8 @@ def generate_report(event, context):
                     "lab": HUB_NAME,
                     "slco1b1": slco1b1,
                     "apoe": apoe,
+                    "variants": variants,
+                    "variantValidations": variantValidations,
                     "versions": versions,
                 }
                 response = invoke_lambda_function(REPORTS_LAMBDA, payload)
@@ -848,6 +869,7 @@ def generate_report(event, context):
                 "vcf": vcf,
                 "lab": HUB_NAME,
                 "variants": variants,
+                "variantValidations": variantValidations,
                 "versions": versions,
             }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
@@ -868,6 +890,10 @@ def generate_report(event, context):
                     "kind": "neg",
                     "lang": body["lang"],
                     "mode": body["mode"],
+                    "validatedByMedicalDirector": job.validatedByMedicalDirector,
+                    "validationComment": job.validationComment,
+                    "validatedAt": str(job.validatedAt),
+                    "validatorSub": job.validatorSub,
                     "versions": versions,
                 }
             else:
@@ -883,6 +909,7 @@ def generate_report(event, context):
                     "lang": body["lang"],
                     "mode": body["mode"],
                     "variants": variants,
+                    "variantValidations": variantValidations,
                     "versions": versions,
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)

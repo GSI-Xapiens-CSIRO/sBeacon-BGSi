@@ -7,11 +7,16 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_num_pos):
+def _create_annotations(
+    filename, pages, footer_name_pos, footer_dob_pos, page_num_pos, report_id=None
+):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
 
     for p in range(pages):
+        x, y, fs, text = (5, 780, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
         # footer name
         x, y, fs, text = footer_name_pos
         form.textfield(
@@ -58,12 +63,7 @@ def _create_annotations(filename, pages, footer_name_pos, footer_dob_pos, page_n
 
 
 def generate(
-    summary_pdf,
-    results_pdf,
-    annots_pdf,
-    *,
-    pii_name=None,
-    pii_dob=None,
+    summary_pdf, results_pdf, annots_pdf, *, pii_name=None, pii_dob=None, report_id=None
 ):
     # x, y, fs, text
     footer_name_pos = (146, 48, 12, pii_name)
@@ -78,7 +78,12 @@ def generate(
     total_pages = len(pdf_int.pages) + len(pdf_results.pages) + len(pdf_summary.pages)
 
     _create_annotations(
-        output_pdf_path, total_pages, footer_name_pos, footer_dob_pos, page_num_pos
+        output_pdf_path,
+        total_pages,
+        footer_name_pos,
+        footer_dob_pos,
+        page_num_pos,
+        report_id,
     )
 
     writer = PdfWriter()

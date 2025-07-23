@@ -3,13 +3,24 @@ import uuid
 
 from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_version, lookup_version):
-    c = canvas.Canvas(filename, pagesize=letter)
+def _create_annotations(
+    filename,
+    slco1b1,
+    apoe,
+    pharmcat_version,
+    pharmgkb_version,
+    lookup_version,
+    report_id,
+):
+    c = canvas.Canvas(filename, pagesize=A4)
+    x, y, fs, text = (5, 830, 12, report_id)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
     c.showPage()
     form = c.acroForm
 
@@ -139,6 +150,9 @@ def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_vers
         (57, 25, 470, 200, 12, "", 0),
     ]
 
+    x, y, fs, text = (5, 830, 12, report_id)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
     for n, pos in enumerate(_text_field_positions_page_1):
         x, y, w, h, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -157,6 +171,7 @@ def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_vers
             forceBorder=False,
             fieldFlags=flags,
         )
+
     for n, pos in enumerate(_checkbox_positions_page_1):
         x, y, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -177,6 +192,9 @@ def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_vers
 
     c.showPage()
 
+    x, y, fs, text = (5, 830, 12, report_id)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
     for n, pos in enumerate(_text_field_positions_page_2):
         x, y, w, h, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -196,6 +214,10 @@ def _create_annotations(filename, slco1b1, apoe, pharmcat_version, pharmgkb_vers
             fieldFlags=flags,
         )
     c.showPage()
+
+    x, y, fs, text = (5, 830, 12, report_id)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
     for n, pos in enumerate(_text_field_positions_page_3):
         x, y, w, h, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -251,10 +273,19 @@ def generate(
     slco1b1=None,
     apoe=None,
     versions=None,
+    report_id=None,
 ):
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
-    _create_annotations("/tmp/annotations.pdf", slco1b1, apoe, versions["pharmcat_version"], versions["pharmgkb_version"], versions["lookup_version"])
+    _create_annotations(
+        "/tmp/annotations.pdf",
+        slco1b1,
+        apoe,
+        versions["pharmcat_version"],
+        versions["pharmgkb_version"],
+        versions["lookup_version"],
+        report_id,
+    )
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",
         f"{module_dir}/template.pdf",
@@ -282,5 +313,6 @@ if __name__ == "__main__":
             "pharmgkb_version": "2025-03-07-16-38",
             "lookup_version": "2025-03-07-16-38",
         },
+        "report_id": str(uuid.uuid4()),
     }
     generate(**payload)

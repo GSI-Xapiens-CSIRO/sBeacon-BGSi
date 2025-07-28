@@ -47,6 +47,7 @@ def add_user(event, context):
     first_name = body_dict.get("first_name")
     last_name = body_dict.get("last_name")
     groups = body_dict.get("groups")
+    attributes = body_dict.get("attributes", {})
 
     if not all([email, first_name, last_name, groups]):
         raise BeaconError(
@@ -88,10 +89,25 @@ def add_user(event, context):
         )
 
     try:
+        # add user to groups
         for group_name, chosen in groups.items():
             if chosen:
                 cognito_client.admin_add_user_to_group(
                     UserPoolId=USER_POOL_ID, Username=email, GroupName=group_name
+                )
+        # update user attributes
+        if "isMedicalDirector" in attributes:
+            is_medical_director = attributes["isMedicalDirector"]
+            if is_medical_director:
+                cognito_client.admin_update_user_attributes(
+                    UserPoolId=USER_POOL_ID,
+                    Username=email,
+                    UserAttributes=[
+                        {
+                            "Name": "custom:is_medical_director",
+                            "Value": "true" if is_medical_director == True else "false",
+                        }
+                    ],
                 )
     except:
         cognito_client.admin_delete_user(
@@ -382,8 +398,8 @@ def update_user_groups(event, context):
     authorizer = get_username_by_email(authorizer_email)
 
     # update user attributes
-    if 'isMedicalDirector' in attributes:
-        is_medical_director = attributes['isMedicalDirector']
+    if "isMedicalDirector" in attributes:
+        is_medical_director = attributes["isMedicalDirector"]
         if is_medical_director:
             cognito_client.admin_update_user_attributes(
                 UserPoolId=USER_POOL_ID,

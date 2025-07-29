@@ -511,7 +511,7 @@ def invalidate_variants(event, context):
         == "true"
     )
 
-    if is_medical_director:
+    if not is_medical_director:
         raise PortalError(403, "User is not a medical director")
 
     project = event["pathParameters"]["project"]

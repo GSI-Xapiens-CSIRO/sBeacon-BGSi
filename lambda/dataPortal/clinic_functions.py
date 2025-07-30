@@ -77,6 +77,7 @@ def list_jobs(event, context):
                 "failed_step": job.failed_step,
                 "error_message": job.error_message,
                 "created_at": job.created_at,
+                "missing_to_ref": job.missing_to_ref,
             }
             for job in jobs
         ],

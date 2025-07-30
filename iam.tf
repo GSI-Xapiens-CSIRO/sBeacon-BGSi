@@ -679,21 +679,26 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
   }
 
-  statement {
-    actions = [
-      "s3:ListBucket"
-    ]
-    resources = var.clinic-temp-bucket-arns
+  dynamic "statement" {
+    for_each = length(var.clinic-temp-bucket-arns) > 0 ? [1] : []
+    content {
+      actions = [
+        "s3:ListBucket"
+      ]
+      resources = var.clinic-temp-bucket-arns
+    }
   }
 
-  statement {
-    actions = [
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      for arn in var.clinic-temp-bucket-arns : "${arn}/*"
-    ]
+  dynamic "statement" {
+    for_each = length(var.clinic-temp-bucket-arns) > 0 ? [1] : []
+    content {
+      actions = [
+        "s3:DeleteObject",
+      ]
+      resources = [
+        for arn in var.clinic-temp-bucket-arns : "${arn}/*"
+      ]
+    }
   }
 
   statement {

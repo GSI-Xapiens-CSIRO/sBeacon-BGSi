@@ -177,6 +177,26 @@ def _create_annotations(
                 x, y, fs, text = pos
                 c.setFont("Helvetica", fs)
                 c.drawString(x, y, text)
+            # Clinical Notes
+            c.setFont("Helvetica-Bold", 13)
+            c.setFillColor(colors.HexColor("#156082"))
+            c.drawString(70, 500, f"Clinical Notes")
+            x, y, fs, text = (70, 400, 12, "")
+            form.textfield(
+                name="clinical_notes",
+                tooltip="",
+                value=f"{text}",
+                x=x,
+                y=y,
+                width=463,
+                height=90,
+                fontSize=8,
+                borderWidth=0,
+                fillColor=colors.white,
+                textColor=None,
+                forceBorder=False,
+                fieldFlags=1<<12,
+            )
         c.showPage()
 
     c.save()

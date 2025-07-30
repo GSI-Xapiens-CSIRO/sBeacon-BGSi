@@ -42,7 +42,10 @@ def _create_annotations(
         # patient clinical info
         (73, 510, 470, 65, 1 << 12, ""),
     ]
-    pg_2_text_fields = []
+    pg_2_text_fields = [
+        # clinical notes
+        (69, 68, 470, 100, 1 << 12, ""),
+    ]
     pg_3_text_fields = [
         # names in last page
         (188, 280, 350, 15, 0, ""),
@@ -59,6 +62,8 @@ def _create_annotations(
         # versions
         (200, 300, 10, pharmcat_version),
         (200, 284, 10, pharmgkb_version),
+        # clinical notes
+        (69, 180, 13, "Clinical Notes"),
     ]
     pg_3_text_boxes = []
     c = canvas.Canvas(filename, pagesize=letter)

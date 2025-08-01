@@ -212,6 +212,8 @@ def lambda_handler(event, context):
                     file_name=file_name,
                     object_key=object_key,
                 )
+                remove_file(object_key)
+                print("Exiting")
                 clear_tmp()
             else:
                 launch_deidentification_ec2(

@@ -937,8 +937,6 @@ def deidentify(
         log_error(files_table, f"{project}/project-files/{file_name}", str(e))
         log_projects_error(projects_table, project, file_name, anonymise(str(e)))
         log_deidentification_status(projects_table, project, file_name, "Error")
-        s3.delete_object(Bucket=input_bucket, Key=object_key)
-        print("Exiting")
         return
     if any(
         object_key.endswith(suffix)
@@ -959,8 +957,6 @@ def deidentify(
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
             log_deidentification_status(projects_table, project, file_name, "Error")
-            s3.delete_object(Bucket=input_bucket, Key=object_key)
-            print("Exiting")
             return
     elif any(object_key.endswith(suffix) for suffix in METADATA_SUFFIXES):
         try:
@@ -970,8 +966,6 @@ def deidentify(
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
             log_deidentification_status(projects_table, project, file_name, "Error")
-            s3.delete_object(Bucket=input_bucket, Key=object_key)
-            print("Exiting")
             return
         output_paths = [local_output_path]
     else:
@@ -989,7 +983,6 @@ def deidentify(
             Key=f"{output_key}{extra_file[len(base_path):]}",
             Filename=extra_file,
         )
-    s3.delete_object(Bucket=input_bucket, Key=object_key)
 
     update_deidentification_status(
         files_table, f"{project}/project-files/{file_name}", "Anonymised"
@@ -1016,3 +1009,5 @@ if __name__ == "__main__":
         args.file_name,
         args.object_key,
     )
+    s3.delete_object(Bucket=args.input_bucket, Key=args.object_key)
+    print("Exiting")

@@ -31,8 +31,11 @@ SUFFIXES = [
     ".txt",
 ]
 INDEX_SUFFIXES = [
-    ".tbi",
+    # We'll be creating these ourselves from other files, and don't want
+    # the uploaded versions to squash the ones we create.
+    ".bai",
     ".csi",
+    ".tbi",
 ]
 
 
@@ -153,19 +156,8 @@ def update_file(location, update_fields):
     print(f"Received response: {json.dumps(response, default=str)}")
 
 
-def move_file(object_key):
-    s3.copy_object(
-        Bucket=DPORTAL_BUCKET,
-        CopySource={"Bucket": DPORTAL_BUCKET, "Key": object_key},
-        Key=object_key.split("/", 1)[1],
-    )
-    s3.delete_object(Bucket=DPORTAL_BUCKET, Key=object_key)
-    return
-
-
 def remove_file(object_key):
     s3.delete_object(Bucket=DPORTAL_BUCKET, Key=object_key)
-    return
 
 
 def get_object_uploader(object_key):
@@ -201,16 +193,14 @@ def lambda_handler(event, context):
             print(
                 f'File owner for "{file_name}" of project "{project}" is "{user_sub}"'
             )
-        log_deidentification_status(PROJECTS_TABLE, project, file_name, "Pending")
         if any(object_key.endswith(suffix) for suffix in INDEX_SUFFIXES):
-            print(f"{object_key} is an index file, moving directly")
-            move_file(object_key)
-            log_deidentification_status(
-                PROJECTS_TABLE, project, file_name, "Anonymised"
+            print(
+                f"{object_key} is an index file, ignore this and we'll create it from source"
             )
-            return
+            remove_file(object_key)
         else:
             print(f"{object_key} is a genomic or metadata file, deidentifying")
+            log_deidentification_status(PROJECTS_TABLE, project, file_name, "Pending")
             size = event["Records"][0]["s3"]["object"]["size"]
             if size <= MAX_SIZE_FOR_LAMBDA:
                 deidentify(
@@ -234,4 +224,3 @@ def lambda_handler(event, context):
                     object_key=object_key,
                     size_gb=size / 1024**3,
                 )
-            return

@@ -103,14 +103,6 @@ SAM_SUFFIXES = {
     ".sam",
 }
 
-QUIETLY_SKIP_SUFFIXES = {
-    # Because we'll be creating these ourselves
-    # from other files, and don't want the uploaded
-    # versions to squash the ones we create.
-    ".bai",
-    ".csi",
-}
-
 METADATA_SUFFIXES = [
     ".json",
     ".csv",
@@ -970,9 +962,6 @@ def deidentify(
             s3.delete_object(Bucket=input_bucket, Key=object_key)
             print("Exiting")
             return
-    elif any(object_key.endswith(suffix) for suffix in QUIETLY_SKIP_SUFFIXES):
-        print("We'd rather create this file again from the source file, skipping")
-        return
     elif any(object_key.endswith(suffix) for suffix in METADATA_SUFFIXES):
         try:
             deidentify_metadata(local_input_path, local_output_path)

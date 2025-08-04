@@ -103,14 +103,6 @@ SAM_SUFFIXES = {
     ".sam",
 }
 
-QUIETLY_SKIP_SUFFIXES = {
-    # Because we'll be creating these ourselves
-    # from other files, and don't want the uploaded
-    # versions to squash the ones we create.
-    ".bai",
-    ".csi",
-}
-
 METADATA_SUFFIXES = [
     ".json",
     ".csv",
@@ -403,6 +395,11 @@ def process_header(file_path):
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
     for line in view_process.stdout:
+        full_length = len(line)
+        line = line.rstrip("\r\n")
+        if len(line) == full_length:
+            # No line ending, has view_process crashed?
+            view_process.check()
         line = line.rstrip("\r\n")
         if line.startswith("##INFO=<"):
             # INFO line, add to whitelist if Type is not "String"
@@ -447,6 +444,11 @@ def process_records(file_path, header_lines, info_whitelist):
         "Creating deidentified records failed",
     )
     for line in view_process.stdout:
+        full_length = len(line)
+        line = line.rstrip("\r\n")
+        if len(line) == full_length:
+            # No line ending, has view_process crashed?
+            view_process.check()
         line = line.rstrip("\r\n")
         new_line = anonymise_vcf_record(line, info_whitelist)
         if new_line is not None:
@@ -935,8 +937,6 @@ def deidentify(
         log_error(files_table, f"{project}/project-files/{file_name}", str(e))
         log_projects_error(projects_table, project, file_name, anonymise(str(e)))
         log_deidentification_status(projects_table, project, file_name, "Error")
-        s3.delete_object(Bucket=input_bucket, Key=object_key)
-        print("Exiting")
         return
     if any(
         object_key.endswith(suffix)
@@ -957,12 +957,7 @@ def deidentify(
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
             log_deidentification_status(projects_table, project, file_name, "Error")
-            s3.delete_object(Bucket=input_bucket, Key=object_key)
-            print("Exiting")
             return
-    elif any(object_key.endswith(suffix) for suffix in QUIETLY_SKIP_SUFFIXES):
-        print("We'd rather create this file again from the source file, skipping")
-        return
     elif any(object_key.endswith(suffix) for suffix in METADATA_SUFFIXES):
         try:
             deidentify_metadata(local_input_path, local_output_path)
@@ -971,8 +966,6 @@ def deidentify(
             log_error(files_table, f"{project}/project-files/{file_name}", str(e))
             log_projects_error(projects_table, project, file_name, anonymise(str(e)))
             log_deidentification_status(projects_table, project, file_name, "Error")
-            s3.delete_object(Bucket=input_bucket, Key=object_key)
-            print("Exiting")
             return
         output_paths = [local_output_path]
     else:
@@ -990,7 +983,6 @@ def deidentify(
             Key=f"{output_key}{extra_file[len(base_path):]}",
             Filename=extra_file,
         )
-    s3.delete_object(Bucket=input_bucket, Key=object_key)
 
     update_deidentification_status(
         files_table, f"{project}/project-files/{file_name}", "Anonymised"
@@ -1017,3 +1009,5 @@ if __name__ == "__main__":
         args.file_name,
         args.object_key,
     )
+    s3.delete_object(Bucket=args.input_bucket, Key=args.object_key)
+    print("Exiting")

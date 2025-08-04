@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 
-def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
+def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender, report_id):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
     fields = [
@@ -68,6 +68,9 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender):
     )
 
     for page in range(pages):
+        x, y, fs, text = (5, 780, 12, report_id)
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
         for n, pos in enumerate(fields):
             x, y, w, h, fs, text, flags = pos
             c.setFont("Helvetica", fs)
@@ -340,7 +343,13 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 
 def generate(
-    *, pii_name=None, pii_dob=None, pii_gender=None, variants=None, versions=None
+    *,
+    pii_name=None,
+    pii_dob=None,
+    pii_gender=None,
+    variants=None,
+    versions=None,
+    report_id=None,
 ):
     header_rows = [
         [
@@ -404,7 +413,7 @@ def generate(
     total_pages = len(pdf_table.pages) + len(pdf_rest.pages)
 
     _write_header_footer(
-        output_pdf_annotations, total_pages, pii_name, pii_dob, pii_gender
+        output_pdf_annotations, total_pages, pii_name, pii_dob, pii_gender, report_id
     )
 
     footer_pagenum_annotations = PdfReader(output_pdf_annotations)
@@ -482,4 +491,4 @@ if __name__ == "__main__":
         "omim_version": "N/A",
     }
 
-    generate(variants=data, **pii_data, versions=versions)
+    generate(variants=data, **pii_data, versions=versions, report_id=str(uuid.uuid4()))

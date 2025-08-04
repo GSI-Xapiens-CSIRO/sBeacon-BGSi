@@ -12,6 +12,7 @@ from pynamodb.attributes import (
     MapAttribute,
     ListAttribute,
     UTCDateTimeAttribute,
+    BooleanAttribute,
 )
 
 
@@ -110,6 +111,12 @@ class ClinicJobs(Model):
     failed_step = UnicodeAttribute(default="")
     error_message = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
+    reference_versions = MapAttribute(default=dict)
+    missing_to_ref = BooleanAttribute(null=True)
+    validatedByMedicalDirector = BooleanAttribute(default=False)
+    validationComment = UnicodeAttribute(null=True)
+    validatorSub = UnicodeAttribute(null=True)
+    validatedAt = UTCDateTimeAttribute(null=True)
     project_index = ClinicJobsProjectNameIndex()
 
     def save(self, *args, **kwargs):
@@ -142,6 +149,10 @@ class ClinicalVariants(Model):
     variants = UnicodeAttribute(default="")
     variants_annotations = UnicodeAttribute(default="")
     uid = UnicodeAttribute(default="")
+    validatedByMedicalDirector = BooleanAttribute(default=False)
+    validationComment = UnicodeAttribute(null=True)
+    validatorSub = UnicodeAttribute(null=True)
+    validatedAt = UTCDateTimeAttribute(null=True)
     created_at = UTCDateTimeAttribute(default_for_new=get_current_time_utc)
 
 

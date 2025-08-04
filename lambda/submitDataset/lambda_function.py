@@ -171,7 +171,7 @@ def lambda_handler(event, context):
             "success": False,
             "message": "Invalid payload. Required fields are missing",
         }
-    except Exception:
+    except Exception as e:
         return {"success": False, "message": str(e)}
 
     if validation_errors := validate_request(body_dict):

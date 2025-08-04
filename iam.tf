@@ -680,21 +680,26 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     ]
   }
 
-  statement {
-    actions = [
-      "s3:ListBucket"
-    ]
-    resources = var.clinic-temp-bucket-arns
+  dynamic "statement" {
+    for_each = length(var.clinic-temp-bucket-arns) > 0 ? [1] : []
+    content {
+      actions = [
+        "s3:ListBucket"
+      ]
+      resources = var.clinic-temp-bucket-arns
+    }
   }
 
-  statement {
-    actions = [
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      for arn in var.clinic-temp-bucket-arns : "${arn}/*"
-    ]
+  dynamic "statement" {
+    for_each = length(var.clinic-temp-bucket-arns) > 0 ? [1] : []
+    content {
+      actions = [
+        "s3:DeleteObject",
+      ]
+      resources = [
+        for arn in var.clinic-temp-bucket-arns : "${arn}/*"
+      ]
+    }
   }
 
   statement {
@@ -748,23 +753,6 @@ data "aws_iam_policy_document" "lambda-generateCohortVCfs" {
   }
 }
 
-#
-# generateReports Lambda Function
-#
-data "aws_iam_policy_document" "lambda-generateReports" {
-  statement {
-    actions = [
-      "dynamodb:DescribeTable",
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-    ]
-    resources = [
-      "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.this.account_id}:table/${var.svep-references-table-name}"
-    ]
-  }
-}
-
 # 
 # dynamodb locks table access
 # 
@@ -783,6 +771,18 @@ data "aws_iam_policy_document" "dataportal-locks-access" {
     ]
     resources = [
       aws_dynamodb_table.dataportal_locks_table.arn,
+    ]
+  }
+}
+
+# generateReports lambda access
+data "aws_iam_policy_document" "lambda-generateReports" {
+  statement {
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/clinical-workflows/*/reports/*",
     ]
   }
 }

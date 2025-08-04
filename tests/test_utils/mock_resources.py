@@ -10,7 +10,7 @@ from .env import keys  # to inject keys into the environment
 
 @mock_aws
 def setup_resources():
-    from shared.dynamodb import Quota, UsageMap
+    from shared.dynamodb import Quota, UsageMap, UserInfo
 
     # Create a Cognito User Pool
     cognito_client = boto3.client(
@@ -85,6 +85,19 @@ def setup_resources():
         uid=guest_sub,
         CostEstimation=100,
         Usage=UsageMap(quotaSize=100, quotaQueryCount=100, usageSize=50, usageCount=50),
+    ).save()
+
+    UserInfo.create_table()
+    UserInfo(
+        uid=admin_sub,
+        institutionType="University",
+        institutionName="Admin University",
+    ).save()
+
+    UserInfo(
+        uid=guest_sub,
+        institutionType="Hospital",
+        institutionName="Guest Hospital",
     ).save()
 
     # create sagemaker life cycle config

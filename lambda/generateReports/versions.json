@@ -3,12 +3,17 @@
   "sift_version": "5.2.2",
   "dbsnp_version": "b156",
   "gnomad_1KG_version": "v3.1.2",
-  "gnomad_constraints_version": "v3.1.2",
+  "gnomad_constraints_version": "N/A",
   "snp_eff_version": "N/A",
   "snp_sift_version": "N/A",
   "polyphen2_version": "N/A",
   "omim_version": "N/A",
   "pharmcat_version": "3.0.0",
   "pharmgkb_version": "2025-03-07-16-38",
-  "lookup_version": "N/A"
+  "lookup_version": "N/A",
+  "bcftools_version": "1.21",
+  "htslib_version": "1.21",
+  "samtools_version": "1.21",
+  "clinvar_version": "N/A",
+  "ensembl_release": "N/A"
 }

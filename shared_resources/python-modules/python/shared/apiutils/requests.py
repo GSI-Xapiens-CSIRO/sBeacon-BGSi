@@ -32,6 +32,69 @@ BEACON_API_VERSION = ENV_BEACON.BEACON_API_VERSION
 BEACON_DEFAULT_GRANULARITY = ENV_BEACON.BEACON_DEFAULT_GRANULARITY
 CONFIG_MAX_VARIANT_SEARCH_BASE_RANGE = ENV_CONFIG.CONFIG_MAX_VARIANT_SEARCH_BASE_RANGE
 
+INDIVIDUALS_TABLE_COLUMNS = [
+    "id",
+    "diseases",
+    "ethnicity",
+    "exposures",
+    "geographicorigin",
+    "info",
+    "interventionsorprocedures",
+    "karyotypicsex",
+    "measures",
+    "pedigrees",
+    "phenotypicfeatures",
+    "sex",
+    "treatments",
+]
+BIOSAMPLES_TABLE_COLUMNS = [
+    "id",
+    "individualid",
+    "biosamplestatus",
+    "collectiondate",
+    "collectionmoment",
+    "diagnosticmarkers",
+    "histologicaldiagnosis",
+    "measurements",
+    "obtentionprocedure",
+    "pathologicalstage",
+    "pathologicaltnmfinding",
+    "phenotypicfeatures",
+    "sampleorigindetail",
+    "sampleorigintype",
+    "sampleprocessing",
+    "samplestorage",
+    "tumorgrade",
+    "tumorprogression",
+    "info",
+    "notes",
+]
+RUNS_TABLE_COLUMNS = [
+    "id",
+    "biosampleid",
+    "individualid",
+    "info",
+    "librarylayout",
+    "libraryselection",
+    "librarysource",
+    "librarystrategy",
+    "platform",
+    "platformmodel",
+    "rundate",
+]
+ANALYSES_TABLE_COLUMNS = [
+    "id",
+    "individualid",
+    "biosampleid",
+    "runid",
+    "aligner",
+    "analysisdate",
+    "info",
+    "pipelinename",
+    "pipelineref",
+    "variantcaller",
+]
+
 
 # Thirdparty Code
 class CamelModel(BaseModel):
@@ -141,6 +204,28 @@ class AlphanumericFilter(CamelModel):
     scope: Optional[str] = None
     operator: Operator = Operator.EQUAL
 
+    @model_validator(mode="after")
+    def valid_alphanumeric_filter_id(self):
+        scope = self.scope
+        attribute = self.id
+        if scope not in [
+            "biosamples",
+            "individuals",
+            "runs",
+            "analyses",
+        ]:
+            raise ValueError(f"Invalid scope: {scope}")
+        if scope == "biosamples" and attribute.lower() not in BIOSAMPLES_TABLE_COLUMNS:
+            raise ValueError(f"Invalid biosample filter: {attribute}")
+        elif (
+            scope == "individuals"
+            and attribute.lower() not in INDIVIDUALS_TABLE_COLUMNS
+        ):
+            raise ValueError(f"Invalid individual filter: {attribute}")
+        elif scope == "runs" and attribute.lower() not in RUNS_TABLE_COLUMNS:
+            raise ValueError(f"Invalid run filter: {attribute}")
+        elif scope == "analyses" and attribute.lower() not in ANALYSES_TABLE_COLUMNS:
+            raise ValueError(f"Invalid analysis filter: {attribute}")
 
 # Thirdparty Code
 class CustomFilter(CamelModel):

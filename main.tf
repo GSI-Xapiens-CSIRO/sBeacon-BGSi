@@ -688,6 +688,7 @@ module "lambda-updateFiles" {
   tags               = var.common-tags
 
   environment_variables = {
+    HUB_NAME                              = var.hub_name
     DPORTAL_BUCKET                        = aws_s3_bucket.dataportal-bucket.bucket
     DYNAMO_PROJECTS_TABLE                 = aws_dynamodb_table.projects.name
     DYNAMO_VCFS_TABLE                     = aws_dynamodb_table.vcfs.name

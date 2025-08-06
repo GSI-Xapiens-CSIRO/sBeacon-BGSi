@@ -6,6 +6,7 @@ from urllib.parse import unquote_plus
 import boto3
 from botocore.exceptions import ClientError
 
+HUB_NAME = os.environ["HUB_NAME"]
 DPORTAL_BUCKET = os.environ["DPORTAL_BUCKET"]
 PROJECTS_TABLE = os.environ["DYNAMO_PROJECTS_TABLE"]
 VCFS_TABLE = os.environ["DYNAMO_VCFS_TABLE"]
@@ -19,6 +20,13 @@ VCF_SUFFIXES = [
     ".vcf.gz",
     ".vcf.bgz",
 ]
+HUB_CONFIGS = {
+    "RSCM": {"status_fields": ["svep_status"]},
+    "RSSARDJITO": {"status_fields": ["svep_status"]},
+    "RSPON": {"status_fields": ["pharmcat_status"]},
+    "RSIGNG": {"status_fields": ["lookup_status"]},
+    "RSJPD": {"status_fields": ["pharmcat_status", "lookup_status"]},
+}
 
 dynamodb = boto3.client("dynamodb")
 s3 = boto3.client("s3")
@@ -267,30 +275,32 @@ def expire_clinic_jobs(project, file_name):
 
     updated_count = 0
     error_count = 0
+    job_statuses = HUB_CONFIGS[HUB_NAME]["status_fields"]
     for job in jobs_to_expire:
         job_id = job.get("job_id", {}).get("S")
         if job_id:
-            kwargs = {
-                "TableName": JOBS_TABLE,
-                "Key": {
-                    "job_id": {"S": job_id},
-                },
-                "UpdateExpression": "SET job_status = :job_status",
-                "ExpressionAttributeValues": {
-                    ":job_status": {
-                        "S": "expired",
+            for job_status in job_statuses:
+                kwargs = {
+                    "TableName": JOBS_TABLE,
+                    "Key": {
+                        "job_id": {"S": job_id},
                     },
-                },
-                "ConditionExpression": "attribute_exists(job_id)",
-            }
-            print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
-            try:
-                response = dynamodb.update_item(**kwargs)
-                print(f"Received response: {json.dumps(response)}")
-                updated_count += 1
-            except ClientError as e:
-                print(f"Error updating job {job_id}: {e}")
-                error_count += 1
+                    "UpdateExpression": f"SET {job_status} = :{job_status}",
+                    "ExpressionAttributeValues": {
+                        f":{job_status}": {
+                            "S": "expired",
+                        },
+                    },
+                    "ConditionExpression": "attribute_exists(job_id)",
+                }
+                print(f"Calling dynamodb.update_item with kwargs: {json.dumps(kwargs)}")
+                try:
+                    response = dynamodb.update_item(**kwargs)
+                    print(f"Received response: {json.dumps(response)}")
+                    updated_count += 1
+                except ClientError as e:
+                    print(f"Error updating job {job_id}: {e}")
+                    error_count += 1
         else:
             print(f"Missing job_id for a job, skipping")
 

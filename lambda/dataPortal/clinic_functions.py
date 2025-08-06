@@ -19,6 +19,73 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 CLINIC_TEMP_BUCKET_NAMES = os.environ.get("CLINIC_TEMP_BUCKET_NAMES").split(",")
 REPORTS_LAMBDA = os.environ.get("REPORTS_LAMBDA")
 HUB_NAME = os.environ.get("HUB_NAME")
+HUB_CONFIGS = {
+    "RSCM": {
+        "status_fields": [ClinicJobs.svep_status],
+        "fields": [
+            "job_id",
+            "job_name",
+            "input_vcf",
+            "svep_status",
+            "svep_failed_step",
+            "svep_error_message",
+            "created_at",
+        ],
+    },
+    "RSSARDJITO": {
+        "status_fields": [ClinicJobs.svep_status],
+        "fields": [
+            "job_id",
+            "job_name",
+            "input_vcf",
+            "svep_status",
+            "svep_failed_step",
+            "svep_error_message",
+            "created_at",
+        ],
+    },
+    "RSPON": {
+        "status_fields": [ClinicJobs.pharmcat_status],
+        "fields": [
+            "job_id",
+            "job_name",
+            "input_vcf",
+            "pharmcat_status",
+            "pharmcat_failed_step",
+            "pharmcat_error_message",
+            "created_at",
+            "missing_to_ref",
+        ],
+    },
+    "RSIGNG": {
+        "status_fields": [ClinicJobs.lookup_status],
+        "fields": [
+            "job_id",
+            "job_name",
+            "input_vcf",
+            "lookup_status",
+            "lookup_failed_step",
+            "lookup_error_message",
+            "created_at",
+        ],
+    },
+    "RSJPD": {
+        "status_fields": [ClinicJobs.pharmcat_status, ClinicJobs.lookup_status],
+        "fields": [
+            "job_id",
+            "job_name",
+            "input_vcf",
+            "pharmcat_status",
+            "pharmcat_failed_step",
+            "pharmcat_error_message",
+            "lookup_status",
+            "lookup_failed_step",
+            "lookup_error_message",
+            "created_at",
+            "missing_to_ref",
+        ],
+    },
+}
 
 
 @router.attach("/dportal/projects/{project}/clinical-workflows", "get")
@@ -35,6 +102,15 @@ def list_jobs(event, context):
     try:
         # ensure user has access to project
         ProjectUsers.get(project, sub)
+        # ensure valid hub name and status fields
+        if HUB_NAME not in [
+            "RSCM",
+            "RSPON",
+            "RSSARDJITO",
+            "RSJPD",
+            "RSIGNG",
+        ] or not HUB_CONFIGS.get(HUB_NAME, {}).get("status_fields"):
+            raise KeyError("Lab not configured")
         # get project
         Projects.get(project)
         # get jobs
@@ -49,7 +125,11 @@ def list_jobs(event, context):
                     search_term.lower()
                 )
             if job_status:
-                filter_condition &= ClinicJobs.job_status.contains(job_status)
+                status_fields = HUB_CONFIGS[HUB_NAME].get("status_fields", [])
+                status_condition = status_fields[0].contains(job_status)
+                for status_field in status_fields[1:]:
+                    status_condition |= status_field.contains(job_status)
+                filter_condition &= status_condition
             jobs = ClinicJobs.scan(
                 filter_condition=filter_condition,
                 **common_params,
@@ -65,22 +145,17 @@ def list_jobs(event, context):
         raise PortalError(404, "Project not found")
     except ClinicalAnnotations.DoesNotExist:
         raise PortalError(404, "Annotations not found")
+    except KeyError as e:
+        print(f"Error invoking lambda function: missing key: {e}")
+        return {
+            "success": False,
+            "message": "Lab not configured. Please contact administrator.",
+        }
 
+    fields = HUB_CONFIGS[HUB_NAME]["fields"]
     return {
         "success": True,
-        "jobs": [
-            {
-                "job_id": job.job_id,
-                "job_name": job.job_name,
-                "input_vcf": job.input_vcf,
-                "job_status": job.job_status,
-                "failed_step": job.failed_step,
-                "error_message": job.error_message,
-                "created_at": job.created_at,
-                "missing_to_ref": job.missing_to_ref,
-            }
-            for job in jobs
-        ],
+        "jobs": [{field: getattr(job, field) for field in fields} for job in jobs],
         "last_evaluated_key": (
             json.dumps(jobs.last_evaluated_key) if jobs.last_evaluated_key else None
         ),
@@ -99,9 +174,23 @@ def get_job(event, context):
     try:
         # check is user registered in project
         ProjectUsers.get(project_name, sub)
-
+        # ensure valid hub name and status fields
+        if HUB_NAME not in [
+            "RSCM",
+            "RSPON",
+            "RSSARDJITO",
+            "RSJPD",
+            "RSIGNG",
+        ] or not HUB_CONFIGS.get(HUB_NAME, {}).get("status_fields"):
+            raise KeyError("Lab not configured")
+        # get job
         job = ClinicJobs.get(selected_job)
-        if job.job_status.lower() in ["failed", "expired"]:
+        status_fields = HUB_CONFIGS[HUB_NAME].get("status_fields", [])
+        job_statuses = [
+            getattr(job, status_field.attr_name).lower()
+            for status_field in status_fields
+        ]
+        if all(status in ["failed", "expired"] for status in job_statuses):
             return {
                 "success": False,
                 "message": f"Job {selected_job} is a failed/expired status.",
@@ -148,10 +237,16 @@ def delete_jobid(event, context):
         ProjectUsers.get(project_name, sub)
 
         job = ClinicJobs.get(selected_job)
-        if job.job_status.lower() in ["failed", "expired"]:
+
+        status_fields = HUB_CONFIGS[HUB_NAME].get("status_fields", [])
+        job_statuses = [
+            getattr(job, status_field.attr_name).lower()
+            for status_field in status_fields
+        ]
+        if all(status not in ["failed", "expired"] for status in job_statuses):
             return {
                 "success": False,
-                "message": f"Job {selected_job} is a failed/expired status.",
+                "message": f"Job {selected_job} is not in a failed/expired status.",
             }
         job.delete()
 

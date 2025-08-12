@@ -352,21 +352,32 @@ def run_custom_query(
     print(f"After projects filter: {query=}")
     print(f"After projects filter: {execution_parameters=}")
 
-    if execution_parameters is None:
-        response = athena.start_query_execution(
-            QueryString=query,
-            # ClientRequestToken='string',
-            QueryExecutionContext={"Database": database},
-            WorkGroup=workgroup,
-        )
-    else:
-        response = athena.start_query_execution(
-            QueryString=query,
-            # ClientRequestToken='string',
-            QueryExecutionContext={"Database": database},
-            WorkGroup=workgroup,
-            ExecutionParameters=execution_parameters,
-        )
+    for itr in range(1,4):
+        try:
+            if execution_parameters is None:
+                response = athena.start_query_execution(
+                    QueryString=query,
+                    # ClientRequestToken='string',
+                    QueryExecutionContext={"Database": database},
+                    WorkGroup=workgroup,
+                )
+            else:
+                response = athena.start_query_execution(
+                    QueryString=query,
+                    # ClientRequestToken='string',
+                    QueryExecutionContext={"Database": database},
+                    WorkGroup=workgroup,
+                    ExecutionParameters=execution_parameters,
+                )
+            print(f"Query started successfully on first attempt")
+            break  # Exit the retry loop if the query starts successfully
+        except athena.exceptions.TooManyRequestsException as e:
+            if itr < 3:
+                print(f"Rate limit exceeded, retrying attempt: {itr}")
+                time.sleep(itr * 2)  # Exponential backoff
+            else:
+                print(f"Rate limit exceeded, giving up after {itr} attempts")
+                return None
 
     retries = 0
     while True:

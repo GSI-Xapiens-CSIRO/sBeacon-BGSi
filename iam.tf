@@ -553,7 +553,8 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       "ec2:DescribeInstances",
       "ec2:CreateTags",
       "ec2:DescribeImages",
-      "ec2:DescribeSubnets"
+      "ec2:DescribeSubnets",
+      "ec2:DescribeVpcs"
     ]
     resources = [
       "*"

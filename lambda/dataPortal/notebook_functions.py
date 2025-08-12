@@ -32,7 +32,7 @@ def create_notebook(event, context):
         InstanceType=instance_type,
         VolumeSizeInGB=int(volume_size),
         RoleArn=os.getenv("JUPYTER_INSTACE_ROLE_ARN"),
-        DirectInternetAccess="Enabled",
+        DirectInternetAccess="Disabled",
         RootAccess="Disabled",
         Tags=[{"Key": "IdentityId", "Value": identity_id}],
         LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME"),

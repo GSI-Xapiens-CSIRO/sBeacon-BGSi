@@ -549,6 +549,19 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
 data "aws_iam_policy_document" "data-portal-lambda-access" {
   statement {
     actions = [
+      "ec2:RunInstances",
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+      "ec2:DescribeImages",
+      "ec2:DescribeSubnets"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+
+  statement {
+    actions = [
       "dynamodb:DescribeTable",
       "dynamodb:GetItem",
       "dynamodb:Query",

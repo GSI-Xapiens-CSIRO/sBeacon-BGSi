@@ -36,9 +36,9 @@ def create_notebook(event, context):
         RootAccess="Disabled",
         Tags=[{"Key": "IdentityId", "Value": identity_id}],
         LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME"),
-        SubnetId="subnet-05084677ad780f998",
+        SubnetId="subnet-090dd1a07b54a6fcf",
         SecurityGroupIds=[
-            "vpc-0ccdbc0528b7def47",
+            "sg-07dcaaee52a151853",
         ],
     )
     entry = JupyterInstances(sub, notebook_name)

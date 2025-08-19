@@ -130,13 +130,13 @@ python3.12 -m venv py312
 source ~/py312/bin/activate 
 ```
 
-Make sure you have the terraform version `Terraform v1.9.4` or newer if you're not using the docker image. Run the following command to get the terraform binary.
+Make sure you have the terraform version `Terraform v1.12.2` or newer if you're not using the docker image. Run the following command to get the terraform binary.
 
 ```bash
-# only for linux - find other OS version here https://releases.hashicorp.com/terraform/1.9.4/
+# only for linux - find other OS version here https://releases.hashicorp.com/terraform/1.12.2/
 cd ~
-wget https://releases.hashicorp.com/terraform/1.9.4/terraform_1.9.4_linux_amd64.zip
-sudo unzip terraform_1.9.4_linux_amd64.zip -d /usr/bin/
+wget https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+sudo unzip terraform_1.12.2_linux_amd64.zip -d /usr/bin/
 ```
 
 <!-- TOC --><a name="option-2-using-the-docker-image"></a>

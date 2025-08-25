@@ -5,8 +5,8 @@ RUN dnf install -y git tar make openssl-devel libcurl-devel wget bzip2-devel xz-
 RUN dnf install -y gcc gcc-c++ cmake
 RUN dnf install -y docker
 
-RUN wget https://releases.hashicorp.com/terraform/1.9.4/terraform_1.9.4_linux_amd64.zip
-RUN unzip terraform_1.9.4_linux_amd64.zip -d /usr/bin/
+RUN wget https://releases.hashicorp.com/terraform/1.12.2/terraform_1.12.2_linux_amd64.zip
+RUN unzip terraform_1.12.2_linux_amd64.zip -d /usr/bin/
 
 # Copy requirements.txt
 RUN pip install --upgrade pip

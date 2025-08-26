@@ -52,10 +52,7 @@ CONFIG_FILE="/opt/conda/envs/JupyterSystemEnv/etc/jupyter/labconfig/page_config.
 
 if [ -f "$CONFIG_FILE" ]; then
     echo "Existing page_config.json found, merging with download restrictions..."
-    
-    # Backup existing config
-    # cp "$CONFIG_FILE" "${CONFIG_FILE}.backup"
-    
+        
     # Use Python to merge JSON properly
     python3 << 'PYTHON_END'
 import json

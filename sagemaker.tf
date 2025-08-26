@@ -24,6 +24,9 @@ sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
 
+jupyter labextension disable @jupyterlab/docmanager-extension:download
+jupyter labextension disable @jupyterlab/filebrowser-extension:download
+
 EOT
   )
 
@@ -34,8 +37,6 @@ EOT
 sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
-
-sleep 120
 
 jupyter labextension disable @jupyterlab/docmanager-extension:download
 jupyter labextension disable @jupyterlab/filebrowser-extension:download

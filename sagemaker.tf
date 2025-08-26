@@ -16,6 +16,7 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
 
 resource "aws_sagemaker_notebook_instance_lifecycle_configuration" "sagemaker_jupyter_instance_lcc" {
   name = "clone-gaspi-notebooks"
+
   on_create = base64encode(
     <<EOT
 #!/bin/bash
@@ -30,45 +31,58 @@ EOT
   on_start = base64encode(
     <<EOT
 #!/bin/bash
+set -e
 
-sudo unlink /home/ec2-user/sample-notebooks
+echo "OnStart: Starting lifecycle configuration..."
+
+# Setup GASPI notebooks
+echo "Setting up GASPI notebooks..."
+sudo unlink /home/ec2-user/sample-notebooks 2>/dev/null || true
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
 
-# Disable JupyterLab download functionality for all notebooks
-echo "Setting up JupyterLab download restrictions..."
-
-sudo -u ec2-user -i <<'EOF'
-
-# Wait for conda environment to be ready
-sleep 30
-
-# Activate the JupyterSystemEnv environment
-source activate JupyterSystemEnv
+# Wait for JupyterLab to be ready
+echo "Waiting for JupyterLab environment to be ready..."
+sleep 120
 
 echo "Disabling JupyterLab download extensions..."
 
-# Disable downloads from File > Download menu
-jupyter labextension disable @jupyterlab/docmanager-extension:download 2>/dev/null || echo "docmanager download extension not found"
+sudo -u ec2-user -i <<'EOF'
 
-# Disable downloads from context menu in file browser
-jupyter labextension disable @jupyterlab/filebrowser-extension:download 2>/dev/null || echo "filebrowser download extension not found"
+# Wait for conda and jupyter to be available
+while ! command -v jupyter >/dev/null 2>&1; do
+    echo "Waiting for jupyter command..."
+    sleep 10
+done
 
-# Disable save-as functionality (another way to download)
-jupyter labextension disable @jupyterlab/docmanager-extension:save-as 2>/dev/null || echo "save-as extension not found"
+# Activate JupyterSystemEnv
+source activate JupyterSystemEnv
 
-# Optional: Disable other export functionality
-# jupyter labextension disable @jupyterlab/docmanager-extension:export 2>/dev/null || echo "export extension not found"
+echo "Current environment: $CONDA_DEFAULT_ENV"
+echo "Jupyter location: $(which jupyter)"
 
-# Rebuild JupyterLab to apply changes
+# Disable downloads from File > Download
+echo "Disabling docmanager download extension..."
+jupyter labextension disable @jupyterlab/docmanager-extension:download
+
+# Disable downloads from the context menu in the file browser  
+echo "Disabling filebrowser download extension..."
+jupyter labextension disable @jupyterlab/filebrowser-extension:download
+
+# Rebuild JupyterLab
 echo "Rebuilding JupyterLab..."
 jupyter lab build --minimize=False
 
-echo "JupyterLab download restrictions applied successfully!"
+# Verify extensions are disabled
+echo "Verifying extensions are disabled:"
+jupyter labextension list
+
+# Create log file
+echo "$(date): Extensions disabled successfully" > /tmp/jupyter_extensions_disabled.log
 
 EOF
 
-echo "Lifecycle configuration completed"
+echo "OnStart lifecycle configuration completed!"
 
 EOT
   )

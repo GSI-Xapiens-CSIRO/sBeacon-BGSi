@@ -281,3 +281,22 @@ variable "clinic-temp-bucket-arns" {
   type        = list(string)
   description = "List of clinic bucket arns containing temp files to clear"
 }
+
+# Hub configurations
+variable "hub_name" {
+  type        = string
+  description = "Configuration for the hub"
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "Subnet ID for the GASPI VPC"
+  default     = "NONE"
+
+}
+
+variable "security_group_id" {
+  type        = string
+  description = "Security Group ID for the GASPI VPC"
+  default     = "NONE"
+}

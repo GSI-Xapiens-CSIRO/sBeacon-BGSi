@@ -751,6 +751,8 @@ module "lambda-data-portal" {
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
       CLINIC_TEMP_BUCKET_NAMES          = join(",", var.clinic-temp-bucket-names)
+      SUBNET_ID                         = var.subnet_id
+      SECURITY_GROUP_ID                 = var.security_group_id
     },
   )
 

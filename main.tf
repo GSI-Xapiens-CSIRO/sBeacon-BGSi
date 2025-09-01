@@ -836,7 +836,7 @@ module "lambda-clinicalReports" {
   handler                = "lambda_function.lambda_handler"
   memory_size            = 512
   timeout                = 60
-  source_path            = "${path.module}/lambda/generateReports"
+  source_path            = "${path.module}/lambda/clinicalReports"
   attach_policy_jsons    = true
   number_of_policy_jsons = 1
   tags                   = var.common-tags

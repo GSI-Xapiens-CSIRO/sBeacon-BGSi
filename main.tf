@@ -748,6 +748,7 @@ module "lambda-data-portal" {
       SUBMIT_LAMBDA                     = module.lambda-submitDataset.lambda_function_name
       INDEXER_LAMBDA                    = module.lambda-indexer.lambda_function_name
       REPORTS_LAMBDA                    = module.lambda-generateReports.lambda_function_name
+      CLINICAL_REPORTS_LAMBDA           = module.lambda-clinicalReports.lambda_function_name
       COHORT_MAKER_LAMBDA               = module.lambda-generateCohortVCfs.lambda_function_name
       HUB_NAME                          = var.hub_name
       CLINIC_TEMP_BUCKET_NAMES          = join(",", var.clinic-temp-bucket-names)
@@ -818,6 +819,33 @@ module "lambda-generateReports" {
 
   policy_jsons = [
     data.aws_iam_policy_document.lambda-generateReports.json,
+  ]
+}
+
+#
+# generateReports Function
+#
+module "lambda-clinicalReports" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name          = "sbeacon-backend-clinicalReports"
+  description            = "Backend function to generate clinical reports."
+  runtime                = "python3.12"
+  handler                = "lambda_function.lambda_handler"
+  memory_size            = 512
+  timeout                = 60
+  source_path            = "${path.module}/lambda/generateReports"
+  attach_policy_jsons    = true
+  number_of_policy_jsons = 1
+  tags                   = var.common-tags
+
+  environment_variables = {
+    DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
+    DPORTAL_BUCKET               = aws_s3_bucket.dataportal-bucket.bucket
+  }
+
+  policy_jsons = [
+    data.aws_iam_policy_document.lambda-clinicalReports.json,
   ]
 }
 

@@ -785,3 +785,15 @@ data "aws_iam_policy_document" "lambda-generateReports" {
     ]
   }
 }
+
+# generateReports lambda access
+data "aws_iam_policy_document" "lambda-clinicalReports" {
+  statement {
+    actions = [
+      "s3:PutObject"
+    ]
+    resources = [
+      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/clinical-workflows/*/reports/*",
+    ]
+  }
+}

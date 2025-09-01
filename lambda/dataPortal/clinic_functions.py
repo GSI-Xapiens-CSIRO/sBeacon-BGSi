@@ -18,6 +18,7 @@ router = LambdaRouter()
 DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 CLINIC_TEMP_BUCKET_NAMES = os.environ.get("CLINIC_TEMP_BUCKET_NAMES").split(",")
 REPORTS_LAMBDA = os.environ.get("REPORTS_LAMBDA")
+# REPORTS_LAMBDA = os.environ.get("CLINICAL_REPORTS_LAMBDA")
 HUB_NAME = os.environ.get("HUB_NAME")
 HUB_CONFIGS = {
     "RSCM": {

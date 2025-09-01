@@ -724,6 +724,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
       module.lambda-indexer.lambda_function_arn,
       module.lambda-submitDataset.lambda_function_arn,
       module.lambda-generateReports.lambda_function_arn,
+      module.lambda-clinicalReports.lambda_function_arn,
       module.lambda-generateCohortVCfs.lambda_function_arn,
     ]
   }

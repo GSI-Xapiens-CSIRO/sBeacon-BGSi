@@ -1,3 +1,4 @@
+# Generate secure random keys khusus untuk PII
 resource "random_bytes" "pii_primary_key" {
   length = 32 # 256-bit AES key
 }
@@ -64,9 +65,9 @@ resource "aws_secretsmanager_secret_version" "dataportal_pii_encryption" {
   secret_id = aws_secretsmanager_secret.dataportal_pii_encryption.id
 
   secret_string = jsonencode({
-    primary_key   = base64encode(random_bytes.pii_primary_key.result)
-    secondary_key = base64encode(random_bytes.pii_secondary_key.result)
-    salt          = base64encode(random_bytes.pii_salt.result)
+    primary_key   = base64encode(random_bytes.pii_primary_key.hex)
+    secondary_key = base64encode(random_bytes.pii_secondary_key.hex)
+    salt          = base64encode(random_bytes.pii_salt.hex)
     version       = "v1"
     algorithm     = "AES-256-GCM"
     purpose       = "PII-DataPortal"

@@ -18,7 +18,7 @@ class PIIEncryption:
     def _get_secrets_client(self):
         """Get atau create Secrets Manager client"""
         if self._secrets_client is None:
-            region_name = os.environ.get("AWS_REGION", "us-east-1")
+            region_name = os.environ["AWS_DEFAULT_REGION"]
             session = boto3.session.Session()
             self._secrets_client = session.client(
                 service_name="secretsmanager", region_name=region_name
@@ -129,75 +129,3 @@ class PIIEncryption:
         # Combine IV + encrypted content dan encode base64
         encrypted_bytes = iv + encrypted_content
         return base64.b64encode(encrypted_bytes).decode("utf-8")
-
-    def validate_pii_fields(self, decrypted_data, required_fields=None):
-        """
-        Validate PII fields setelah decryption
-
-        Args:
-            decrypted_data (dict): Decrypted PII data
-            required_fields (list): List of required fields
-
-        Returns:
-            dict: Validated PII data
-        """
-        if required_fields is None:
-            required_fields = []
-
-        # Check required fields
-        missing_fields = [
-            field for field in required_fields if field not in decrypted_data
-        ]
-        if missing_fields:
-            raise ValueError(f"Missing required PII fields: {missing_fields}")
-
-        # Basic PII field validation
-        validated_data = {}
-
-        # Email validation
-        if "email" in decrypted_data:
-            email = decrypted_data["email"].strip().lower()
-            if "@" not in email:
-                raise ValueError("Invalid email format in PII data")
-            validated_data["email"] = email
-
-        # Phone validation
-        if "phone" in decrypted_data:
-            phone = "".join(filter(str.isdigit, decrypted_data["phone"]))
-            if len(phone) < 10:
-                raise ValueError("Invalid phone number in PII data")
-            validated_data["phone"] = phone
-
-        # Name validation
-        if "name" in decrypted_data:
-            name = decrypted_data["name"].strip()
-            if len(name) < 2:
-                raise ValueError("Invalid name in PII data")
-            validated_data["name"] = name
-
-        # Copy other fields
-        for key, value in decrypted_data.items():
-            if key not in validated_data:
-                validated_data[key] = value
-
-        return validated_data
-
-
-# Global instance
-pii_encryption = PIIEncryption()
-
-
-# Convenience functions
-def decrypt_pii_payload(encrypted_data):
-    """Convenience function untuk decrypt PII payload"""
-    return pii_encryption.decrypt_pii_payload(encrypted_data)
-
-
-def encrypt_pii_data(pii_data, use_secondary=False):
-    """Convenience function untuk encrypt PII data"""
-    return pii_encryption.encrypt_pii_data(pii_data, use_secondary)
-
-
-def validate_pii_fields(decrypted_data, required_fields=None):
-    """Convenience function untuk validate PII fields"""
-    return pii_encryption.validate_pii_fields(decrypted_data, required_fields)

@@ -814,6 +814,26 @@ data "aws_iam_policy_document" "dataportal-locks-access" {
 # generateReports lambda access
 data "aws_iam_policy_document" "lambda-generateReports" {
   statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      aws_secretsmanager_secret.dataportal_pii_encryption.arn,
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+    ]
+    resources = [
+      aws_kms_key.pii_encryption_key.arn,
+    ]
+  }
+  statement {
     actions = [
       "s3:PutObject"
     ]

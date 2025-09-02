@@ -818,6 +818,7 @@ module "lambda-generateReports" {
   environment_variables = {
     DYNAMO_SVEP_REFERENCES_TABLE = var.svep-references-table-name
     DPORTAL_BUCKET               = aws_s3_bucket.dataportal-bucket.bucket
+    PII_ENCRYPTION_SECRET_NAME   = aws_secretsmanager_secret.dataportal_pii_encryption.name
   }
 
   policy_jsons = [

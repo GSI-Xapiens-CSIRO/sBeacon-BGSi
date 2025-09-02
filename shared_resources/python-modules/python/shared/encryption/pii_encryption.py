@@ -9,14 +9,11 @@ from Crypto.Random import get_random_bytes
 
 
 class PIIEncryption:
-    """PII Encryption handler khusus untuk Data Portal"""
-
     def __init__(self):
         self._cached_secret = None
         self._secrets_client = None
 
     def _get_secrets_client(self):
-        """Get atau create Secrets Manager client"""
         if self._secrets_client is None:
             region_name = os.environ["AWS_DEFAULT_REGION"]
             session = boto3.session.Session()
@@ -26,7 +23,6 @@ class PIIEncryption:
         return self._secrets_client
 
     def _get_pii_keys(self):
-        """Retrieve PII encryption keys dari AWS Secrets Manager"""
         if self._cached_secret is not None:
             return self._cached_secret
 
@@ -53,15 +49,6 @@ class PIIEncryption:
             raise e
 
     def decrypt_pii_payload(self, encrypted_data):
-        """
-        Decrypt PII payload dari frontend
-
-        Args:
-            encrypted_data (str): Base64 encoded encrypted PII data
-
-        Returns:
-            dict: Decrypted PII data
-        """
         if not encrypted_data:
             raise ValueError("No encrypted PII data provided")
 
@@ -79,7 +66,6 @@ class PIIEncryption:
                 )
 
     def _decrypt_with_key(self, encrypted_data, key):
-        """Helper function untuk decrypt dengan specific key"""
         try:
             # Decode base64
             encrypted_bytes = base64.b64decode(encrypted_data)
@@ -102,16 +88,6 @@ class PIIEncryption:
             raise ValueError(f"Decryption failed: {str(e)}")
 
     def encrypt_pii_data(self, pii_data, use_secondary=False):
-        """
-        Encrypt PII data (untuk testing atau internal use)
-
-        Args:
-            pii_data (dict): PII data to encrypt
-            use_secondary (bool): Use secondary key instead of primary
-
-        Returns:
-            str: Base64 encoded encrypted data
-        """
         keys = self._get_pii_keys()
         key = keys["secondary_key"] if use_secondary else keys["primary_key"]
 
@@ -129,3 +105,16 @@ class PIIEncryption:
         # Combine IV + encrypted content dan encode base64
         encrypted_bytes = iv + encrypted_content
         return base64.b64encode(encrypted_bytes).decode("utf-8")
+
+
+# Global instance
+pii_encryption = PIIEncryption()
+
+
+# Convenience functions
+def decrypt_pii_payload(encrypted_data):
+    return pii_encryption.decrypt_pii_payload(encrypted_data)
+
+
+def encrypt_pii_data(pii_data, use_secondary=False):
+    return pii_encryption.encrypt_pii_data(pii_data, use_secondary)

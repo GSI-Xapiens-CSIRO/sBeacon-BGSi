@@ -754,6 +754,7 @@ module "lambda-data-portal" {
       CLINIC_TEMP_BUCKET_NAMES          = join(",", var.clinic-temp-bucket-names)
       SUBNET_ID                         = var.subnet_id
       SECURITY_GROUP_ID                 = var.security_group_id
+      PII_ENCRYPTION_SECRET_NAME        = aws_secretsmanager_secret.dataportal_pii_encryption.name
     },
   )
 

@@ -548,6 +548,27 @@ data "aws_iam_policy_document" "lambda-updateFiles" {
 # DataPortal Lambda Access
 data "aws_iam_policy_document" "data-portal-lambda-access" {
   statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [
+      aws_secretsmanager_secret.dataportal_pii_encryption.arn,
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+    ]
+    resources = [
+      aws_kms_key.pii_encryption_key.arn,
+    ]
+  }
+
+  statement {
     actions = [
       "ec2:RunInstances",
       "ec2:DescribeInstances",

@@ -95,3 +95,4 @@ pip install requests==2.31.0 --target layers/python_libraries/python
 pip install smart_open==7.0.4 --target layers/python_libraries/python
 pip install strenum==0.4.15 --target layers/python_libraries/python
 pip install python-magic==0.4.27 --target layers/python_libraries/python
+pip install pycryptodome==3.19.0 --target layers/python_libraries/python

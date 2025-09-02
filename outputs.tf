@@ -37,3 +37,8 @@ output "dynamo-clinic-jobs-stream-arn" {
   value       = aws_dynamodb_table.clinic_jobs.stream_arn
   description = "Dynammo clinic jobs table"
 }
+
+output "dataportal-pii-encryption-secret-name" {
+  value       = aws_secretsmanager_secret.dataportal_pii_encryption.name
+  description = "Secrets Manager secret name for PII encryption keys"
+}

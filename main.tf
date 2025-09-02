@@ -824,6 +824,11 @@ module "lambda-generateReports" {
   policy_jsons = [
     data.aws_iam_policy_document.lambda-generateReports.json,
   ]
+
+  layers = [
+    local.python_libraries_layer,
+    local.python_modules_layer
+  ]
 }
 
 #

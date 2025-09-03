@@ -24,43 +24,95 @@ class PIIEncryption:
 
     def _get_pii_keys(self):
         if self._cached_secret is not None:
+            print("DEBUG - Using cached secret")
             return self._cached_secret
 
         secret_name = os.environ.get("PII_ENCRYPTION_SECRET_NAME")
         if not secret_name:
             raise ValueError("PII_ENCRYPTION_SECRET_NAME environment variable not set")
 
+        print(f"DEBUG - Fetching secret: {secret_name}")
+
         try:
             client = self._get_secrets_client()
             response = client.get_secret_value(SecretId=secret_name)
             secret_data = json.loads(response["SecretString"])
 
-            # DEBUG: Print untuk melihat format data
-            print(f"DEBUG - Primary key raw: {secret_data['primary_key']}")
+            print(f"DEBUG - Secret retrieved successfully")
+            print(f"DEBUG - Secret keys available: {list(secret_data.keys())}")
+            print(
+                f"DEBUG - Primary key raw (first 20 chars): {secret_data['primary_key'][:20]}..."
+            )
             print(f"DEBUG - Primary key length: {len(secret_data['primary_key'])}")
             print(f"DEBUG - Secondary key length: {len(secret_data['secondary_key'])}")
             print(f"DEBUG - Salt length: {len(secret_data['salt'])}")
+            print(f"DEBUG - Version: {secret_data.get('version', 'N/A')}")
 
-            # Karena Anda pakai hex format, langsung decode hex
-            primary_key = bytes.fromhex(secret_data["primary_key"])
-            secondary_key = bytes.fromhex(secret_data["secondary_key"])
-            salt = bytes.fromhex(secret_data["salt"])
+            try:
+                # Step 1: Decode base64 to get hex string
+                print("DEBUG - Step 1: Decoding base64...")
+                hex_primary = base64.b64decode(secret_data["primary_key"]).decode(
+                    "utf-8"
+                )
+                hex_secondary = base64.b64decode(secret_data["secondary_key"]).decode(
+                    "utf-8"
+                )
+                hex_salt = base64.b64decode(secret_data["salt"]).decode("utf-8")
 
-            # DEBUG: Print key lengths after decode
-            print(f"DEBUG - Decoded primary key length: {len(primary_key)} bytes")
-            print(f"DEBUG - Decoded secondary key length: {len(secondary_key)} bytes")
-            print(f"DEBUG - Decoded salt length: {len(salt)} bytes")
+                print(f"DEBUG - Hex primary (first 20 chars): {hex_primary[:20]}...")
+                print(f"DEBUG - Hex primary length: {len(hex_primary)}")
+                print(f"DEBUG - Hex secondary length: {len(hex_secondary)}")
+                print(f"DEBUG - Hex salt length: {len(hex_salt)}")
 
-            self._cached_secret = {
-                "primary_key": primary_key,
-                "secondary_key": secondary_key,
-                "salt": salt,
-                "version": secret_data["version"],
-            }
+                # Step 2: Convert hex string to bytes
+                print("DEBUG - Step 2: Converting hex to bytes...")
+                primary_key = bytes.fromhex(hex_primary)
+                secondary_key = bytes.fromhex(hex_secondary)
+                salt = bytes.fromhex(hex_salt)
 
-            return self._cached_secret
+                print(f"DEBUG - Final primary key length: {len(primary_key)} bytes")
+                print(f"DEBUG - Final secondary key length: {len(secondary_key)} bytes")
+                print(f"DEBUG - Final salt length: {len(salt)} bytes")
+
+                # Validate key lengths
+                if len(primary_key) != 32:
+                    raise ValueError(
+                        f"Primary key must be 32 bytes, got {len(primary_key)} bytes"
+                    )
+                if len(secondary_key) != 32:
+                    raise ValueError(
+                        f"Secondary key must be 32 bytes, got {len(secondary_key)} bytes"
+                    )
+                if len(salt) != 16:
+                    raise ValueError(f"Salt must be 16 bytes, got {len(salt)} bytes")
+
+                print("DEBUG - Key validation passed ✓")
+
+                self._cached_secret = {
+                    "primary_key": primary_key,
+                    "secondary_key": secondary_key,
+                    "salt": salt,
+                    "version": secret_data["version"],
+                }
+
+                print("DEBUG - Secret cached successfully ✓")
+                return self._cached_secret
+
+            except Exception as decode_error:
+                print(f"DEBUG - Decoding error: {str(decode_error)}")
+                print(f"DEBUG - Error type: {type(decode_error).__name__}")
+                raise ValueError(f"Failed to decode secret data: {str(decode_error)}")
 
         except ClientError as e:
+            print(
+                f"DEBUG - AWS ClientError: {e.response['Error']['Code']} - {e.response['Error']['Message']}"
+            )
+            raise e
+        except json.JSONDecodeError as e:
+            print(f"DEBUG - JSON decode error: {str(e)}")
+            raise ValueError(f"Invalid JSON in secret: {str(e)}")
+        except Exception as e:
+            print(f"DEBUG - Unexpected error: {type(e).__name__} - {str(e)}")
             raise e
 
     def decrypt_pii_payload(self, encrypted_data):

@@ -35,13 +35,23 @@ class PIIEncryption:
             response = client.get_secret_value(SecretId=secret_name)
             secret_data = json.loads(response["SecretString"])
 
-            # Cache the secret
-            self._cached_secret = {
-                "primary_key": base64.b64decode(secret_data["primary_key"]),
-                "secondary_key": base64.b64decode(secret_data["secondary_key"]),
-                "salt": base64.b64decode(secret_data["salt"]),
-                "version": secret_data["version"],
-            }
+            # Cache the secret - decode dari hex jika format hex
+            if (
+                len(secret_data["primary_key"]) == 64
+            ):  # Hex format (32 bytes = 64 hex chars)
+                self._cached_secret = {
+                    "primary_key": bytes.fromhex(secret_data["primary_key"]),
+                    "secondary_key": bytes.fromhex(secret_data["secondary_key"]),
+                    "salt": bytes.fromhex(secret_data["salt"]),
+                    "version": secret_data["version"],
+                }
+            else:  # Base64 format
+                self._cached_secret = {
+                    "primary_key": base64.b64decode(secret_data["primary_key"]),
+                    "secondary_key": base64.b64decode(secret_data["secondary_key"]),
+                    "salt": base64.b64decode(secret_data["salt"]),
+                    "version": secret_data["version"],
+                }
 
             return self._cached_secret
 

@@ -821,6 +821,7 @@ def generate_report(event, context):
                     "validatedAt": str(job.validatedAt),
                     "validatorSub": job.validatorSub,
                     "versions": versions,
+                    "pii": body["pii"],
                 }
             else:
                 payload = {
@@ -835,6 +836,7 @@ def generate_report(event, context):
                     "variants": variants,
                     "variantValidations": variantValidations,
                     "versions": versions,
+                    "pii": body["pii"],
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {

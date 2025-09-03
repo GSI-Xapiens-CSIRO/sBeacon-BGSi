@@ -2,6 +2,8 @@ import os
 import base64
 import json
 from datetime import datetime
+from shared.utils import clear_tmp
+from shared.utils import encrypt_pii_data, decrypt_pii_payload
 
 import boto3
 
@@ -24,7 +26,13 @@ def lambda_handler(event, context):
     report_id = event["report_id"]
     project = event["project"]
     job_id = event["job_id"]
+    pii = event["pii"]
+
     event["timestamp"] = str(datetime.now())
+
+    decrypted_pii = decrypt_pii_payload(pii)
+
+    print(f"decrypted_pii {decrypted_pii}")
 
     # RSCM
     match event["lab"]:

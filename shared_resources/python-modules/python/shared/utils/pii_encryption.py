@@ -35,23 +35,28 @@ class PIIEncryption:
             response = client.get_secret_value(SecretId=secret_name)
             secret_data = json.loads(response["SecretString"])
 
-            # Cache the secret - decode dari hex jika format hex
-            if (
-                len(secret_data["primary_key"]) == 64
-            ):  # Hex format (32 bytes = 64 hex chars)
-                self._cached_secret = {
-                    "primary_key": bytes.fromhex(secret_data["primary_key"]),
-                    "secondary_key": bytes.fromhex(secret_data["secondary_key"]),
-                    "salt": bytes.fromhex(secret_data["salt"]),
-                    "version": secret_data["version"],
-                }
-            else:  # Base64 format
-                self._cached_secret = {
-                    "primary_key": base64.b64decode(secret_data["primary_key"]),
-                    "secondary_key": base64.b64decode(secret_data["secondary_key"]),
-                    "salt": base64.b64decode(secret_data["salt"]),
-                    "version": secret_data["version"],
-                }
+            # DEBUG: Print untuk melihat format data
+            print(f"DEBUG - Primary key raw: {secret_data['primary_key']}")
+            print(f"DEBUG - Primary key length: {len(secret_data['primary_key'])}")
+            print(f"DEBUG - Secondary key length: {len(secret_data['secondary_key'])}")
+            print(f"DEBUG - Salt length: {len(secret_data['salt'])}")
+
+            # Karena Anda pakai hex format, langsung decode hex
+            primary_key = bytes.fromhex(secret_data["primary_key"])
+            secondary_key = bytes.fromhex(secret_data["secondary_key"])
+            salt = bytes.fromhex(secret_data["salt"])
+
+            # DEBUG: Print key lengths after decode
+            print(f"DEBUG - Decoded primary key length: {len(primary_key)} bytes")
+            print(f"DEBUG - Decoded secondary key length: {len(secondary_key)} bytes")
+            print(f"DEBUG - Decoded salt length: {len(salt)} bytes")
+
+            self._cached_secret = {
+                "primary_key": primary_key,
+                "secondary_key": secondary_key,
+                "salt": salt,
+                "version": secret_data["version"],
+            }
 
             return self._cached_secret
 

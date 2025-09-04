@@ -188,8 +188,8 @@ if __name__ == "__main__":
         "snp_sift_version": "N/A",
         "polyphen2_version": "N/A",
         "omim_version": "N/A",
-        "pharmcat_version": "3.0.0",
-        "pharmgkb_version": "2025-03-07-16-38",
+        "pharmcat_version": "3.0.1",
+        "pharmgkb_version": "2025-05-14-21-40",
     }
     generate(
         pii_name="John Doe",

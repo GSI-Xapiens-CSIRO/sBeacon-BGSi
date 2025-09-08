@@ -8,66 +8,52 @@ from reportlab.lib import colors
 
 
 def _create_annotations(
-    filename, pages, footer_name_pos, footer_dob_pos, page_num_pos, report_id=None
+    filename, pages, footer_name_pos, footer_dob_pos, page_num_pos, report_id=None, versions_pos=None
 ):
     c = canvas.Canvas(filename, pagesize=letter)
-    form = c.acroForm
-
+    text_color = colors.HexColor("#156082")
+    
     for p in range(pages):
-        x, y, fs, text = (5, 780, 12, report_id)
+        # report_id di header
+        x, y, fs, text = (5, 780, 12, report_id or "")
         c.setFont("Helvetica", fs)
         c.drawString(x, y, text)
+
+        if p == pages - 1:
+            for pos in versions_pos:
+                x, y, fs, text = pos
+                c.setFont("Helvetica", fs)
+                c.drawString(x, y, text or "")
+
         # footer name
         x, y, fs, text = footer_name_pos
-        form.textfield(
-            name="name",
-            tooltip="Name",
-            value=f"{text}",
-            x=x,
-            y=y,
-            width=200,
-            height=12,
-            fontSize=8,
-            borderWidth=0,
-            fillColor=colors.white,
-            textColor=None,
-            forceBorder=False,
-            fieldFlags=0,
-        )
+        c.setFont("Helvetica", fs)
+        c.setFillColor(text_color)
+        c.drawString(x, y, text or "")
 
         # footer dob
         x, y, fs, text = footer_dob_pos
-        form.textfield(
-            name="dob",
-            tooltip="Date of Birth",
-            value=f"{text}",
-            x=x,
-            y=y,
-            width=100,
-            height=12,
-            fontSize=8,
-            borderWidth=0,
-            fillColor=colors.white,
-            textColor=None,
-            forceBorder=False,
-            fieldFlags=0,
-        )
+        c.setFont("Helvetica", fs)
+        c.setFillColor(text_color)
+        c.drawString(x, y, text or "")
 
         # page num
         x, y = page_num_pos
-        c.setFont("Helvetica", fs)
+        c.setFont("Helvetica", 10)
         c.setFillColor(colors.HexColor("#156082"))
         c.drawString(x, y, f"Page {p+1} of {pages}")
+
         c.showPage()
     c.save()
 
 
 def generate(
-    summary_pdf, results_pdf, annots_pdf, *, pii_name=None, pii_dob=None, report_id=None
+    summary_pdf, results_pdf, annots_pdf, *, pii_name=None, pii_dob=None, report_id=None, 
+    versions=None,
 ):
     # x, y, fs, text
-    footer_name_pos = (146, 48, 12, pii_name)
-    footer_dob_pos = (146, 36, 12, pii_dob)
+    footer_name_pos = (146, 50, 12, pii_name)
+    footer_dob_pos = (146, 38, 12, pii_dob)
     page_num_pos = (500, 70)
 
     output_pdf_path = "/tmp/annotations.pdf"
@@ -77,6 +63,18 @@ def generate(
 
     total_pages = len(pdf_int.pages) + len(pdf_results.pages) + len(pdf_summary.pages)
 
+
+    versions_pos = [
+        (180, 570, 11, versions["snp_eff_version"]),
+        (180, 555, 11, versions["snp_sift_version"]),
+        (180, 541, 11, versions["clinvar_version"]),
+        (180, 527, 11, versions["omim_version"]),
+        (470, 570, 11, versions["gnomad_version"]),
+        (470, 555, 11, versions["dbsnp_version"]),
+        (470, 541, 11, versions["sift_version"]),
+        (470, 527, 11, versions["polyphen2_version"]),
+    ]
+
     _create_annotations(
         output_pdf_path,
         total_pages,
@@ -84,17 +82,20 @@ def generate(
         footer_dob_pos,
         page_num_pos,
         report_id,
+        versions_pos
     )
 
     writer = PdfWriter()
     pages = []
 
+    # urutan pages
     pages.append(pdf_int.pages[0])
     pages += pdf_summary.pages
     pages.append(pdf_int.pages[1])
     pages += pdf_results.pages
     pages += pdf_int.pages[2:]
 
+    # merge annotations (footer & pagenum)
     footer_pagenum_annotations = PdfReader(output_pdf_path)
 
     for n, page in enumerate(pages):

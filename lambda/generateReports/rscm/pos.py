@@ -6,27 +6,38 @@ try:
     from .pos_stage_3 import generate as generate_pos_stage_3
 except:
     # local run
-    print("Running locally")
-    from pos_stage_1 import generate as generate_pos_stage_1
-    from pos_stage_2 import generate as generate_pos_stage_2
-    from pos_stage_3 import generate as generate_pos_stage_3
+    from .pos_stage_1 import generate as generate_pos_stage_1
+    from .pos_stage_2 import generate as generate_pos_stage_2
+    from .pos_stage_3 import generate as generate_pos_stage_3
 
 
-def generate(
+def generate_pos(
     *,
     pii_name=None,
     pii_dob=None,
     pii_gender=None,
+    pii_rekam_medis=None,
+    pii_clinical_diagnosis=None,
+    pii_symptoms=None,
+    pii_physician=None,
+    pii_genetic_counselor=None,
     variants=None,
     versions=None,
-    report_id=None
+    report_id=None,
 ):
     # Generate the first stage of the report
     summary_pdf, results_pdf = generate_pos_stage_1(variants=variants)
 
     # Generate the second stage of the report
     annots_pdf = generate_pos_stage_2(
-        pii_name=pii_name, pii_dob=pii_dob, pii_gender=pii_gender, versions=versions
+        pii_name=pii_name,
+        pii_dob=pii_dob,
+        pii_gender=pii_gender,
+        pii_rekam_medis=pii_rekam_medis,
+        pii_clinical_diagnosis=pii_clinical_diagnosis,
+        pii_symptoms=pii_symptoms,
+        pii_physician=pii_physician,
+        pii_genetic_counselor=pii_genetic_counselor
     )
 
     # Generate the third stage of the report
@@ -37,6 +48,7 @@ def generate(
         pii_name=pii_name,
         pii_dob=pii_dob,
         report_id=report_id,
+        versions=versions,
     )
 
     os.remove(summary_pdf)
@@ -50,10 +62,15 @@ if __name__ == "__main__":
     import uuid
 
     # Example usage - for testing includes made up data
-    generate(
+    generate_pos(
         pii_name="John Doe",
         pii_dob="01/01/1900",
         pii_gender="Female",
+        pii_rekam_medis="RM-12345",
+        pii_clinical_diagnosis="Familial Hypercholesterolemia (FH)",
+        pii_symptoms="Headache, fatigue",
+        pii_physician="dr. Dicky Tahapary, SpPD-KEMD., PhD",
+        pii_genetic_counselor="dr. Widya Eka Nugraha, M.Si. Med.",
         versions={
             "clinvar_version": "2025-0504",
             "ensembl_version": "114",

@@ -20,6 +20,11 @@ def lambda_handler(event, context):
         "pii_name": "",
         "pii_dob": "",
         "pii_gender": "Male",
+        "pii_rekam_medis":"",
+        "pii_clinical_diagnosis": "",
+        "pii_symptoms": "",
+        "pii_physician": "",
+        "pii_genetic_counselor": ""
     }
 
     versions = {**json.load(open("versions.json")), **event["versions"]}
@@ -27,8 +32,21 @@ def lambda_handler(event, context):
     project = event["project"]
     job_id = event["job_id"]
     pii = event["pii"]
-
     event["timestamp"] = str(datetime.now())
+    decrypted_pii = decrypt_pii_payload(pii)
+
+    data.update(
+        {
+            "pii_name": decrypted_pii.get("patient_name", ""),
+            "pii_dob": decrypted_pii.get("date_of_birth", ""),
+            "pii_gender": decrypted_pii.get("gender", ""),
+            "pii_rekam_medis": decrypted_pii.get("rekam_medis", ""),
+            "pii_clinical_diagnosis": decrypted_pii.get("clinical_diagnosis", ""),
+            "pii_symptoms": decrypted_pii.get("symptoms", ""),
+            "pii_physician": decrypted_pii.get("physician", ""),
+            "pii_genetic_counselor": decrypted_pii.get("genetic_counselor", ""),
+        }
+    )
 
     decrypted_pii = decrypt_pii_payload(pii)
 
@@ -37,11 +55,14 @@ def lambda_handler(event, context):
     # RSCM
     match event["lab"]:
         case "RSCM":
-            from rscm import generate_neg, generate_pos
 
-            if event["kind"] == "neg":
+            if event.get("kind") == "neg":
+                from rscm import generate_neg
+
                 res = generate_neg(**data, versions=versions, report_id=report_id)
-            elif event["kind"] == "pos":
+            elif event.get("kind") == "pos":
+                from rscm import generate_pos
+
                 assert len(event["variants"]) > 0, "Variants not provided"
                 variants = event.get("variants", [])
                 res = generate_pos(

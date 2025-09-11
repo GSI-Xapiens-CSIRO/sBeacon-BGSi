@@ -24,6 +24,10 @@ def generate_pos(
     variants=None,
     versions=None,
     report_id=None,
+    variant_validations=None,
+    project=None,
+    vcf=None,
+    user=None
 ):
     # Generate the first stage of the report
     summary_pdf, results_pdf = generate_pos_stage_1(variants=variants)
@@ -49,6 +53,10 @@ def generate_pos(
         pii_dob=pii_dob,
         report_id=report_id,
         versions=versions,
+        variant_validations=variant_validations,
+        project=project,
+        vcf=vcf,
+        user=user
     )
 
     os.remove(summary_pdf)
@@ -129,4 +137,56 @@ if __name__ == "__main__":
             },
         ],
         report_id=str(uuid.uuid4()),
+        variant_validations= [
+            {
+                'variant': {
+                    'Gene Name': 'TTN',
+                    'Variant Name': 'NM_001267550.2(TTN):c.65794G>A (p.Gly21932Arg)',
+                    'gt': '1/1',
+                    'clinSig': 'Uncertain significance',
+                    'conditions': 'Autosomal recessive limb-girdle muscular dystrophy type 2J, Dilated cardiomyopathy 1G',
+                    'Transcript ID & Version': 'ENST00000342175.12'
+                },
+                'validatedByMedicalDirector': True,
+                'validationComment': 'validate variant1',
+                'validatedAt': '2025-09-08 03:15:21.262885+00:00',
+                'validatorSub': 'd1a94d26-c011-700a-3926-787d72ed2c9c'
+            },
+            {
+                'variant': {
+                    'Variant Name': 'NM_001267550.2(TTN):c.65794G>A (p.Gly21932Arg)',
+                    'gt': '1/1',
+                    'clinSig': 'Uncertain significance',
+                    'conditions': 'Autosomal recessive limb-girdle muscular dystrophy type 2J, Dilated cardiomyopathy 1G',
+                    'SIFT (max)': '.',
+                    'Allele Frequency (Global)': '2.6304e-05',
+                    'Gene Name': 'TTN',
+                    'Transcript ID & Version': 'ENST00000342175.12',
+                    'Amino Acid Change': 'G/R'
+                },
+                'validatedByMedicalDirector': True,
+                'validationComment': 'reads',
+                'validatedAt': '2025-09-08 03:09:32.524298+00:00',
+                'validatorSub': 'd1a94d26-c011-700a-3926-787d72ed2c9c'
+            },
+            {
+                'variant': {
+                    'Variant Name': 'NM_001267550.2(TTN):c.65794G>A (p.Gly21932Arg)',
+                    'gt': '1/1',
+                    'clinSig': 'Conflicting classifications of pathogenicity',
+                    'conditions': 'not provided',
+                    'SIFT (max)': '.',
+                    'Allele Frequency (Global)': '2.6304e-05',
+                    'Gene Name': 'TTN',
+                    'Transcript ID & Version': 'ENST00000342992.11',
+                    'Amino Acid Change': 'G/R'
+                },
+                'validatedByMedicalDirector': True,
+                'validationComment': 'cccccas',
+                'validatedAt': '2025-09-08 03:09:37.596894+00:00',
+                'validatorSub': 'd1a94d26-c011-700a-3926-787d72ed2c9c'
+            }
+        ],
+        project="project1",
+        vcf="vcf1.vcf.gz"
     )

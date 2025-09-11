@@ -757,6 +757,7 @@ def generate_report(event, context):
         ProjectUsers.get(project, sub)
         # get project
         Projects.get(project)
+        user_data = get_user_from_attribute("sub", job.validatorSub)
         # get variants
         variants = [
             variant
@@ -776,6 +777,11 @@ def generate_report(event, context):
             for variant in json.loads(entry.variants)
             if entry.validatedByMedicalDirector
         ]
+        user = {
+            "firstName": get_user_attribute(user_data, "given_name"),
+            "lastName": get_user_attribute(user_data, "family_name"),
+            "email": get_user_attribute(user_data, "email"),
+        }
         if len(variants) == 0:
             if not job.validatedByMedicalDirector:
                 return {
@@ -822,6 +828,8 @@ def generate_report(event, context):
                     "validatorSub": job.validatorSub,
                     "versions": versions,
                     "pii": body["pii"],
+                    "non_pii": body["nonPii"],
+                    "user": user
                 }
             else:
                 payload = {
@@ -837,6 +845,8 @@ def generate_report(event, context):
                     "variantValidations": variantValidations,
                     "versions": versions,
                     "pii": body["pii"],
+                    "non_pii": body["nonPii"],
+                    "user":user
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {

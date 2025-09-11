@@ -1,7 +1,6 @@
 import os
 import uuid
 from pathlib import Path
-from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -9,14 +8,13 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
-def clear_area(c, x, y, width=200, height=15, color=colors.white):
+def clear_area(c, x, y, width=220, height=15, color=colors.white):
     c.setFillColor(color)
     c.rect(x, y, width, height, fill=1, stroke=0)
     c.setFillColor(colors.black)
 
 def _create_annotations(
     filename,
-    date_pos,
     name_pos,
     dob_pos,
     rekam_medis_pos,
@@ -27,57 +25,117 @@ def _create_annotations(
     genetic_counselor_pos
 ):
     c = canvas.Canvas(filename, pagesize=letter)
-
-    # Date (tetap ada label)
-    x, y, fs, text = date_pos
-    c.setFont("Helvetica-Bold", fs)
-    c.drawString(x, y, text or "")
+    form = c.acroForm
 
     # Clinical Diagnosis
     x, y, fs, text = clinical_diagnosis_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
     # Physician
     x, y, fs, text = physician_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
     # Genetic Counselor
     x, y, fs, text = genetic_counselor_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
-    # Name (hanya value)
+    # name
     x, y, fs, text = name_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="name",
+        tooltip="Name",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # DOB
+    #dob
     x, y, fs, text = dob_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="dob",
+        tooltip="Date of Birth",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Rekam Medis
+    # rekam medis
     x, y, fs, text = rekam_medis_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="rekam",
+        tooltip="Rekam Meidis",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Gender
+    # gender
     x, y, fs, text = gender_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.choice(
+        name="gender",
+        tooltip="Gender",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontName="Helvetica",
+        fontSize=fs,
+        options=["Male", "Female"],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Symptoms
+    # symptoms
     x, y, fs, text = symptoms_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="symptoms",
+        tooltip="Symptoms",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        fieldFlags=0,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+    )
 
     c.save()
 
@@ -114,19 +172,17 @@ def generate(
     input_pdf_path = f"{module_dir}/pos.pdf"
 
     # positions
-    date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
-    name_pos = (192, 568, 12, pii_name)
-    dob_pos = (192, 552, 12, pii_dob)
-    rekam_medis_pos = (192, 538, 12, pii_rekam_medis)
-    gender_pos = (192, 524, 12, pii_gender)
-    clinical_diagnosis_pos = (192, 510, 12, pii_clinical_diagnosis)
-    symptoms_pos = (192, 494, 12, pii_symptoms)
-    physician_pos = (192, 480, 12, pii_physician)
-    genetic_counselor_pos = (192, 464, 12, pii_genetic_counselor)
+    name_pos = (192, 568, 12, "")
+    dob_pos = (192, 552, 12, "")
+    rekam_medis_pos = (192, 538, 12, "")
+    gender_pos = (192, 524, 12, "Male")
+    clinical_diagnosis_pos = (192, 510, 12, "Familial Hypercholesterolemia (FH)")
+    symptoms_pos = (192, 494, 12, "")
+    physician_pos = (192, 480, 12, "dr. Dicky Tahapary, SpPD-KEMD., PhD")
+    genetic_counselor_pos = (192, 464, 12, "dr. Widya Eka Nugraha, M.Si. Med.")
 
     _create_annotations(
         output_pdf_path,
-        date_pos,
         name_pos,
         dob_pos,
         rekam_medis_pos,

@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -28,116 +28,222 @@ def _create_annotations(
     filename,
     versions,
     report_id,
+    validated_at,
+    validated_by,
+    project_value,
+    vcf_value,
+    validated_comment,
 ):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
     text_color = colors.HexColor("#156082")
 
-    # date
-    x, y, fs, text = date_pos
-    c.setFont("Helvetica-Bold", fs)
-    c.drawString(x, y, text)
-
+    print("validated_comment:", validated_comment)
     # Clinical Diagnosis
     x, y, fs, text = clinical_diagnosis_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
     # Physician
     x, y, fs, text = physician_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
     # Genetic Counselor
     x, y, fs, text = genetic_counselor_pos
-    clear_area(c, x, y - 2, width=250, height=16)
     c.setFont("Helvetica", fs)
     c.setFillColor(colors.black)
     c.drawString(x, y, text or "")
 
-    # Name (hanya value)
+    # name
     x, y, fs, text = name_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="name",
+        tooltip="Name",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # DOB
+    #dob
     x, y, fs, text = dob_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="dob",
+        tooltip="Date of Birth",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Rekam Medis
+    # rekam medis
     x, y, fs, text = rekam_medis_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="rekam",
+        tooltip="Rekam Meidis",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Gender
+    # gender
     x, y, fs, text = gender_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.choice(
+        name="gender",
+        tooltip="Gender",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontName="Helvetica",
+        fontSize=fs,
+        options=["Male", "Female"],
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=0,
+    )
 
-    # Symptoms
+    # symptoms
     x, y, fs, text = symptoms_pos
-    c.setFont("Helvetica", fs)
-    c.drawString(x, y, text or "")
+    form.textfield(
+        name="symptoms",
+        tooltip="Symptoms",
+        value=text,
+        x=x,
+        y=y,
+        width=220,
+        height=13,
+        fontSize=fs,
+        fieldFlags=0,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+    )
 
-    for n in range(3):
+    for n in range(4):
         x, y, fs, text = (5, 780, 12, report_id)
         c.setFont("Helvetica", fs)
         c.drawString(x, y, text)
+        
         # footer name
         x, y, fs, text = footer_name_pos
-        c.setFont("Helvetica", fs)
-        c.setFillColor(text_color)
-        c.drawString(x, y, text or "")
+        form.textfield(
+            name="name",
+            tooltip="Name",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=160,
+            height=11,
+            fontSize=fs,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=text_color,
+            forceBorder=False,
+            fieldFlags=0,
+        )
 
         # footer dob
         x, y, fs, text = footer_dob_pos
+        form.textfield(
+            name="dob",
+            tooltip="Date of Birth",
+            value=f"{text}",
+            x=x,
+            y=y,
+            width=160,
+            height=11,
+            fontSize=fs,
+            borderWidth=0,
+            fillColor=colors.white,
+            textColor=text_color,
+            forceBorder=False,
+            fieldFlags=0,
+        )
+
+        # footer date
+        x, y, fs, text = date_pos
         c.setFont("Helvetica", fs)
         c.setFillColor(text_color)
         c.drawString(x, y, text or "")
+        
         if n == 2:
             versions_pos = [
                 # left col
-                (180, 570 + 15, 11, versions["snp_eff_version"]),
-                (180, 556 + 15, 11, versions["snp_sift_version"]),
-                (180, 542 + 15, 11, versions["clinvar_version"]),
-                (180, 528 + 15, 11, versions["omim_version"]),
+                (180, 570 + 15, 11, versions["clinvar_version"]),
+                (180, 556 + 15, 11, versions["gnomad_version"]),
                 # right col
-                (450 - 20, 570 + 15, 11, versions["gnomad_version"]),
-                (450 - 20, 556 + 15, 11, versions["dbsnp_version"]),
-                (450 - 20, 542 + 15, 11, versions["sift_version"]),
-                (450 - 20, 528 + 15, 11, versions["polyphen2_version"]),
+                (450 - 20, 570 + 15, 11, versions["dbsnp_version"]),
+                (450 - 20, 556 + 15, 11, versions["sift_version"]),
             ]
             for pos in versions_pos:
                 x, y, fs, text = pos
                 c.setFont("Helvetica", fs)
                 c.setFillColor(colors.black)
                 c.drawString(x, y, text)
+            
+            x, y, fs, text = validated_at
+            c.setFont("Helvetica", fs)
+            c.setFillColor(colors.black)
+            c.drawString(x, y, text or "")
 
-            # Clinical Notes
-            c.setFont("Helvetica-Bold", 13)
-            c.setFillColor(colors.HexColor("#156082"))
-            c.drawString(70, 500, f"Clinical Notes")
-            x, y, fs, text = (70, 400, 12, "")
-            form.textfield(
-                name="clinical_notes",
-                tooltip="",
-                value=f"{text}",
-                x=x,
-                y=y,
-                width=463,
-                height=90,
-                fontSize=8,
-                borderWidth=0,
-                fillColor=colors.white,
-                textColor=None,
-                forceBorder=False,
-                fieldFlags=1<<12,
-            )
+            x, y, fs, text = validated_by
+            c.setFont("Helvetica", fs)
+            c.setFillColor(colors.black)
+            c.drawString(x, y, text or "")
+
+        if n == 3:
+            #project
+            x, y, fs, text = project_value
+            c.setFont("Helvetica", fs)
+            c.setFillColor(colors.black)
+            c.drawString(x, y, text or "")
+
+            #vcf
+            x, y, fs, text = vcf_value
+            c.setFont("Helvetica", fs)
+            c.setFillColor(colors.black)
+            c.drawString(x, y, text or "")
+
+            x, y, fs, text = validated_comment
+            c.setFont("Helvetica", fs)
+            c.setFillColor(colors.black)
+            c.drawString(x, y, text or "")
+
+        # page num
+        c.setFont("Helvetica", 10)
+        c.setFillColor(colors.HexColor("#156082"))
+        c.drawString(490, 68, f"Page {n+1} of 4")
+
         c.showPage()
 
     c.save()
@@ -177,23 +283,45 @@ def generate_neg(
     variants=None,
     versions=None,
     report_id=None,
+    project=None,   
+    vcf=None,
+    user=None,
+    validated_at=None,
+    validated_comment=None
 ):
     module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/neg.pdf"
 
     # x, y, h, text
-    date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
-    name_pos = (192, 568, 12, pii_name)
-    dob_pos = (192, 552, 12, pii_dob)
-    rekam_medis_pos = (192, 538, 12, pii_rekam_medis)
-    gender_pos = (192, 524, 12, pii_gender)
-    clinical_diagnosis_pos = (192, 510, 12, pii_clinical_diagnosis)
-    symptoms_pos = (192, 494, 12, pii_symptoms)
-    physician_pos = (192, 480, 12, pii_physician)
-    genetic_counselor_pos = (192, 464, 12, pii_genetic_counselor)
-    footer_name_pos = (146, 48, 12, pii_name)
-    footer_dob_pos = (146, 36, 12, pii_dob)
+    date_pos = (158, 47, 10, datetime.now().strftime('%Y-%m-%d'))
+    name_pos = (192, 566, 12, "")
+    dob_pos = (192, 552, 12, "")
+    rekam_medis_pos = (192, 538, 12, "")
+    gender_pos = (192, 524, 12, "Male")
+    clinical_diagnosis_pos = (192, 510, 12, "Familial Hypercholesterolemia (FH)")
+    symptoms_pos = (192, 494, 12, "")
+    physician_pos = (192, 480, 12, "dr. Dicky Tahapary, SpPD-KEMD., PhD")
+    genetic_counselor_pos = (192, 464, 12, "dr. Widya Eka Nugraha, M.Si. Med.")
+    
+    footer_name_pos = (148, 72, 10, "")
+    footer_dob_pos = (148, 58, 10, "")
+    footer_date_pos = (158, 47, 10, datetime.now().strftime('%Y-%m-%d'))
+    
+    project_value = (72, 505, 12, project or "")
+    vcf_value = (72, 550, 12, vcf or "")
+    validated_by = (205, 175, 11, f"{user.get('firstName', '')} {user.get('lastName', '')}".strip())
+
+    try:
+        dt = datetime.fromisoformat(validated_at)
+        dt_wib = dt + timedelta(hours=7)
+        validated_at_str = dt_wib.strftime("%Y-%m-%d %H:%M")
+    except Exception as e:
+        print("Parse error:", e)
+        validated_at_str = validated_at
+
+    validated_at = (205, 161, 11, validated_at_str)
+    validated_comment= (72, 442, 11, validated_comment or "")
 
     _create_annotations(
         date_pos,
@@ -210,6 +338,11 @@ def generate_neg(
         output_pdf_path,
         versions,
         report_id,
+        validated_at,
+        validated_by,
+        project_value,
+        vcf_value,
+        validated_comment,
     )
     output_file_name = f"/tmp/{str(uuid.uuid4())}.pdf"
     _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)

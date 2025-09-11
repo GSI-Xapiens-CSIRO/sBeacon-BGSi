@@ -24,29 +24,7 @@ sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
 
-EOT
-  )
-
-  on_start = base64encode(
-    <<EOT
-#!/bin/bash
-
-sudo unlink /home/ec2-user/sample-notebooks
-git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
-sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
-
-EOT
-  )
-}
-
-
-resource "aws_sagemaker_notebook_instance_lifecycle_configuration" "disable_download" {
-  name = "disable-download-config"
-
-  on_create = base64encode(<<-EOT
-    #!/bin/bash
-    # Tambahkan debugging
-    echo "Memulai konfigurasi lifecycle on_create..."
+echo "Memulai konfigurasi lifecycle on_create..."
 
     # Tunggu hingga conda tersedia (maksimal 5 menit)
     echo "Menunggu conda menjadi tersedia..."
@@ -105,13 +83,19 @@ END
     else
       echo "Conda tidak tersedia setelah 5 menit, melewatkan konfigurasi."
     fi
-    EOT
+
+EOT
   )
 
-  on_start = base64encode(<<-EOT
-    #!/bin/bash
-    # Tambahkan debugging
-    echo "Memulai konfigurasi lifecycle on_start..."
+  on_start = base64encode(
+    <<EOT
+#!/bin/bash
+
+sudo unlink /home/ec2-user/sample-notebooks
+git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
+sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
+
+echo "Memulai konfigurasi lifecycle on_start..."
 
     # Tunggu hingga conda tersedia (maksimal 5 menit)
     echo "Menunggu conda menjadi tersedia..."
@@ -170,6 +154,6 @@ END
     else
       echo "Conda tidak tersedia setelah 5 menit, melewatkan konfigurasi."
     fi
-    EOT
+EOT
   )
 }

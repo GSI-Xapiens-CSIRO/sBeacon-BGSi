@@ -24,6 +24,20 @@ sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
 
+source /etc/profile.d/conda.sh
+conda activate python3
+
+# Install JupyterLab extensions jika belum (SageMaker sudah punya, tapi pastikan)
+pip install jupyterlab
+
+# Disable download extensions
+jupyter labextension disable @jupyterlab/docmanager-extension:download
+jupyter labextension disable @jupyterlab/filebrowser-extension:download
+
+# Restart Jupyter server untuk apply changes
+sudo /home/ec2-user/anaconda3/envs/python3/bin/jupyter lab build
+sudo systemctl restart jupyter
+
 EOT
   )
 
@@ -34,6 +48,12 @@ EOT
 sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
+
+source /etc/profile.d/conda.sh
+conda activate python3
+jupyter labextension disable @jupyterlab/docmanager-extension:download
+jupyter labextension disable @jupyterlab/filebrowser-extension:download
+sudo systemctl restart jupyter
 
 EOT
   )

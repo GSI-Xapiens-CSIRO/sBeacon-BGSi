@@ -32,13 +32,14 @@ def lambda_handler(event, context):
     project = event["project"]
     vcf = event["vcf"]
     job_id = event["job_id"]
-    pii = event["pii"]
-    non_pii = event.get("non_pii", {})
+    # pii = event["pii"]
+    # non_pii = event.get("non_pii", {})
     event["timestamp"] = str(datetime.now())
-    decrypted_pii = decrypt_pii_payload(pii)
+    # decrypted_pii = decrypt_pii_payload(pii)
     user = event.get("user", {})
     validated_at = event.get("validatedAt", "")
     validated_comment = event.get("validationComment", "")
+    print(user)
 
     # notes_key = f"projects/{project}/qc-figures/{vcf}/notes.txt"
     # print("Notes Key: ", notes_key)
@@ -55,14 +56,14 @@ def lambda_handler(event, context):
 
     data.update(
         {
-            "pii_name": decrypted_pii.get("patient_name", ""),
-            "pii_dob": decrypted_pii.get("date_of_birth", ""),
-            "pii_gender": non_pii.get("gender", decrypted_pii.get("gender", "")),
-            "pii_rekam_medis": decrypted_pii.get("rekam_medis", ""),
-            "pii_clinical_diagnosis": non_pii.get("clinical_diagnosis", ""),
-            "pii_symptoms": non_pii.get("symptoms", ""),
-            "pii_physician": non_pii.get("physician", ""),
-            "pii_genetic_counselor": non_pii.get("genetic_counselor", ""),
+            "pii_name": "",
+            "pii_dob": "",
+            "pii_gender": "MALE",
+            "pii_rekam_medis": "",
+            "pii_clinical_diagnosis": "",
+            "pii_symptoms": "",
+            "pii_physician": "",
+            "pii_genetic_counselor": "",
         }
     )
 

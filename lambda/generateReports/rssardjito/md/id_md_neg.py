@@ -171,7 +171,17 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 
 def generate(
-    *, pii_name=None, pii_dob=None, pii_gender=None, versions=None, report_id=None
+    *,
+    pii_name=None,
+    pii_dob=None,
+    pii_gender=None,
+    pii_rekam_medis=None,
+    pii_clinical_diagnosis=None,
+    pii_symptoms=None,
+    pii_physician=None,
+    pii_genetic_counselor=None, 
+    versions=None, 
+    report_id=None
 ):
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"

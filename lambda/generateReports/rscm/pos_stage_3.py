@@ -137,11 +137,6 @@ def generate(
     validated_by, validated_at = None, None
     result_annotation = []
 
-
-    #validated_by
-    full_name = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
-    validated_by = (205, 150, 11, full_name)
-
     if variant_validations:
 
         result_annotation = [
@@ -154,6 +149,11 @@ def generate(
             variant_validations,
             key=lambda v: v.get("validatedAt", "")
         )
+
+        #validated_by
+        user = latest_validation.get("user", {})
+        full_name = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
+        validated_by = (205, 150, 11, full_name)
         
         #validated_at
         raw_validated_at = latest_validation.get("validatedAt")

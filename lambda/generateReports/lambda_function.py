@@ -39,7 +39,6 @@ def lambda_handler(event, context):
     user = event.get("user", {})
     validated_at = event.get("validatedAt", "")
     validated_comment = event.get("validationComment", "")
-    print(user)
 
     # notes_key = f"projects/{project}/qc-figures/{vcf}/notes.txt"
     # print("Notes Key: ", notes_key)
@@ -115,8 +114,15 @@ def lambda_handler(event, context):
                 event["kind"], event["mode"], event["lang"]
             )
             if event["kind"] == "pos":
+                variant_validations = event.get("variantValidations", {})
                 res = generator(
-                    **data, variants=variants, versions=versions, report_id=report_id
+                    **data,
+                    variants=variants,
+                    versions=versions,
+                    report_id=report_id,
+                    project=project,
+                    vcf=vcf,
+                    variant_validations=variant_validations,
                 )
             else:
                 res = generator(**data, versions=versions, report_id=report_id)

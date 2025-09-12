@@ -771,6 +771,15 @@ def generate_report(event, context):
                 "validationComment": entry.validationComment,
                 "validatedAt": str(entry.validatedAt),
                 "validatorSub": entry.validatorSub,
+                "user": (
+                    {
+                        "firstName": get_user_attribute(user, "given_name"),
+                        "lastName": get_user_attribute(user, "family_name"),
+                        "email": get_user_attribute(user, "email"),
+                    }
+                    if (user := get_user_from_attribute("sub", entry.validatorSub))
+                    else None
+                ),
             }
             for entry in ClinicalVariants.query(f"{project}:{job_id}")
             for variant in json.loads(entry.variants)

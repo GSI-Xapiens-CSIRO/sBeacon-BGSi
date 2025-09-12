@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Tuple
 from copy import deepcopy
@@ -49,21 +49,20 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender, report_
     ]
 
     c.setFont("Helvetica", 12)
-    c.drawString(72, 551, f"Kondisi Klinis:")
     form.textfield(
         name=f"clinical-info",
         tooltip="",
         value=f"",
-        x=188,
+        x=150,
         y=540,
-        width=372,
+        width=400,
         height=35,
         fontSize=12 - 2,
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
-        forceBorder=False,
         borderColor=None,
+        forceBorder=False,
         fieldFlags=1 << 12,
     )
 
@@ -86,13 +85,13 @@ def _write_header_footer(filename, pages, pii_name, pii_dob, pii_gender, report_
                 borderWidth=0,
                 fillColor=colors.white,
                 textColor=None,
-                forceBorder=False,
                 borderColor=None,
+                forceBorder=False,
                 fieldFlags=flags,
             )
-        c.setFont("Helvetica", fs)
+        c.setFont("Helvetica", 9)
         c.setFillColor(colors.HexColor("#808080"))
-        c.drawString(290, 30, f"Halaman {page+1} dari {pages}")
+        c.drawString(270, 40, f"Halaman {page+1} dari {pages}")
         c.showPage()
     c.save()
 
@@ -185,17 +184,10 @@ def _create_pdf_with_table(
     # Style the table
     style = TableStyle(
         [
-            ("SPAN", (0, 0), (0, 1)),  # Col 1 header spans 2 rows
-            ("SPAN", (1, 0), (1, 1)),  # Col 2 header spans 2 rows
-            ("SPAN", (2, 0), (2, 1)),  # Col 3 header spans 2 rows
-            ("SPAN", (3, 0), (3, 1)),  # Col 4 header spans 2 rows
-            ("SPAN", (4, 0), (4, 1)),  # Col 5 header spans 2 rows
-            ("SPAN", (5, 0), (6, 0)),  # Col 6 header spans 1 row
-            ("SPAN", (7, 0), (7, 1)),  # Col 7 header spans 2 rows
-            ("BACKGROUND", (0, 0), (-1, 2), colors.HexColor("#EDF180")),
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EDF180")),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
             ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),  # Vertical alignment
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
             ("TOPPADDING", (0, 0), (-1, -1), 8),
@@ -243,43 +235,53 @@ def _overlay_template_with_table(src, dest, output):
 def _create_annotations(
     filename,
     versions,
+    project,
+    vcf,
+    validated_by,
+    validated_at,
+    qc_note,
+    result_annotation
 ):
     _text_field_positions_page_1 = [
-        # Results Interpretation
-        (69, 328, 472, 155, 12, "", 1 << 12),
-        # Conclusion
-        (69, 190, 472, 61, 12, "", 1 << 12),
         # Recommendation
-        (69, 50, 472, 120, 12, "", 1 << 12),
+        (69, 140, 472, 120, 12, "", 1 << 12),
     ]
     _text_field_positions_page_2 = [
-        # additional information
-        (69, 337, 472, 207, 12, "", 1 << 12),
         # validated by
-        (420, 207, 118, 82, 12, "", 0),
+        (420, 226, 118, 82, 12, "", 0),
     ]
     _text_field_positions_page_3 = []
     _text_field_positions_page_4 = [
         # References
         (91, 63, 445, 290, 12, "", 1 << 12),
     ]
+    _text_field_positions_page_5 = [
+    ]
+
     # static text
-    _static_text_page_1 = []
-    _static_text_page_2 = []
+    _static_text_page_1 = [
+        (x, y, fs,align_right, text)
+        for x, y, fs, align_right, text in result_annotation
+    ]
+    _static_text_page_2 = [
+        (74, 486, 11, False, qc_note),
+        (538, 208, 11, True, validated_by),
+        (538, 176, 11, True,  validated_at),
+    ]
     _static_text_page_3 = []
     _static_text_page_4 = [
-        # OMIM
-        (170, 479 - 53, 11, versions["omim_version"]),
         # ClinVar
-        (170, 467 - 53, 11, versions["clinvar_version"]),
+        (170, 479 - 53, 11, False, versions["clinvar_version"]),
         # gnomAD
-        (170, 455 - 53, 11, versions["gnomad_version"]),
+        (170, 467 - 53, 11, False, versions["gnomad_version"]),
         # dbSNP
-        (170, 443 - 53, 11, versions["dbsnp_version"]),
+        (170, 455 - 53, 11, False, versions["dbsnp_version"]),
         # SIFT
-        (170, 431 - 53, 11, versions["sift_version"]),
-        # PolyPhen2
-        (170, 419 - 53, 11, versions["polyphen2_version"]),
+        (170, 443 - 53, 11, False, versions["sift_version"]),
+    ]
+    _static_text_page_5 = [
+        (170, 538, 11, False, vcf),
+        (170, 526, 11, False, project),
     ]
 
     c = canvas.Canvas(filename, pagesize=letter)
@@ -291,6 +293,7 @@ def _create_annotations(
         (_text_field_positions_page_2, _static_text_page_2),
         (_text_field_positions_page_3, _static_text_page_3),
         (_text_field_positions_page_4, _static_text_page_4),
+        (_text_field_positions_page_5, _static_text_page_5),
     ]:
         for n, pos in enumerate(page_poses_tf):
             x, y, w, h, fs, text, flags = pos
@@ -313,9 +316,14 @@ def _create_annotations(
             )
             unique_counter += 1
         for n, pos in enumerate(page_poses_st):
-            x, y, fs, text = pos
+            x, y, fs, align_right, text = pos
             c.setFont("Helvetica", fs)
-            c.drawString(x, y, text)
+            if align_right:
+                text_width = c.stringWidth(text, "Helvetica", fs)
+                c.drawString(x - text_width, y, text)
+            else:
+                c.drawString(x, y, text)
+
         c.showPage()
 
     c.save()
@@ -355,6 +363,10 @@ def generate(
     variants=None,
     versions=None,
     report_id=None,
+    project=None,
+    vcf=None,
+    variant_validations=None,
+    qc_note=None
 ):
     header_rows = [
         [
@@ -363,12 +375,11 @@ def generate(
             "AF",
             "Zigositas",
             "Pewarisan/ Fenotipe Terkait",
-            "Prediksi Komputasi",
-            "",
+            "Prediksi Komputasi(SIFT)",
             "Klasifikasi Varian",
         ],
-        ["", "", "", "", "" "", "SIFT", "PP2"],
     ]
+
     data = []
     for variant in variants:
         variant_protein_change = variant["Variant Name"]
@@ -389,26 +400,59 @@ def generate(
                 variant["Allele Frequency (Global)"],
                 genotype,
                 "-/ " + variant["conditions"],
-                variant["SIFT (max)"],
-                "NA",
+                variant["SIFT (max)"],  # langsung masuk ke kolom Computational Prediction (SIFT)
                 variant["clinSig"],
             ]
         )
+    
+    validated_by, validated_at = None, None
+    result_annotation = []
+
+    if variant_validations:
+
+        result_annotation = [
+            (74, (472 - i*13), 11, False, v.get("validationComment", ""))
+            for i, v in enumerate(variant_validations)
+        ]
+
+        latest_validation = max(
+            variant_validations,
+            key=lambda v: v.get("validatedAt", "")
+        )
+
+        #validated_by
+        user = latest_validation.get("user", {})
+        full_name = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
+        validated_by = full_name
+        
+        #validated_at
+        raw_validated_at = latest_validation.get("validatedAt")
+        validated_at_str = ""
+        if raw_validated_at:
+            try:
+                dt = datetime.fromisoformat(raw_validated_at)
+                dt_local = dt + timedelta(hours=7)
+                validated_at_str = dt_local.strftime("%Y-%m-%d %H:%M")
+            except Exception as e:
+                validated_at_str = str(raw_validated_at)
+
+        validated_at = validated_at_str
+    
     module_dir = Path(__file__).parent
     output_pdf_annotations = "/tmp/annotations.pdf"
-    input_pdf_path = f"{module_dir}/ID_Genome Report_Positive_CRD-TABLE.pdf"
+    input_pdf_path = f"{module_dir}/ID_Genome Report_Positive_CRD_TABLE.pdf"
 
     _create_pdf_with_table(
-        output_pdf_annotations, header_rows, [80, 68, 60, 55, 93, 37, 37, 73], data
+        output_pdf_annotations, header_rows, [80, 68, 60, 55, 93, 60, 83], data
     )
     _overlay_template_with_table(
         output_pdf_annotations, input_pdf_path, "/tmp/overlayed-table.pdf"
     )
 
-    _create_annotations(output_pdf_annotations, versions)
+    _create_annotations(output_pdf_annotations, versions, project, vcf, validated_by, validated_at, qc_note, result_annotation)
     _overlay_pdf_with_annotations(
         output_pdf_annotations,
-        f"{module_dir}/ID_Genome Report_Positive_CRD-REST.pdf",
+        f"{module_dir}/ID_Genome Report_Positive_CRD_REST.pdf",
         "/tmp/overlayed-annot.pdf",
     )
 

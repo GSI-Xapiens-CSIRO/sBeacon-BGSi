@@ -797,7 +797,7 @@ data "aws_iam_policy_document" "lambda-generateReports" {
       "s3:GetObject",
     ]
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/clinical-workflows/*/reports/*",
+      "${aws_s3_bucket.data_portal_bucket_arn}/*",
     ]
   }
 }

@@ -8,8 +8,6 @@ from utils.models import JupyterInstances, InstanceStatus
 
 sagemaker_client = boto3.client("sagemaker")
 router = LambdaRouter()
-SUBNET_ID = os.getenv("SUBNET_ID")
-SECURITY_GROUP_ID = os.getenv("SECURITY_GROUP_ID")
 
 
 @router.attach("/dportal/notebooks", "post")
@@ -22,13 +20,6 @@ def create_notebook(event, context):
     instance_type = body_dict.get("instanceType")
     # TODO check if this can be done better
     identity_id = body_dict.get("identityId")
-
-    # Validate required network configuration
-    if not SUBNET_ID or not SECURITY_GROUP_ID:
-        raise PortalError(
-            error_code=500,
-            error_message="Unable to create notebook instance due to missing network configuration. Please contact your administrator for assistance.",
-        )
 
     if JupyterInstances.count(sub, JupyterInstances.instanceName == notebook_name) > 0:
         raise PortalError(
@@ -44,9 +35,7 @@ def create_notebook(event, context):
         DirectInternetAccess="Enabled",
         RootAccess="Disabled",
         Tags=[{"Key": "IdentityId", "Value": identity_id}],
-        LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME"),
-        SubnetId=SUBNET_ID,
-        SecurityGroupIds=[SECURITY_GROUP_ID],
+        LifecycleConfigName=os.getenv("JUPYTER_LIFECYCLE_CONFIG_NAME")
     )
     entry = JupyterInstances(sub, notebook_name)
     entry.save()

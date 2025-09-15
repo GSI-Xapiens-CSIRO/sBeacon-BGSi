@@ -47,6 +47,12 @@ if command -v conda >/dev/null 2>&1; then
   source /home/ec2-user/anaconda3/etc/profile.d/conda.sh
   conda activate python3
 
+  # Disable JupyterLab download and export extensions
+  echo "Disabling JupyterLab download and export extensions..."
+  jupyter labextension disable @jupyterlab/docmanager-extension:download
+  jupyter labextension disable @jupyterlab/filebrowser-extension:download
+  jupyter labextension disable @jupyterlab/docmanager-extension:export
+
   # Create handlers.py to block file downloads
   echo "Creating handlers.py to disable downloads..."
   mkdir -p /home/ec2-user/.jupyter
@@ -122,6 +128,12 @@ if command -v conda >/dev/null 2>&1; then
   echo "Activating conda environment..."
   source /home/ec2-user/anaconda3/etc/profile.d/conda.sh
   conda activate python3
+
+  # Disable JupyterLab download and export extensions
+  echo "Disabling JupyterLab download and export extensions..."
+  jupyter labextension disable @jupyterlab/docmanager-extension:download
+  jupyter labextension disable @jupyterlab/filebrowser-extension:download
+  jupyter labextension disable @jupyterlab/docmanager-extension:export
 
   # Create handlers.py to block file downloads
   echo "Creating handlers.py to disable downloads..."

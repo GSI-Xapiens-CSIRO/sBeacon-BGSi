@@ -222,7 +222,7 @@ def generate(*, variants=None):
         "Gene/Variant",
         "Genotype",
         "Assesment",
-        # "Mode of Inheritance",
+        "Mode of Inheritance",
         "Phenotype",
     ]
 
@@ -239,14 +239,9 @@ def generate(*, variants=None):
         else:
             genotype = "Heterozygous"
         assessment = variant["clinSig"]
-        # mode_of_inheritance = "-"  # below to be fetched from OMIM
+        mode_of_inheritance = "-"  # below to be fetched from OMIM
         phenotype = variant["conditions"]
-        row = [
-            gene_variant, 
-            genotype, 
-            assessment, 
-            # mode_of_inheritance, 
-            phenotype]
+        row = [gene_variant, genotype, assessment, mode_of_inheritance, phenotype]
         rows.append(row)
 
     _create_pdf_with_table_vs(output_pdf_annotations, headers, rows)

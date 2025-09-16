@@ -18,79 +18,26 @@ def lambda_handler(event, context):
         "pii_name": "",
         "pii_dob": "",
         "pii_gender": "Male",
-        "pii_rekam_medis": "",
-        "pii_clinical_diagnosis": "",
-        "pii_symptoms": "",
-        "pii_physician": "",
-        "pii_genetic_counselor": ""
     }
 
     versions = {**json.load(open("versions.json")), **event["versions"]}
     report_id = event["report_id"]
     project = event["project"]
-    vcf = event["vcf"]
     job_id = event["job_id"]
     event["timestamp"] = str(datetime.now())
-    user = event.get("user", {})
-    validated_at = event.get("validatedAt", "")
-    validated_comment = event.get("validationComment", "")
-
-    notes_key = f"projects/{project}/qc-figures/{vcf}/notes.txt"
-    try:
-        notes_obj = s3_client.get_object(Bucket=DPORTAL_BUCKET, Key=notes_key)
-        notes_content = notes_obj["Body"].read().decode("utf-8")
-    except Exception:
-        notes_content = ""
-
-    print("Event: ", notes_content)
-
-    data.update(
-        {
-            "pii_name": "",
-            "pii_dob": "",
-            "pii_gender": "MALE",
-            "pii_rekam_medis": "",
-            "pii_clinical_diagnosis": "",
-            "pii_symptoms": "",
-            "pii_physician": "",
-            "pii_genetic_counselor": "",
-        }
-    )
 
     # RSCM
     match event["lab"]:
         case "RSCM":
+            from rscm import generate_neg, generate_pos
 
-            if event.get("kind") == "neg":
-                from rscm import generate_neg
-
-                res = generate_neg(
-                    **data,
-                    versions=versions,
-                    report_id=report_id,
-                    project=project,
-                    vcf=vcf,
-                    user=user,
-                    validated_at=validated_at,
-                    validated_comment= validated_comment,
-                    qc_note = notes_content
-                )
-            elif event.get("kind") == "pos":
-                from rscm import generate_pos
-
+            if event["kind"] == "neg":
+                res = generate_neg(**data, versions=versions, report_id=report_id)
+            elif event["kind"] == "pos":
                 assert len(event["variants"]) > 0, "Variants not provided"
                 variants = event.get("variants", [])
-                variant_validations = event.get("variantValidations", {})
                 res = generate_pos(
-                    **data,
-                    variants=variants,
-                    versions=versions,
-                    report_id=report_id,
-                    variant_validations=variant_validations,
-                    project=project,
-                    vcf=vcf,
-                    user=user,
-                    qc_note = notes_content
+                    **data, variants=variants, versions=versions, report_id=report_id
                 )
         case "RSIGNG":
             from igng import generate
@@ -107,29 +54,11 @@ def lambda_handler(event, context):
                 event["kind"], event["mode"], event["lang"]
             )
             if event["kind"] == "pos":
-                variant_validations = event.get("variantValidations", {})
                 res = generator(
-                    **data,
-                    variants=variants,
-                    versions=versions,
-                    report_id=report_id,
-                    project=project,
-                    vcf=vcf,
-                    variant_validations=variant_validations,
-                    qc_note = notes_content
+                    **data, variants=variants, versions=versions, report_id=report_id
                 )
             else:
-                res = generator(
-                    **data,
-                    versions=versions,
-                    report_id=report_id,
-                    project=project,
-                    vcf=vcf,
-                    user=user,
-                    validated_at=validated_at,
-                    validated_comment= validated_comment,
-                    qc_note = notes_content
-                )
+                res = generator(**data, versions=versions, report_id=report_id)
         case "RSPON":
             from rspon import generate
 

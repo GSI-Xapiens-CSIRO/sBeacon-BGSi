@@ -749,19 +749,6 @@ def generate_report(event, context):
     job_id = event["pathParameters"]["job_id"]
     body = json.loads(event["body"])
 
-    def safe_get_user(sub_id):
-        try:
-            user_data = get_user_from_attribute("sub", sub_id)
-            if not user_data:
-                return {"firstName": "", "lastName": "", "email": ""}
-            return {
-                "firstName": get_user_attribute(user_data, "given_name") or "",
-                "lastName": get_user_attribute(user_data, "family_name") or "",
-                "email": get_user_attribute(user_data, "email") or "",
-            }
-        except Exception as e:
-            return {"firstName": "", "lastName": "", "email": ""}
-
     try:
         # get job
         job = ClinicJobs.get(job_id)
@@ -783,15 +770,11 @@ def generate_report(event, context):
                 "validationComment": entry.validationComment,
                 "validatedAt": str(entry.validatedAt),
                 "validatorSub": entry.validatorSub,
-                "user": safe_get_user(entry.validatorSub),
             }
             for entry in ClinicalVariants.query(f"{project}:{job_id}")
             for variant in json.loads(entry.variants)
             if entry.validatedByMedicalDirector
         ]
-
-        user = safe_get_user(job.validatorSub) if job.validatedByMedicalDirector else safe_get_user(job.uid)
-
         if len(variants) == 0:
             if not job.validatedByMedicalDirector:
                 return {
@@ -837,7 +820,6 @@ def generate_report(event, context):
                     "validatedAt": str(job.validatedAt),
                     "validatorSub": job.validatorSub,
                     "versions": versions,
-                    "user": user
                 }
             else:
                 payload = {
@@ -852,7 +834,6 @@ def generate_report(event, context):
                     "variants": variants,
                     "variantValidations": variantValidations,
                     "versions": versions,
-                    "user":user
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {
@@ -1010,7 +991,6 @@ def generate_report(event, context):
                     "validatedAt": str(job.validatedAt),
                     "validatorSub": job.validatorSub,
                     "versions": versions,
-                    "user": user
                 }
             else:
                 payload = {
@@ -1027,7 +1007,6 @@ def generate_report(event, context):
                     "variants": variants,
                     "variantValidations": variantValidations,
                     "versions": versions,
-                    "user": user
                 }
             response = invoke_lambda_function(REPORTS_LAMBDA, payload)
             return {

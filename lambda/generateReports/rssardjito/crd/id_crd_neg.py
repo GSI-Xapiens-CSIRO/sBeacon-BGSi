@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
@@ -67,55 +67,43 @@ def _create_annotations(
     versions,
     report_id,
     filename,
-    project,
-    vcf,
-    user,
-    validated_by,
-    validated_at,
-    validated_comment,
-    qc_note
 ):
     _text_field_positions_page_1 = [
         # Clinical Information
-        (150, 540, 375, 35, 12, "", 1 << 12),
+        (186, 526, 375, 35, 12, "", 1 << 12),
+        # Results interpretation
+        (70, 152, 490, 170, 12, "", 1 << 12),
     ]
     _text_field_positions_page_2 = [
         # recommendation
-        (70, 450, 490, 85, 12, "", 1 << 12),
+        (70, 460, 490, 85, 12, "", 1 << 12),
+        # additional information
+        (70, 221, 490, 216, 12, "", 1 << 12),
         # validated by
-        (442, 112, 110, 76, 12, "", 0),
+        (442, 120, 118, 82, 12, "", 0),
     ]
     _text_field_positions_page_3 = []
     _text_field_positions_page_4 = [
         # References
         (91, 63, 445, 300, 12, "", 1 << 12),
     ]
-    _text_field_positions_page_5 = [
-    ]
-
     # static text
-    _static_text_page_1 = [
-        (74, 320, 11, False, validated_comment)
-    ]
-    _static_text_page_2 = [
-        (74, 378, 11, False, qc_note),
-        (538, 102, 11, True, validated_by),
-        (538, 74, 11, True,  validated_at),
-    ]
+    _static_text_page_1 = []
+    _static_text_page_2 = []
     _static_text_page_3 = []
     _static_text_page_4 = [
+        # OMIM
+        (170, 479 - 52, 11, versions["omim_version"]),
         # ClinVar
-        (170, 426, 11, False, versions["clinvar_version"]),
+        (170, 467 - 52, 11, versions["clinvar_version"]),
         # gnomAD
-        (170, 414, 11, False, versions["gnomad_version"]),
+        (170, 455 - 52, 11, versions["gnomad_version"]),
         # dbSNP
-        (170, 402, 11, False, versions["dbsnp_version"]),
+        (170, 443 - 52, 11, versions["dbsnp_version"]),
         # SIFT
-        (170, 390, 11, False, versions["sift_version"]),
-    ]
-    _static_text_page_5 = [
-        (170, 538, 11, False, vcf),
-        (170, 526, 11, False, project),
+        (170, 431 - 52, 11, versions["sift_version"]),
+        # PolyPhen2
+        (170, 419 - 52, 11, versions["polyphen2_version"]),
     ]
 
     c = canvas.Canvas(filename, pagesize=letter)
@@ -127,7 +115,6 @@ def _create_annotations(
         (_text_field_positions_page_2, _static_text_page_2),
         (_text_field_positions_page_3, _static_text_page_3),
         (_text_field_positions_page_4, _static_text_page_4),
-        (_text_field_positions_page_5, _static_text_page_5),
     ]:
         x, y, fs, text = (5, 780, 12, report_id)
         c.setFont("Helvetica", fs)
@@ -145,23 +132,17 @@ def _create_annotations(
                 height=h,
                 fontSize=fs - 2,
                 borderWidth=0,
-                borderColor=None,
                 fillColor=colors.white,
                 textColor=None,
                 forceBorder=False,
+                borderColor=None,
                 fieldFlags=flags,
             )
             unique_counter += 1
         for n, pos in enumerate(page_poses_st):
-            x, y, fs, align_right, text = pos
+            x, y, fs, text = pos
             c.setFont("Helvetica", fs)
-            if align_right:
-                text_width = c.stringWidth(text, "Helvetica", fs)
-                c.drawString(x - text_width, y, text)
-            else:
-                if text is not None:
-                    c.drawString(x, y, str(text))
-
+            c.drawString(x, y, text)
         _write_header(c, form, pii_name, pii_dob, pii_gender)
         c.showPage()
 
@@ -190,54 +171,12 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
 
 def generate(
-    *, 
-    pii_name=None,
-    pii_dob=None,
-    pii_gender=None,
-    pii_rekam_medis=None,
-    pii_clinical_diagnosis=None,
-    pii_symptoms=None,
-    pii_physician=None,
-    pii_genetic_counselor=None, 
-    versions=None, 
-    report_id=None,
-    project=None,
-    vcf=None,
-    user=None,
-    validated_at=None,
-    validated_comment=None,
-    qc_note=None
+    *, pii_name=None, pii_dob=None, pii_gender=None, versions=None, report_id=None
 ):
-    
-    validated_by = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
-
-    try:
-        dt = datetime.fromisoformat(validated_at)
-        dt_wib = dt + timedelta(hours=7)
-        validated_at_str = dt_wib.strftime("%Y-%m-%d %H:%M")
-    except Exception as e:
-        print("Parse error:", e)
-        validated_at_str = validated_at
-
-    validated_at = validated_at_str
-    validated_comment= validated_comment
-
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
     _create_annotations(
-        pii_name,
-        pii_dob,
-        pii_gender,
-        versions,
-        report_id,
-        "/tmp/annotations.pdf",
-        project,
-        vcf,
-        user,
-        validated_by,
-        validated_at,
-        validated_comment,
-        qc_note
+        pii_name, pii_dob, pii_gender, versions, report_id, "/tmp/annotations.pdf"
     )
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",

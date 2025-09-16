@@ -48,10 +48,16 @@ if command -v conda >/dev/null 2>&1; then
   conda activate python3
 
   # Disable JupyterLab download and export extensions
-  echo "Disabling JupyterLab download and export extensions..."
-  jupyter labextension disable @jupyterlab/docmanager-extension:download
-  jupyter labextension disable @jupyterlab/filebrowser-extension:download
-  jupyter labextension disable @jupyterlab/docmanager-extension:export
+  JUPYTER_BIN="/home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/jupyter"
+
+  if [ -f "$JUPYTER_BIN" ] && $JUPYTER_BIN labextension --help >/dev/null 2>&1; then
+    echo "Using JupyterSystemEnv jupyter binary"
+    $JUPYTER_BIN labextension disable @jupyterlab/docmanager-extension:download
+    $JUPYTER_BIN labextension disable @jupyterlab/filebrowser-extension:download  
+    $JUPYTER_BIN labextension disable @jupyterlab/docmanager-extension:export
+  else
+    echo "JupyterSystemEnv jupyter does not support labextension, trying fallback"
+  fi
 
   # Create handlers.py to block file downloads
   echo "Creating handlers.py to disable downloads..."
@@ -130,10 +136,16 @@ if command -v conda >/dev/null 2>&1; then
   conda activate python3
 
   # Disable JupyterLab download and export extensions
-  echo "Disabling JupyterLab download and export extensions..."
-  jupyter labextension disable @jupyterlab/docmanager-extension:download
-  jupyter labextension disable @jupyterlab/filebrowser-extension:download
-  jupyter labextension disable @jupyterlab/docmanager-extension:export
+  JUPYTER_BIN="/home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/jupyter"
+
+  if [ -f "$JUPYTER_BIN" ] && $JUPYTER_BIN labextension --help >/dev/null 2>&1; then
+    echo "Using JupyterSystemEnv jupyter binary"
+    $JUPYTER_BIN labextension disable @jupyterlab/docmanager-extension:download
+    $JUPYTER_BIN labextension disable @jupyterlab/filebrowser-extension:download  
+    $JUPYTER_BIN labextension disable @jupyterlab/docmanager-extension:export
+  else
+    echo "JupyterSystemEnv jupyter does not support labextension, trying fallback"
+  fi
 
   # Create handlers.py to block file downloads
   echo "Creating handlers.py to disable downloads..."

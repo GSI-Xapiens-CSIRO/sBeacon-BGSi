@@ -1,7 +1,6 @@
 import os
 import uuid
 from pathlib import Path
-from datetime import datetime
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -9,23 +8,42 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 
 
+def clear_area(c, x, y, width=220, height=15, color=colors.white):
+    c.setFillColor(color)
+    c.rect(x, y, width, height, fill=1, stroke=0)
+    c.setFillColor(colors.black)
+
 def _create_annotations(
     filename,
-    date_pos,
     name_pos,
     dob_pos,
     rekam_medis_pos,
     gender_pos,
     symptoms_pos,
-    versions_pos,
+    clinical_diagnosis_pos,
+    physician_pos,
+    genetic_counselor_pos
 ):
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
 
-    # date
-    x, y, fs, text = date_pos
-    c.setFont("Helvetica-Bold", fs)
-    c.drawString(x, y, text)
+    # Clinical Diagnosis
+    x, y, fs, text = clinical_diagnosis_pos
+    c.setFont("Helvetica", fs)
+    c.setFillColor(colors.black)
+    c.drawString(x, y, text or "")
+
+    # Physician
+    x, y, fs, text = physician_pos
+    c.setFont("Helvetica", fs)
+    c.setFillColor(colors.black)
+    c.drawString(x, y, text or "")
+
+    # Genetic Counselor
+    x, y, fs, text = genetic_counselor_pos
+    c.setFont("Helvetica", fs)
+    c.setFillColor(colors.black)
+    c.drawString(x, y, text or "")
 
     # name
     x, y, fs, text = name_pos
@@ -35,9 +53,9 @@ def _create_annotations(
         value=f"{text}",
         x=x,
         y=y,
-        width=200,
-        height=fs,
-        fontSize=8,
+        width=220,
+        height=13,
+        fontSize=fs,
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
@@ -45,7 +63,7 @@ def _create_annotations(
         fieldFlags=0,
     )
 
-    # dob
+    #dob
     x, y, fs, text = dob_pos
     form.textfield(
         name="dob",
@@ -53,9 +71,9 @@ def _create_annotations(
         value=f"{text}",
         x=x,
         y=y,
-        width=100,
-        height=12,
-        fontSize=8,
+        width=220,
+        height=13,
+        fontSize=fs,
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
@@ -71,9 +89,9 @@ def _create_annotations(
         value=text,
         x=x,
         y=y,
-        width=200,
-        height=fs,
-        fontSize=8,
+        width=220,
+        height=13,
+        fontSize=fs,
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
@@ -89,15 +107,16 @@ def _create_annotations(
         value=text,
         x=x,
         y=y,
-        width=100,
+        width=220,
         height=13,
         fontName="Helvetica",
-        fontSize=8,
-        options=[("Male", "male"), ("Female", "female")],
+        fontSize=fs,
+        options=["Male", "Female"],
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
         forceBorder=False,
+        fieldFlags=0,
     )
 
     # symptoms
@@ -108,57 +127,24 @@ def _create_annotations(
         value=text,
         x=x,
         y=y,
-        width=200,
-        height=fs,
-        fontSize=8,
+        width=220,
+        height=13,
+        fontSize=fs,
         fieldFlags=0,
         borderWidth=0,
         fillColor=colors.white,
         textColor=None,
         forceBorder=False,
     )
-    c.showPage()
-    c.showPage()
-    c.showPage()
-
-    # Clinical Notes
-    c.setFont("Helvetica-Bold", 13)
-    c.setFillColor(colors.HexColor("#156082"))
-    c.drawString(70, 500, f"Clinical Notes")
-    x, y, fs, text = (70, 400, 12, "")
-    form.textfield(
-        name="clinical_notes",
-        tooltip="",
-        value=f"{text}",
-        x=x,
-        y=y,
-        width=463,
-        height=90,
-        fontSize=8,
-        borderWidth=0,
-        fillColor=colors.white,
-        textColor=None,
-        forceBorder=False,
-        fieldFlags=1<<12,
-    )
-
-    for pos in versions_pos:
-        x, y, fs, text = pos
-        c.setFont("Helvetica", fs)
-        c.drawString(x, y, text)
 
     c.save()
 
 
 def _overlay_pdf_with_annotations(src, dest, output):
-    # Open the existing PDF and the newly created PDF
     annotations_pdf = PdfReader(src)
     template_pdf = PdfReader(dest)
 
-    # Create a PDF writer for the output PDF
     writer = PdfWriter()
-
-    # Add pages from the existing PDF and overlay them with new content
     for page_number in range(len(template_pdf.pages)):
         page = template_pdf.pages[page_number]
         if page_number < len(annotations_pdf.pages):
@@ -166,49 +152,47 @@ def _overlay_pdf_with_annotations(src, dest, output):
             page.merge_page(overlay_page)
         writer.add_page(page)
 
-    # Write the merged PDF to a file
     with open(output, "wb") as f:
         writer.write(f)
 
 
-def generate(*, pii_name=None, pii_dob=None, pii_gender=None, versions=None):
+def generate(
+    *,
+    pii_name=None,
+    pii_dob=None,
+    pii_gender=None,
+    pii_rekam_medis=None,
+    pii_symptoms=None,
+    pii_clinical_diagnosis=None,
+    pii_physician=None,
+    pii_genetic_counselor=None
+):
     module_dir = Path(__file__).parent
     output_pdf_path = "/tmp/annotations.pdf"
     input_pdf_path = f"{module_dir}/pos.pdf"
 
-    # x, y, fs, text
-    date_pos = (72, 595, 12, f"Date: {datetime.now().strftime('%d %B %Y')}")
-    name_pos = (192, 564, 12, pii_name)
-    dob_pos = (192, 550, 12, pii_dob)
-    rekam_medis_pos = (192, 538, 12, f"")
-    gender_pos = (192, 524, 12, pii_gender)
-    symptoms_pos = (192, 492, 12, f"")
-
-    # TODO get versions
-
-    versions_pos = [
-        # left col
-        (180, 570, 11, versions["snp_eff_version"]),
-        (180, 556, 11, versions["snp_sift_version"]),
-        (180, 542, 11, versions["clinvar_version"]),
-        (180, 528, 11, versions["omim_version"]),
-        # right col
-        (450, 570, 11, versions["gnomad_version"]),
-        (450, 556, 11, versions["dbsnp_version"]),
-        (450, 542, 11, versions["sift_version"]),
-        (450, 528, 11, versions["polyphen2_version"]),
-    ]
+    # positions
+    name_pos = (192, 568, 12, "")
+    dob_pos = (192, 552, 12, "")
+    rekam_medis_pos = (192, 538, 12, "")
+    gender_pos = (192, 524, 12, "Male")
+    clinical_diagnosis_pos = (192, 510, 12, "Familial Hypercholesterolemia (FH)")
+    symptoms_pos = (192, 494, 12, "")
+    physician_pos = (192, 480, 12, "dr. Dicky Tahapary, SpPD-KEMD., PhD")
+    genetic_counselor_pos = (192, 464, 12, "dr. Widya Eka Nugraha, M.Si. Med.")
 
     _create_annotations(
         output_pdf_path,
-        date_pos,
         name_pos,
         dob_pos,
         rekam_medis_pos,
         gender_pos,
         symptoms_pos,
-        versions_pos,
+        clinical_diagnosis_pos,
+        physician_pos,
+        genetic_counselor_pos
     )
+
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
     _overlay_pdf_with_annotations(output_pdf_path, input_pdf_path, output_file_name)
     os.remove(output_pdf_path)

@@ -309,9 +309,9 @@ if __name__ == "__main__":
         },
         "apoe": {"diplotype": "CC", "phenotype": "Efficacy", "genotype": "1/0"},
         "versions": {
-            "pharmcat_version": "3.0.0",
-            "pharmgkb_version": "2025-03-07-16-38",
-            "lookup_version": "2025-03-07-16-38",
+            "pharmcat_version": "3.0.1",
+            "pharmgkb_version": "2025-05-14-21-40",
+            "lookup_version": "2025-05-14-21-40",
         },
         "report_id": str(uuid.uuid4()),
     }

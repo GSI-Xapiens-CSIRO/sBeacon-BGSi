@@ -778,10 +778,11 @@ data "aws_iam_policy_document" "dataportal-locks-access" {
 data "aws_iam_policy_document" "lambda-generateReports" {
   statement {
     actions = [
-      "s3:PutObject"
+      "s3:PutObject",
+      "s3:GetObject",
     ]
     resources = [
-      "${aws_s3_bucket.dataportal-bucket.arn}/projects/*/clinical-workflows/*/reports/*",
+      "${aws_s3_bucket.dataportal-bucket.arn}/*",
     ]
   }
 }

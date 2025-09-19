@@ -739,6 +739,7 @@ module "lambda-data-portal" {
       DYNAMO_CLINICAL_ANNOTATIONS_TABLE = aws_dynamodb_table.clinical_annotations.name
       DYNAMO_CLINICAL_VARIANTS_TABLE    = aws_dynamodb_table.clinical_variants.name
       DYNAMO_PRICING_CACHE_TABLE        = aws_dynamodb_table.dataportal_pricing_cache.name
+      DYNAMO_CLI_UPLOAD_TABLE           = aws_dynamodb_table.dataportal_cli_upload.name
       JUPYTER_INSTACE_ROLE_ARN          = aws_iam_role.sagemaker_jupyter_instance_role.arn,
       JUPYTER_LIFECYCLE_CONFIG_NAME     = aws_sagemaker_notebook_instance_lifecycle_configuration.sagemaker_jupyter_instance_lcc.name,
       USER_POOL_ID                      = var.cognito-user-pool-id,

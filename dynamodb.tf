@@ -1,3 +1,9 @@
+locals {
+  project_users_uid_index        = "uid-index"
+  clinic_jobs_project_name_index = "project-name-index"
+  cli_uploads_project_name_index = "cli-uploads-project-name-index"
+}
+
 # 
 # sBeacon DynamoDB Tables
 # 
@@ -59,10 +65,6 @@ resource "aws_dynamodb_table" "projects" {
   }
 }
 
-locals {
-  project_users_uid_index        = "uid-index"
-  clinic_jobs_project_name_index = "project-name-index"
-}
 # User Projects Table
 resource "aws_dynamodb_table" "project_users" {
   billing_mode = "PAY_PER_REQUEST"
@@ -287,5 +289,42 @@ resource "aws_dynamodb_table" "dataportal_pricing_cache" {
   ttl {
     attribute_name = "ExpirationTime"
     enabled        = true
+  }
+}
+
+# dataportal cli upload table
+resource "aws_dynamodb_table" "dataportal_cli_upload" {
+  name         = "sbeacon-dataportal-cli-upload"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "uid"
+  range_key    = "upload_id"
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  attribute {
+    name = "upload_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "project_name"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "ExpirationTime"
+    enabled        = true
+  }
+
+  global_secondary_index {
+    name            = local.cli_uploads_project_name_index
+    hash_key        = "project_name"
+    range_key       = "uid"
+    projection_type = "ALL"
   }
 }

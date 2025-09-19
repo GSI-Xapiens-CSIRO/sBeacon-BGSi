@@ -663,6 +663,7 @@ data "aws_iam_policy_document" "data-portal-lambda-access" {
     actions = [
       "s3:DeleteObject",
       "s3:GetObject",
+      "s3:PutObject",
     ]
 
     resources = [

@@ -150,7 +150,18 @@ def lambda_handler(event, context):
                 "apoe": event.get("apoe", None),
                 "slco1b1": event.get("slco1b1", None),
             }
-            res = generate(**data, versions=versions, report_id=report_id)
+            variants = event.get("variants", [])
+            variant_validations = event.get("variantValidations", {})
+            res = generate(
+                **data,
+                versions=versions,
+                report_id=report_id,
+                variant_validations=variant_validations,
+                project=project,
+                vcf=vcf,
+                user=user,
+                qc_note = notes_content
+            )
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

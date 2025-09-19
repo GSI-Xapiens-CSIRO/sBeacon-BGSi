@@ -6,7 +6,7 @@ from pathlib import Path
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-
+from datetime import datetime, timedelta
 
 def _create_annotations(
     filename,
@@ -16,6 +16,12 @@ def _create_annotations(
     pharmgkb_version,
     lookup_version,
     report_id,
+    project,
+    vcf,
+    validated_by,
+    validated_at,
+    qc_note,
+    result_annotation,
 ):
     c = canvas.Canvas(filename, pagesize=A4)
     x, y, fs, text = (5, 830, 12, report_id)
@@ -23,6 +29,7 @@ def _create_annotations(
     c.drawString(x, y, text)
     c.showPage()
     form = c.acroForm
+    date_now = datetime.now().strftime('%Y-%m-%d')
 
     _text_field_positions_page_1 = [
         # -----
@@ -48,7 +55,7 @@ def _create_annotations(
         # Waktu pengambilan
         (420, 605, 130, 12, 12, "", 0),
         # Waktu penerimaan
-        (420, 560, 130, 12, 12, "", 0),
+        (420, 575, 130, 12, 12, "", 0),
         # Diagnosa
         (120, 420, 400, 24, 12, "", 1 << 12),
         # -----
@@ -116,43 +123,50 @@ def _create_annotations(
     _text_field_positions_page_2 = [
         # -----
         # SLCO1B1
-        (190, 690, 100, 12, 12, slco1b1["phenotype"], 0),
-        (305, 690, 100, 12, 12, slco1b1["genotype"], 0),
-        (420, 690, 100, 12, 12, slco1b1["diplotype"], 0),
+        (190, 660, 100, 12, 12, slco1b1["phenotype"], 0),
+        (305, 660, 100, 12, 12, slco1b1["genotype"], 0),
+        (420, 660, 100, 12, 12, slco1b1["diplotype"], 0),
         # APOE
-        (190, 660, 100, 12, 12, apoe["phenotype"], 0),
-        (305, 660, 100, 12, 12, apoe["genotype"], 0),
-        (420, 660, 100, 12, 12, apoe["diplotype"], 0),
+        (190, 620, 100, 12, 12, apoe["phenotype"], 0),
+        (305, 620, 100, 12, 12, apoe["genotype"], 0),
+        (420, 620, 100, 12, 12, apoe["diplotype"], 0),
         # ----
         # 1
-        (290, 577, 45, 12, 12, "", 0),
-        (341, 577, 45, 12, 12, "", 0),
+        (290, 545, 45, 12, 12, "", 0),
+        (341, 545, 45, 12, 12, "", 0),
         # 2
-        (190, 548, 35, 12, 12, "", 0),
+        (190, 514, 35, 12, 12, "", 0),
         # 3
-        (190, 513, 35, 12, 12, "", 0),
+        (190, 479, 35, 12, 12, "", 0),
         # 4
-        (190, 480, 35, 12, 12, "", 0),
+        (190, 446, 35, 12, 12, "", 0),
         # 5
-        (166, 446, 45, 12, 12, "", 0),
+        (166, 414, 45, 12, 12, "", 0),
         # ------
         # Kesimpulan
-        (57, 293, 470, 69, 12, "", 1 << 12),
+        (57, 270, 470, 60, 12, "", 1 << 12),
         # Tindak Lanjut Pengobatan
-        (57, 55, 470, 210, 12, "", 1 << 12),
+        (57, 166, 470, 70, 12, "", 1 << 12),
     ]
 
     _text_field_positions_page_3 = [
         # -----
         # Metode Uji
-        (57, 718, 470, 52, 12, "", 0),
+        (57, 710, 470, 30, 12, "", 0),
         # Sumber
-        (57, 25, 470, 200, 12, "", 0),
+        (57, 60, 470, 130, 12, "", 0),
     ]
 
     x, y, fs, text = (5, 830, 12, report_id)
     c.setFont("Helvetica", fs)
     c.drawString(x, y, text)
+
+
+    # Tanggal pelaporan
+    x, y, fs, text = (420, 545, 12, date_now)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
+    
     for n, pos in enumerate(_text_field_positions_page_1):
         x, y, w, h, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -192,6 +206,29 @@ def _create_annotations(
 
     c.showPage()
 
+    #page 2
+    x, y, w, h, fs, text, flags = (137, 799, 130, 12, 11, "", 0,)
+    c.setFont("Helvetica", fs)
+    form.textfield(
+        name=f"1-name-0",
+        tooltip="",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=w,
+        height=h,
+        fontSize=fs - 2,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=flags,
+    )
+    
+    x, y, fs, text = (137, 787, 11, date_now)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
+
     x, y, fs, text = (5, 830, 12, report_id)
     c.setFont("Helvetica", fs)
     c.drawString(x, y, text)
@@ -213,11 +250,38 @@ def _create_annotations(
             forceBorder=False,
             fieldFlags=flags,
         )
+    
+    c.drawString(200, 134, validated_by)
+    c.drawString(200, 110, validated_at)
     c.showPage()
+
+    #page 3
+    x, y, w, h, fs, text, flags = (140, 799, 130, 12, 11, "", 0,)
+    c.setFont("Helvetica", fs)
+    form.textfield(
+        name=f"1-name-0",
+        tooltip="",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=w,
+        height=h,
+        fontSize=fs - 2,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=flags,
+    )
+    
+    x, y, fs, text = (140, 787, 11, date_now)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
 
     x, y, fs, text = (5, 830, 12, report_id)
     c.setFont("Helvetica", fs)
     c.drawString(x, y, text)
+
     for n, pos in enumerate(_text_field_positions_page_3):
         x, y, w, h, fs, text, flags = pos
         c.setFont("Helvetica", fs)
@@ -238,9 +302,52 @@ def _create_annotations(
         )
     c.setFont("Helvetica-Bold", 10)
     c.setFillColor(colors.black)
-    c.drawString(57, 295, f"PharmCAT version: {pharmcat_version}")
-    c.drawString(57, 275, f"PharmGKB version: {pharmgkb_version}")
-    c.drawString(57, 255, f"Lookup version: {lookup_version}")
+    c.drawString(150, 278, pharmcat_version)
+    c.drawString(150, 265, pharmgkb_version)
+    c.drawString(150, 250, lookup_version)
+
+    c.showPage()
+
+    #page 4
+    x, y, w, h, fs, text, flags = (140, 799, 130, 12, 11, "", 0,)
+    c.setFont("Helvetica", fs)
+    form.textfield(
+        name=f"1-name-0",
+        tooltip="",
+        value=f"{text}",
+        x=x,
+        y=y,
+        width=w,
+        height=h,
+        fontSize=fs - 2,
+        borderWidth=0,
+        fillColor=colors.white,
+        textColor=None,
+        forceBorder=False,
+        fieldFlags=flags,
+    )
+    
+    x, y, fs, text = (140, 787, 11, date_now)
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text)
+    
+    c.setFont("Helvetica", 10)
+    c.setFillColor(colors.black)
+    #validation
+    for ra in result_annotation:
+        x, y, fs, text = ra
+        c.setFont("Helvetica", fs)
+        c.setFillColor(colors.black)
+        c.drawString(x, y, text or "")
+    #qc_notes
+    c.drawString(57, 630, qc_note or "")
+    #project
+    c.drawString(120, 525, project or "")
+    #vcf
+    c.drawString(120, 512, vcf or "")
+
+
+
     c.save()
 
 
@@ -251,6 +358,7 @@ def _overlay_pdf_with_annotations(src, dest, output):
 
     # Create a PDF writer for the output PDF
     writer = PdfWriter()
+    
 
     # Add pages from the existing PDF and overlay them with new content
     for page_number in range(len(template_pdf.pages)):
@@ -270,11 +378,55 @@ def generate(
     pii_name=None,
     pii_dob=None,
     pii_gender=None,
+    pii_rekam_medis=None,
+    pii_clinical_diagnosis=None,
+    pii_symptoms=None,
+    pii_physician=None,
+    pii_genetic_counselor=None,
     slco1b1=None,
     apoe=None,
     versions=None,
     report_id=None,
+    variant_validations=None,
+    project=None,
+    vcf=None,
+    user=None,
+    qc_note=None
 ):
+    
+    validated_by, validated_at = None, None
+    result_annotation = []
+
+    if variant_validations:
+
+        result_annotation = [
+            (57, (735 - i*13), 11, v.get("validationComment", ""))
+            for i, v in enumerate(variant_validations)
+        ]
+        
+        latest_validation = max(
+            variant_validations,
+            key=lambda v: v.get("validatedAt", "")
+        )
+
+        #validated_by
+        user = latest_validation.get("user", {})
+        full_name = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
+        validated_by = full_name
+        
+        #validated_at
+        raw_validated_at = latest_validation.get("validatedAt")
+        validated_at_str = ""
+        if raw_validated_at:
+            try:
+                dt = datetime.fromisoformat(raw_validated_at)
+                dt_local = dt + timedelta(hours=7)
+                validated_at_str = dt_local.strftime("%Y-%m-%d %H:%M")
+            except Exception as e:
+                validated_at_str = str(raw_validated_at)
+
+        validated_at = validated_at_str
+
     module_dir = Path(__file__).parent
     output_file_name = f"/tmp/{uuid.uuid4()}.pdf"
     _create_annotations(
@@ -285,6 +437,12 @@ def generate(
         versions["pharmgkb_version"],
         versions["lookup_version"],
         report_id,
+        project,
+        vcf,
+        validated_by,
+        validated_at,
+        qc_note,
+        result_annotation
     )
     _overlay_pdf_with_annotations(
         "/tmp/annotations.pdf",

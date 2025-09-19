@@ -200,3 +200,26 @@ class PricingCache(Model):
     resource = UnicodeAttribute(hash_key=True)
     pricing = NumberAttribute()
     expiration = NumberAttribute(attr_name="ExpirationTime")
+
+
+class CliUploadProjectNameIndex(GlobalSecondaryIndex):
+    class Meta:
+        index_name = "cli-uploads-project-name-index"
+        projection = AllProjection()
+
+    project_name = UnicodeAttribute(hash_key=True)
+    uid = UnicodeAttribute(range_key=True)
+
+
+class CliUpload(Model):
+    class Meta:
+        table_name = os.environ.get("DYNAMO_CLI_UPLOAD_TABLE")
+        region = REGION
+
+    uid = UnicodeAttribute(hash_key=True)
+    upload_id = UnicodeAttribute(range_key=True)
+    max_mb = NumberAttribute()
+    project_name = UnicodeAttribute()
+    file_name = UnicodeAttribute()
+    expiration = NumberAttribute(attr_name="ExpirationTime")
+    project_name_index = CliUploadProjectNameIndex()

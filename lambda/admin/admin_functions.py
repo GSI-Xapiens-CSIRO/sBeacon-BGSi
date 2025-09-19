@@ -314,8 +314,11 @@ def delete_user(event, context):
                 }
 
     # delete user quota
-    quota = Quota.get(sub)
-    quota.delete()
+    try:
+        quota = Quota.get(sub)
+        quota.delete()
+    except Quota.DoesNotExist:
+        print(f"Quota for user {sub} does not exist.")
 
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 

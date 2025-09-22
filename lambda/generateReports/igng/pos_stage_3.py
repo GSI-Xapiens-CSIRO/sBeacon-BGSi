@@ -15,31 +15,31 @@ def _create_annotations(filename, pages, page_num_pos, report_id=None):
     text_boxes = [
         # ---left side---
         # Nama Pasien :
-        (147, 768, 134, 12),
+        (147, 765, 134, 12),
         # ID Pasien :
-        (147, 755, 134, 12),
+        (147, 752, 134, 12),
         # Jenis Kelamin :
-        (147, 742, 134, 12),
+        (147, 739, 134, 12),
         # Tanggal Lahir :
-        (147, 729, 134, 12),
+        (147, 726, 134, 12),
         # Ras :
-        (147, 716, 134, 12),
+        (147, 712, 134, 12),
         # Jenis Sampel :
-        (147, 703, 134, 12),
+        (147, 701, 134, 12),
         # ---right side---
         # Dokter Pengirim :
-        (435, 768, 90, 12),
+        (435, 764, 90, 12),
         # Tanggal Pengambilan sampel :
-        (435, 755, 90, 12),
+        (435, 750, 90, 12),
         # Tanggal Pemeriksaan :
-        (435, 742, 90, 12),
+        (435, 738, 90, 12),
         # Institusi Pengirim :
-        (435, 716, 90, 12),
+        (435, 712, 90, 12),
         # Laboratorium Penguji :
-        (435, 703, 90, 12),
+        (435, 700, 90, 12),
     ]
     # Tanggal Pelaporan :
-    date_pos = (435, 731, 12)
+    date_pos = (435, 729, 12)
 
     for p in range(pages):
         # page num

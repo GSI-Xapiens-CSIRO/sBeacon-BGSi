@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from time import time
 
 from utils.models import Projects, ProjectUsers
 from pynamodb.exceptions import DoesNotExist
@@ -13,7 +14,7 @@ from shared.dynamodb.locks import acquire_lock
 from utils.models import (
     Projects,
     ProjectUsers,
-    ClinicJobs,
+    CliUpload,
 )
 
 router = LambdaRouter()
@@ -135,6 +136,88 @@ def add_user_to_project(event, context):
             batch.save(user_project)
 
     return {"success": True, "message": ""}
+
+
+@router.attach(
+    "/dportal/admin/projects/{name}/users/{email}/upload", "post", authenticate_manager
+)
+def admin_user_cli_add_upload(event, context):
+    name = event["pathParameters"]["name"]
+    email = event["pathParameters"]["email"]
+    body_dict = json.loads(event.get("body"))
+
+    try:
+        user = get_user_from_attribute("email", email)
+        sub = get_user_attribute(user, "sub")
+        request_id = event["requestContext"]["requestId"]
+        max_mb = body_dict["maxMB"]
+        file_name = body_dict["fileName"]
+        expiration = body_dict["expirationMins"]
+        ProjectUsers.get(name, sub)
+    except DoesNotExist:
+        return {"success": False, "message": "User not found in project"}
+    except KeyError as e:
+        return {"success": False, "message": f"Missing parameter: {e}"}
+    except PortalError as e:
+        return {"success": False, "message": e.error_message}
+
+    upload = CliUpload(sub, request_id)
+    upload.project_name = name
+    upload.max_mb = max_mb
+    upload.file_name = file_name
+    upload.expiration = int(time()) + expiration * 60
+    upload.save()
+
+    return {"success": True}
+
+
+@router.attach(
+    "/dportal/admin/projects/{name}/users/{email}/upload/{upload_id}",
+    "delete",
+    authenticate_manager,
+)
+def admin_user_cli_remove_upload(event, context):
+    email = event["pathParameters"]["email"]
+    upload_id = event["pathParameters"]["upload_id"]
+
+    try:
+        user = get_user_from_attribute("email", email)
+        sub = get_user_attribute(user, "sub")
+        upload = CliUpload(sub, upload_id)
+        upload.delete()
+    except PortalError as e:
+        return {"success": False, "message": e.error_message}
+    except DoesNotExist:
+        return {"success": False, "message": "Upload not found"}
+
+    return {"success": True, "message": ""}
+
+
+#
+# Project Cli Functions
+#
+
+
+@router.attach("/dportal/admin/projects/{name}/upload", "get", authenticate_manager)
+def admin_get_project_uploads(event, context):
+    name = event["pathParameters"]["name"]
+
+    try:
+        uploads = CliUpload.project_name_index.query(name)
+        uploads = [
+            upload.attribute_values
+            for upload in uploads
+            if upload.expiration > int(time())
+        ]
+
+        for upload in uploads:
+            user = get_user_from_attribute("sub", upload["uid"])
+            email = get_user_attribute(user, "email")
+            upload["email"] = email
+    except DoesNotExist:
+        return {"success": False, "message": "Project not found"}
+
+    return {"success": True, "uploads": uploads}
 
 
 #

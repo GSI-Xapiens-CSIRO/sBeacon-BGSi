@@ -1,9 +1,9 @@
 resource "aws_iam_role" "sagemaker_jupyter_instance_role" {
   name               = "sbeacon_backend_sagemaker_jupyter_instance_role"
-  assume_role_policy = data.aws_iam_policy_document.sagemaker_jupyter_instance_policy.json
+  assume_role_policy = data.aws_iam_policy_document.sagemaker_jupyter_instance_assume_role_policy.json
 }
 
-data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
+data "aws_iam_policy_document" "sagemaker_jupyter_instance_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -12,6 +12,25 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
       identifiers = ["sagemaker.amazonaws.com"]
     }
   }
+}
+
+data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
+  statement {
+    actions   = ["s3:GetObject"]
+    effect    = "Allow"
+    resources = ["arn:aws:s3:::${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs*"]
+  }
+}
+
+resource "aws_iam_policy" "sagemaker_jupyter_instance_policy" {
+  name        = "sagemaker_jupyter_instance_policy"
+  description = "Policy for Sagemaker Jupyter instance to access GASPI-ETL notebooks and gaspifs binary"
+  policy      = data.aws_iam_policy_document.sagemaker_jupyter_instance_policy.json
+}
+
+resource "aws_iam_role_policy_attachment" "sagemaker_jupyter_instance_role_attachment" {
+  role       = aws_iam_role.sagemaker_jupyter_instance_role.name
+  policy_arn = aws_iam_policy.sagemaker_jupyter_instance_policy.arn
 }
 
 resource "aws_sagemaker_notebook_instance_lifecycle_configuration" "sagemaker_jupyter_instance_lcc" {
@@ -24,6 +43,10 @@ resource "aws_sagemaker_notebook_instance_lifecycle_configuration" "sagemaker_ju
 sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
+
+# Download gaspifs binary from S3 and set executable permissions
+aws s3 cp "s3://${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs" /usr/bin/gaspifs
+chmod +x /usr/bin/gaspifs
 
 # Remove SSH clients and server packages for security
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
@@ -112,6 +135,10 @@ EOT
 sudo unlink /home/ec2-user/sample-notebooks
 git clone --depth 1 https://github.com/GSI-Xapiens-CSIRO/GASPI-ETL-notebooks.git /home/ec2-user/GASPI-ETL-notebooks
 sudo ln -s /home/ec2-user/GASPI-ETL-notebooks /home/ec2-user/sample-notebooks
+
+# Download gaspifs binary from S3 and set executable permissions
+aws s3 cp "s3://${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs" /usr/bin/gaspifs
+chmod +x /usr/bin/gaspifs
 
 # Remove SSH clients and server packages for security
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients

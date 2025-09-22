@@ -7,6 +7,7 @@ from admin_user_functions import router as admin_user_router
 from clinic_functions import router as clinic_router
 from pricing_functions import router as pricing_router
 from user_info_functions import router as user_info_router
+from cli_functions import router as cli_router
 from shared.apiutils import LambdaRouter
 
 router = LambdaRouter()
@@ -19,6 +20,7 @@ router.update(admin_user_router)
 router.update(clinic_router)
 router.update(pricing_router)
 router.update(user_info_router)
+router.update(cli_router)
 
 
 def lambda_handler(event, context):

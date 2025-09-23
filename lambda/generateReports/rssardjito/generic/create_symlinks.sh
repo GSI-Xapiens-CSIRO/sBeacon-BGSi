@@ -1,5 +1,5 @@
 rm -rf *.pdf
 
-for file in ../../../../../report_templates/rssardjito/gen/*.pdf; do
+for file in ../../../../../clinical_reports/rssardjito/gen/*.pdf; do
   ln -s "$file" "$(basename "$file")"
 done

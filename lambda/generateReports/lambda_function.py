@@ -94,10 +94,19 @@ def lambda_handler(event, context):
                 )
         case "RSIGNG":
             from igng import generate
-
-            variants = event["variants"]
+            variants = event.get("variants", [])
+            variant_validations = event.get("variantValidations", {})
+            
             res = generate(
-                **data, variants=variants, versions=versions, report_id=report_id
+                **data,
+                variants=variants,
+                versions=versions,
+                report_id=report_id,
+                variant_validations=variant_validations,
+                project=project,
+                vcf=vcf,
+                user=user,
+                qc_note = notes_content
             )
         case "RSSARDJITO":
             from rssardjito import get_report_generator
@@ -135,12 +144,19 @@ def lambda_handler(event, context):
 
             phenotype = event["phenotype"]
             alleles = event["alleles"]
+            variants = event.get("variants", [])
+            variant_validations = event.get("variantValidations", {})
             res = generate(
                 **data,
                 phenotype=phenotype,
                 alleles=alleles,
                 versions=versions,
                 report_id=report_id,
+                variant_validations=variant_validations,
+                project=project,
+                vcf=vcf,
+                user=user,
+                qc_note = notes_content
             )
         case "RSJPD":
             from rsjpd import generate
@@ -150,7 +166,18 @@ def lambda_handler(event, context):
                 "apoe": event.get("apoe", None),
                 "slco1b1": event.get("slco1b1", None),
             }
-            res = generate(**data, versions=versions, report_id=report_id)
+            variants = event.get("variants", [])
+            variant_validations = event.get("variantValidations", {})
+            res = generate(
+                **data,
+                versions=versions,
+                report_id=report_id,
+                variant_validations=variant_validations,
+                project=project,
+                vcf=vcf,
+                user=user,
+                qc_note = notes_content
+            )
         case _:
             return {"statusCode": 400, "body": "Invalid lab or not implemented"}
 

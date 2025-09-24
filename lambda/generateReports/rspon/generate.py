@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict
 import uuid
+from datetime import datetime, timedelta
 
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -20,6 +21,12 @@ def _create_annotations(
     pharmcat_version,
     pharmgkb_version,
     report_id,
+    project,
+    vcf,
+    validated_by,
+    validated_at,
+    qc_note,
+    result_annotation,
 ):
     YT = 695
     # x, y, w, h, flags, text
@@ -43,29 +50,33 @@ def _create_annotations(
         (73, 510, 470, 65, 1 << 12, ""),
     ]
     pg_2_text_fields = [
-        # clinical notes
-        (69, 68, 470, 100, 1 << 12, ""),
+        # # clinical notes
+        # (69, 68, 470, 100, 1 << 12, ""),
     ]
     pg_3_text_fields = [
         # names in last page
-        (188, 280, 350, 15, 0, ""),
-        (188, 255, 350, 15, 0, ""),
-        (188, 230, 350, 15, 0, ""),
+        (188, 555, 350, 15, 0, ""),
     ]
 
     pg_1_text_boxes = [
         # examination details
-        (280, 454, 11, diplotype),
-        (380, 454, 11, phenotype),
+        (300, 477, 11, diplotype),
+        (380, 477, 11, phenotype),
     ]
     pg_2_text_boxes = [
         # versions
-        (200, 300, 10, pharmcat_version),
-        (200, 284, 10, pharmgkb_version),
-        # clinical notes
-        (69, 180, 13, "Clinical Notes"),
+        (200, 384, 10, pharmcat_version),
+        (200, 368, 10, pharmgkb_version),
     ]
-    pg_3_text_boxes = []
+    pg_3_text_boxes = [
+        (188, 535, 11, validated_by),
+        (188, 510, 11, validated_at),
+        (74, 350, 11, qc_note),
+        (150, 259, 11, vcf),
+        (150, 236, 11, project),
+
+
+    ]
     c = canvas.Canvas(filename, pagesize=letter)
     form = c.acroForm
     unique_counter = 0
@@ -77,6 +88,11 @@ def _create_annotations(
         x, y, fs, text = (5, 780, 12, report_id)
         c.setFont("Helvetica", fs)
         c.drawString(x, y, text)
+
+        x, y, fs, text = (405, 630, 9, datetime.now().strftime('%Y-%m-%d'))
+        c.setFont("Helvetica", fs)
+        c.drawString(x, y, text)
+
         for n, (x, y, w, h, flags, text) in enumerate(common_text_fields):
             form.textfield(
                 name=f"header_{n}",
@@ -111,8 +127,16 @@ def _create_annotations(
             )
             unique_counter += 1
         for n, (x, y, fs, text) in enumerate(page_text_boxes):
+
             c.setFont("Helvetica", fs)
             c.drawString(x, y, text)
+
+            if n == 2 :
+                for ra in result_annotation:
+                    x, y, fs, text = ra
+                    c.setFont("Helvetica", fs)
+                    c.setFillColor(colors.black)
+                    c.drawString(x, y, text or "")
 
         c.showPage()
     c.save()
@@ -144,11 +168,55 @@ def generate(
     pii_name=None,
     pii_dob=None,
     pii_gender=None,
+    pii_rekam_medis=None,
+    pii_clinical_diagnosis=None,
+    pii_symptoms=None,
+    pii_physician=None,
+    pii_genetic_counselor=None,
     phenotype=None,
     alleles=None,
     versions=None,
     report_id=None,
+    variant_validations=None,
+    project=None,
+    vcf=None,
+    user=None,
+    qc_note=None
 ):
+    
+    validated_by, validated_at = None, None
+    result_annotation = []
+
+    if variant_validations:
+
+        result_annotation = [
+            (74, (444 - i*13), 11, v.get("validationComment", ""))
+            for i, v in enumerate(variant_validations)
+        ]
+        
+        latest_validation = max(
+            variant_validations,
+            key=lambda v: v.get("validatedAt", "")
+        )
+
+        #validated_by
+        user = latest_validation.get("user", {})
+        full_name = f"{user.get('firstName', '')} {user.get('lastName', '')}".strip()
+        validated_by = full_name
+        
+        #validated_at
+        raw_validated_at = latest_validation.get("validatedAt")
+        validated_at_str = ""
+        if raw_validated_at:
+            try:
+                dt = datetime.fromisoformat(raw_validated_at)
+                dt_local = dt + timedelta(hours=7)
+                validated_at_str = dt_local.strftime("%Y-%m-%d %H:%M")
+            except Exception as e:
+                validated_at_str = str(raw_validated_at)
+
+        validated_at = validated_at_str
+
     module_dir = Path(__file__).parent
     kind = "".join([x[0] for x in phenotype.split(" ")])
 
@@ -167,6 +235,12 @@ def generate(
         versions["pharmcat_version"],
         versions["pharmgkb_version"],
         report_id,
+        project,
+        vcf,
+        validated_by,
+        validated_at,
+        qc_note,
+        result_annotation
     )
     _overlay_pdf_with_annotations(annotated, template, output_file_name)
     os.remove(annotated)

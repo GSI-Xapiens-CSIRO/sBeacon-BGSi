@@ -7,9 +7,9 @@ try:
 except:
     # local run
     print("Running locally")
-    from pos_stage_1 import generate as generate_pos_stage_1
-    from pos_stage_2 import generate as generate_pos_stage_2
-    from pos_stage_3 import generate as generate_pos_stage_3
+    from .pos_stage_1 import generate as generate_pos_stage_1
+    from .pos_stage_2 import generate as generate_pos_stage_2
+    from .pos_stage_3 import generate as generate_pos_stage_3
 
 
 def generate(
@@ -17,16 +17,33 @@ def generate(
     pii_name=None,
     pii_dob=None,
     pii_gender=None,
+    pii_rekam_medis=None,
+    pii_clinical_diagnosis=None,
+    pii_symptoms=None,
+    pii_physician=None,
+    pii_genetic_counselor=None,
     variants=None,
     versions=None,
-    report_id=None
+    report_id=None,
+    variant_validations=None,
+    project=None,
+    vcf=None,
+    user=None,
+    qc_note=None
 ):
     # Generate the first stage of the report
     table_pdf = generate_pos_stage_1(variants=variants)
 
     # Generate the second stage of the report
     annots_pdf = generate_pos_stage_2(
-        pii_name=pii_name, pii_dob=pii_dob, pii_gender=pii_gender, versions=versions
+        pii_name=pii_name,
+        pii_dob=pii_dob,
+        pii_gender=pii_gender,
+        versions=versions,
+        variant_validations=variant_validations,
+        project=project,
+        vcf=vcf,
+        qc_note=qc_note
     )
 
     # Generate the third stage of the report

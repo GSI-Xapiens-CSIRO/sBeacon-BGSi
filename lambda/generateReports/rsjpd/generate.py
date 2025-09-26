@@ -342,9 +342,9 @@ def _create_annotations(
     #qc_notes
     c.drawString(57, 630, qc_note or "")
     #project
-    c.drawString(120, 525, project or "")
+    c.drawString(120, 512, project or "")
     #vcf
-    c.drawString(120, 512, vcf or "")
+    c.drawString(120, 525, vcf or "")
 
 
 

@@ -20,6 +20,17 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
     effect    = "Allow"
     resources = ["arn:aws:s3:::${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs*"]
   }
+
+  statement {
+    actions = [
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion"
+    ]
+    effect    = "Deny"
+    resources = ["arn:aws:s3:::*/*"]
+  }
 }
 
 resource "aws_iam_policy" "sagemaker_jupyter_instance_policy" {

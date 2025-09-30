@@ -70,21 +70,27 @@ def _create_annotations(
     )
 
     # Nama Pemvalidasi
-    x, y, fs, text = (484, 315, 12, validated_by)
+    x, y, fs, text = (506, 315, 12, validated_by)
+    c.setFont("Helvetica", fs)
     text_width = c.stringWidth(text, "Helvetica", fs)
     c.drawString(x - text_width, y, text)
 
     # Date
-    c.setFont("Helvetica", fs)
     x, y, fs, text = (410, 294, 12, validated_at)
+    c.setFont("Helvetica", fs)
     c.drawString(x, y, text)
 
     c.showPage()
 
-    #skip page 3
+    # Lookup Version
+    x, y, fs, text = (150, 136, 11, versions["lookup_version"] or "")
+    c.setFont("Helvetica", fs)
+    c.drawString(x, y, text),
+
     c.showPage()
 
-    c.setFont("Helvetica", fs)
+
+    c.setFont("Helvetica", 11)
     #qc_note
     c.drawString(72, 644, qc_note or "")
     #project

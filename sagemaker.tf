@@ -17,6 +17,7 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
+  # Allow GetObject HANYA untuk gaspifs
   statement {
     sid       = "AllowGetGaspifs"
     actions   = ["s3:GetObject"]
@@ -24,39 +25,43 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
     resources = ["arn:aws:s3:::${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs*"]
   }
 
+  # Deny PutObject, DeleteObject, dll (upload/delete operations)
   statement {
-    sid = "AllowS3InCurrentAccount"
-    actions = [
-      "s3:PutObject",
-      "s3:GetObject",
-      "s3:DeleteObject",
-      "s3:ListBucket"
-    ]
-    effect = "Allow"
-    resources = [
-      "arn:aws:s3:::*",
-      "arn:aws:s3:::*/*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceAccount"
-      values   = [data.aws_caller_identity.this.account_id]
-    }
-  }
-
-  statement {
-    sid = "DenyUploadToExternalAccounts"
+    sid = "DenyUploadDelete"
     actions = [
       "s3:PutObject",
       "s3:PutObjectAcl",
-      "s3:DeleteObject"
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion",
+      "s3:RestoreObject"
     ]
     effect    = "Deny"
     resources = ["arn:aws:s3:::*/*"]
+  }
+
+  # Deny List operations
+  statement {
+    sid = "DenyListOperations"
+    actions = [
+      "s3:ListBucket",
+      "s3:ListBucketVersions",
+      "s3:ListAllMyBuckets"
+    ]
+    effect    = "Deny"
+    resources = ["*"]
+  }
+
+  # Deny GetObject EXCEPT untuk gaspifs
+  statement {
+    sid       = "DenyGetObjectExceptGaspifs"
+    actions   = ["s3:GetObject"]
+    effect    = "Deny"
+    resources = ["arn:aws:s3:::*/*"]
+
     condition {
-      test     = "StringNotEquals"
-      variable = "aws:ResourceAccount"
-      values   = [data.aws_caller_identity.this.account_id]
+      test     = "StringNotLike"
+      variable = "s3:prefix"
+      values   = ["binaries/gaspifs*"]
     }
   }
 }

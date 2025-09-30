@@ -15,56 +15,21 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_assume_role_policy" {
 }
 
 data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
-  # Allow GetObject HANYA untuk gaspifs binary
   statement {
-    sid       = "AllowGetGaspifs"
     actions   = ["s3:GetObject"]
     effect    = "Allow"
     resources = ["arn:aws:s3:::${aws_s3_bucket.dataportal-bucket.bucket}/binaries/gaspifs*"]
   }
 
-  # DENY semua S3 upload operations
   statement {
-    sid = "DenyAllS3Uploads"
     actions = [
       "s3:PutObject",
       "s3:PutObjectAcl",
-      "s3:PutObjectTagging",
       "s3:DeleteObject",
-      "s3:DeleteObjectVersion",
-      "s3:RestoreObject",
-      "s3:ReplicateObject",
-      "s3:ReplicateDelete"
+      "s3:DeleteObjectVersion"
     ]
     effect    = "Deny"
     resources = ["arn:aws:s3:::*/*"]
-  }
-
-  # DENY list buckets dan list objects
-  statement {
-    sid = "DenyListBuckets"
-    actions = [
-      "s3:ListBucket",
-      "s3:ListBucketVersions",
-      "s3:ListAllMyBuckets",
-      "s3:ListBucketMultipartUploads",
-      "s3:GetBucketLocation"
-    ]
-    effect    = "Deny"
-    resources = ["*"]
-  }
-
-  # DENY semua S3 management operations
-  statement {
-    sid = "DenyS3Management"
-    actions = [
-      "s3:CreateBucket",
-      "s3:DeleteBucket",
-      "s3:PutBucketPolicy",
-      "s3:DeleteBucketPolicy"
-    ]
-    effect    = "Deny"
-    resources = ["*"]
   }
 }
 

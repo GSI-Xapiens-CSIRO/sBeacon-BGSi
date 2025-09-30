@@ -25,56 +25,39 @@ data "aws_iam_policy_document" "sagemaker_jupyter_instance_policy" {
   }
 
   statement {
-    sid = "AllowS3OnlyToCurrentAccount"
+    sid = "AllowS3InCurrentAccount"
     actions = [
       "s3:PutObject",
-      "s3:PutObjectAcl",
       "s3:GetObject",
       "s3:DeleteObject",
       "s3:ListBucket"
     ]
-    effect    = "Allow"
-    resources = ["*"]
-
+    effect = "Allow"
+    resources = [
+      "arn:aws:s3:::*",
+      "arn:aws:s3:::*/*"
+    ]
     condition {
       test     = "StringEquals"
-      variable = "s3:ResourceAccount"
+      variable = "aws:ResourceAccount"
       values   = [data.aws_caller_identity.this.account_id]
     }
   }
 
   statement {
-    sid = "DenyUploadToOtherAccounts"
+    sid = "DenyUploadToExternalAccounts"
     actions = [
       "s3:PutObject",
       "s3:PutObjectAcl",
-      "s3:DeleteObject",
-      "s3:DeleteObjectVersion",
-      "s3:PutObjectTagging",
-      "s3:RestoreObject",
-      "s3:ListBucket"
+      "s3:DeleteObject"
     ]
     effect    = "Deny"
     resources = ["arn:aws:s3:::*/*"]
-
     condition {
       test     = "StringNotEquals"
-      variable = "s3:ResourceAccount"
+      variable = "aws:ResourceAccount"
       values   = [data.aws_caller_identity.this.account_id]
     }
-  }
-
-  # DENY list buckets untuk security
-  statement {
-    sid = "DenyListBuckets"
-    actions = [
-      "s3:ListBucket",
-      "s3:ListBucketVersions",
-      "s3:ListAllMyBuckets",
-      "s3:GetBucketLocation"
-    ]
-    effect    = "Deny"
-    resources = ["*"]
   }
 }
 

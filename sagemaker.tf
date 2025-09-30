@@ -52,6 +52,95 @@ chmod +x /usr/bin/gaspifs
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
 
+# ===== NUCLEAR OPTION: REMOVE AWS CLI COMPLETELY =====
+echo "🔥 NUCLEAR: Removing AWS CLI..."
+
+# Remove AWS CLI v2
+sudo rm -rf /usr/local/aws-cli
+sudo rm -f /usr/local/bin/aws
+sudo rm -f /usr/local/bin/aws_completer
+
+# Remove AWS CLI v1
+sudo pip uninstall -y awscli 2>/dev/null || true
+sudo pip3 uninstall -y awscli 2>/dev/null || true
+sudo yum remove -y aws-cli 2>/dev/null || true
+
+# Remove from all possible locations
+sudo rm -f /usr/bin/aws
+sudo rm -f /bin/aws
+sudo rm -f ~/.local/bin/aws
+sudo rm -rf /usr/local/aws
+sudo rm /usr/local/bin/aws
+
+
+# Create fake aws command that shows error
+sudo tee /usr/local/bin/aws > /dev/null << 'FAKEAWS'
+#!/bin/bash
+echo ""
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║                                                                ║"
+echo "║  ❌ AWS CLI has been REMOVED from this instance               ║"
+echo "║                                                                ║"
+echo "║  For security reasons, AWS CLI is not available.              ║"
+echo "║  If you need AWS access, please contact your administrator.   ║"
+echo "║                                                                ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+exit 127
+FAKEAWS
+
+sudo chmod +x /usr/local/bin/aws
+
+# Prevent reinstallation via pip
+cat << 'PIPCONF' > /home/ec2-user/.config/pip/pip.conf
+[global]
+no-binary = awscli
+PIPCONF
+
+# Block in bashrc
+cat << 'BASHRC' >> /home/ec2-user/.bashrc
+
+# AWS CLI removed for security
+export PATH="/usr/local/bin:$PATH"
+alias aws='echo "❌ AWS CLI is disabled on this instance"'
+
+BASHRC
+
+echo "✓ AWS CLI completely removed"
+
+# Remove SSH clients and server packages for security
+sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
+sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
+
+rm -f /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
+rm -f /home/ec2-user/anaconda3/bin/aws
+rm -f /usr/bin/aws
+
+tee /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws > /dev/null << 'ENDAWS'
+#!/bin/bash
+exit 127
+ENDAWS
+chmod +x /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
+
+rm -f /home/ec2-user/anaconda3/bin/curl
+rm -f /usr/bin/curl
+
+tee /home/ec2-user/anaconda3/bin/curl > /dev/null << 'ENDCURL'
+#!/bin/bash
+exit 127
+ENDCURL
+chmod +x /home/ec2-user/anaconda3/bin/curl
+
+rm -f /usr/bin/wget
+
+tee /usr/local/bin/wget > /dev/null << 'ENDWGET'
+#!/bin/bash
+exit 127
+ENDWGET
+chmod +x /usr/local/bin/wget
+ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
+# ========================================================
+
 echo "Starting lifecycle on_create configuration..."
 
 # Wait for conda to become available (maximum 5 minutes)
@@ -143,6 +232,95 @@ chmod +x /usr/bin/gaspifs
 # Remove SSH clients and server packages for security
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
 sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
+
+# ===== NUCLEAR OPTION: REMOVE AWS CLI COMPLETELY =====
+echo "🔥 NUCLEAR: Removing AWS CLI..."
+
+# Remove AWS CLI v2
+sudo rm -rf /usr/local/aws-cli
+sudo rm -f /usr/local/bin/aws
+sudo rm -f /usr/local/bin/aws_completer
+
+# Remove AWS CLI v1
+sudo pip uninstall -y awscli 2>/dev/null || true
+sudo pip3 uninstall -y awscli 2>/dev/null || true
+sudo yum remove -y aws-cli 2>/dev/null || true
+
+# Remove from all possible locations
+sudo rm -f /usr/bin/aws
+sudo rm -f /bin/aws
+sudo rm -f ~/.local/bin/aws
+sudo rm -rf /usr/local/aws
+sudo rm /usr/local/bin/aws
+
+
+# Create fake aws command that shows error
+sudo tee /usr/local/bin/aws > /dev/null << 'FAKEAWS'
+#!/bin/bash
+echo ""
+echo "╔════════════════════════════════════════════════════════════════╗"
+echo "║                                                                ║"
+echo "║  ❌ AWS CLI has been REMOVED from this instance               ║"
+echo "║                                                                ║"
+echo "║  For security reasons, AWS CLI is not available.              ║"
+echo "║  If you need AWS access, please contact your administrator.   ║"
+echo "║                                                                ║"
+echo "╚════════════════════════════════════════════════════════════════╝"
+echo ""
+exit 127
+FAKEAWS
+
+sudo chmod +x /usr/local/bin/aws
+
+# Prevent reinstallation via pip
+cat << 'PIPCONF' > /home/ec2-user/.config/pip/pip.conf
+[global]
+no-binary = awscli
+PIPCONF
+
+# Block in bashrc
+cat << 'BASHRC' >> /home/ec2-user/.bashrc
+
+# AWS CLI removed for security
+export PATH="/usr/local/bin:$PATH"
+alias aws='echo "❌ AWS CLI is disabled on this instance"'
+
+BASHRC
+
+echo "✓ AWS CLI completely removed"
+
+# Remove SSH clients and server packages for security
+sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
+sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
+
+rm -f /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
+rm -f /home/ec2-user/anaconda3/bin/aws
+rm -f /usr/bin/aws
+
+tee /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws > /dev/null << 'ENDAWS'
+#!/bin/bash
+exit 127
+ENDAWS
+chmod +x /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
+
+rm -f /home/ec2-user/anaconda3/bin/curl
+rm -f /usr/bin/curl
+
+tee /home/ec2-user/anaconda3/bin/curl > /dev/null << 'ENDCURL'
+#!/bin/bash
+exit 127
+ENDCURL
+chmod +x /home/ec2-user/anaconda3/bin/curl
+
+rm -f /usr/bin/wget
+
+tee /usr/local/bin/wget > /dev/null << 'ENDWGET'
+#!/bin/bash
+exit 127
+ENDWGET
+chmod +x /usr/local/bin/wget
+ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
+# ========================================================
 
 echo "Starting lifecycle on_start configuration..."
 

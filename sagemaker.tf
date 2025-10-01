@@ -72,26 +72,16 @@ sudo rm -f ~/.local/bin/aws
 sudo rm -rf /usr/local/aws
 sudo rm /usr/local/bin/aws
 
-
 # Create fake aws command that shows error
 sudo tee /usr/local/bin/aws > /dev/null << 'FAKEAWS'
 #!/bin/bash
-echo ""
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║                                                                ║"
-echo "║  ❌ AWS CLI has been REMOVED from this instance               ║"
-echo "║                                                                ║"
-echo "║  For security reasons, AWS CLI is not available.              ║"
-echo "║  If you need AWS access, please contact your administrator.   ║"
-echo "║                                                                ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
-echo ""
 exit 127
 FAKEAWS
 
 sudo chmod +x /usr/local/bin/aws
 
 # Prevent reinstallation via pip
+mkdir -p /home/ec2-user/.config/pip
 cat << 'PIPCONF' > /home/ec2-user/.config/pip/pip.conf
 [global]
 no-binary = awscli
@@ -107,10 +97,6 @@ alias aws='echo "❌ AWS CLI is disabled on this instance"'
 BASHRC
 
 echo "✓ AWS CLI completely removed"
-
-# Remove SSH clients and server packages for security
-sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
-sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
 
 rm -f /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
 rm -f /home/ec2-user/anaconda3/bin/aws
@@ -139,6 +125,85 @@ exit 127
 ENDWGET
 chmod +x /usr/local/bin/wget
 ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
+
+# ===== BLOCK BOTO3 IMPORTS =====
+echo "🔒 Installing boto3 import blocker..."
+
+# Create the sitecustomize.py blocker script
+cat << 'SITECUSTOM' > /tmp/sitecustomize.py
+"""Block boto3 with import hooks"""
+import sys
+from importlib.abc import MetaPathFinder
+
+class AWSBlocker(MetaPathFinder):
+    """Block AWS-related imports"""
+    
+    BLOCKED = ['boto3', 'botocore', 'awscli', 's3transfer']
+    
+    def find_spec(self, fullname, path, target=None):
+        # Check if module is blocked
+        for blocked in self.BLOCKED:
+            if fullname == blocked or fullname.startswith(blocked + '.'):
+                raise ImportError(
+                    f"\n"
+                    f"╔════════════════════════════════════════════════════════╗\n"
+                    f"║  ❌ Import BLOCKED: {fullname:<40} ║\n"
+                    f"║                                                        ║\n"
+                    f"║  AWS SDK is disabled on this instance                 ║\n"
+                    f"╚════════════════════════════════════════════════════════╝\n"
+                )
+        return None
+
+# Install blocker
+sys.meta_path.insert(0, AWSBlocker())
+
+# Block existing imports
+for module in list(sys.modules.keys()):
+    if any(module.startswith(blocked) for blocked in AWSBlocker.BLOCKED):
+        del sys.modules[module]
+SITECUSTOM
+
+# Wait for anaconda to be available
+echo "Waiting for Anaconda..."
+for i in {1..60}; do
+  if [ -d "/home/ec2-user/anaconda3" ]; then
+    break
+  fi
+  sleep 5
+done
+
+# Install to all Python site-packages
+echo "Installing blocker to all Python environments..."
+
+# Install to base anaconda (Python 3.12)
+for site_pkg in /home/ec2-user/anaconda3/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Install to JupyterSystemEnv (Python 3.10)
+for site_pkg in /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Install to all other conda environments
+for site_pkg in /home/ec2-user/anaconda3/envs/*/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Cleanup
+rm -f /tmp/sitecustomize.py
+
+echo "✓ boto3 import blocker installed"
+
 # ========================================================
 
 echo "Starting lifecycle on_create configuration..."
@@ -253,26 +318,16 @@ sudo rm -f ~/.local/bin/aws
 sudo rm -rf /usr/local/aws
 sudo rm /usr/local/bin/aws
 
-
 # Create fake aws command that shows error
 sudo tee /usr/local/bin/aws > /dev/null << 'FAKEAWS'
 #!/bin/bash
-echo ""
-echo "╔════════════════════════════════════════════════════════════════╗"
-echo "║                                                                ║"
-echo "║  ❌ AWS CLI has been REMOVED from this instance               ║"
-echo "║                                                                ║"
-echo "║  For security reasons, AWS CLI is not available.              ║"
-echo "║  If you need AWS access, please contact your administrator.   ║"
-echo "║                                                                ║"
-echo "╚════════════════════════════════════════════════════════════════╝"
-echo ""
 exit 127
 FAKEAWS
 
 sudo chmod +x /usr/local/bin/aws
 
 # Prevent reinstallation via pip
+mkdir -p /home/ec2-user/.config/pip
 cat << 'PIPCONF' > /home/ec2-user/.config/pip/pip.conf
 [global]
 no-binary = awscli
@@ -288,10 +343,6 @@ alias aws='echo "❌ AWS CLI is disabled on this instance"'
 BASHRC
 
 echo "✓ AWS CLI completely removed"
-
-# Remove SSH clients and server packages for security
-sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-clients
-sudo yum remove -y --setopt=clean_requirements_on_remove=0 openssh-server
 
 rm -f /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
 rm -f /home/ec2-user/anaconda3/bin/aws
@@ -320,9 +371,88 @@ exit 127
 ENDWGET
 chmod +x /usr/local/bin/wget
 ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
+
+# ===== BLOCK BOTO3 IMPORTS =====
+echo "🔒 Installing boto3 import blocker..."
+
+# Create the sitecustomize.py blocker script
+cat << 'SITECUSTOM' > /tmp/sitecustomize.py
+"""Block boto3 with import hooks"""
+import sys
+from importlib.abc import MetaPathFinder
+
+class AWSBlocker(MetaPathFinder):
+    """Block AWS-related imports"""
+    
+    BLOCKED = ['boto3', 'botocore', 'awscli', 's3transfer']
+    
+    def find_spec(self, fullname, path, target=None):
+        # Check if module is blocked
+        for blocked in self.BLOCKED:
+            if fullname == blocked or fullname.startswith(blocked + '.'):
+                raise ImportError(
+                    f"\n"
+                    f"╔════════════════════════════════════════════════════════╗\n"
+                    f"║  ❌ Import BLOCKED: {fullname:<40} ║\n"
+                    f"║                                                        ║\n"
+                    f"║  AWS SDK is disabled on this instance                 ║\n"
+                    f"╚════════════════════════════════════════════════════════╝\n"
+                )
+        return None
+
+# Install blocker
+sys.meta_path.insert(0, AWSBlocker())
+
+# Block existing imports
+for module in list(sys.modules.keys()):
+    if any(module.startswith(blocked) for blocked in AWSBlocker.BLOCKED):
+        del sys.modules[module]
+SITECUSTOM
+
+# Wait for anaconda to be available
+echo "Waiting for Anaconda..."
+for i in {1..60}; do
+  if [ -d "/home/ec2-user/anaconda3" ]; then
+    break
+  fi
+  sleep 5
+done
+
+# Install to all Python site-packages
+echo "Installing blocker to all Python environments..."
+
+# Install to base anaconda (Python 3.12)
+for site_pkg in /home/ec2-user/anaconda3/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Install to JupyterSystemEnv (Python 3.10)
+for site_pkg in /home/ec2-user/anaconda3/envs/JupyterSystemEnv/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Install to all other conda environments
+for site_pkg in /home/ec2-user/anaconda3/envs/*/lib/python*/site-packages; do
+    if [ -d "$site_pkg" ]; then
+        cp /tmp/sitecustomize.py "$site_pkg/"
+        echo "✓ Installed to: $site_pkg"
+    fi
+done
+
+# Cleanup
+rm -f /tmp/sitecustomize.py
+
+echo "✓ boto3 import blocker installed"
+
 # ========================================================
 
-echo "Starting lifecycle on_start configuration..."
+echo "Starting lifecycle on_create configuration..."
 
 # Wait for conda to become available (maximum 5 minutes)
 echo "Waiting for conda to become available..."
@@ -372,7 +502,7 @@ class ForbidFilesHandler(IPythonHandler):
 END
 
   # Create jupyter_notebook_config.py to configure the handler
-  echo "Applying Jupyter configuration using custom handler..."
+  echo "Applying Jupyter configuration..."
   cat << 'END' > /home/ec2-user/.jupyter/jupyter_notebook_config.py
 import os, sys
 sys.path.append('/home/ec2-user/.jupyter/')

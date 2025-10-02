@@ -141,6 +141,21 @@ chmod +x /home/ec2-user/anaconda3/bin/curl
 
 echo "✓ curl blocked"
 
+# ===== BLOCK SENDMAIL =====
+echo "🔥 Blocking sendmail..."
+
+sudo rm -f /usr/sbin/sendmail
+sudo rm -f /usr/bin/sendmail
+
+tee /usr/sbin/sendmail > /dev/null << 'ENDSENDMAIL'
+#!/bin/bash
+echo "❌ sendmail is disabled on this instance"
+exit 127
+ENDSENDMAIL
+sudo chmod +x /usr/sbin/sendmail
+
+echo "✓ sendmail blocked"
+
 # ===== BLOCK WGET COMPLETELY =====
 echo "🔥 Blocking wget..."
 
@@ -461,6 +476,21 @@ ENDCURL
 chmod +x /home/ec2-user/anaconda3/bin/curl
 
 echo "✓ curl blocked"
+
+# ===== BLOCK SENDMAIL =====
+echo "🔥 Blocking sendmail..."
+
+sudo rm -f /usr/sbin/sendmail
+sudo rm -f /usr/bin/sendmail
+
+tee /usr/sbin/sendmail > /dev/null << 'ENDSENDMAIL'
+#!/bin/bash
+echo "❌ sendmail is disabled on this instance"
+exit 127
+ENDSENDMAIL
+sudo chmod +x /usr/sbin/sendmail
+
+echo "✓ sendmail blocked"
 
 # ===== BLOCK WGET COMPLETELY =====
 echo "🔥 Blocking wget..."

@@ -356,7 +356,7 @@ fi
 EOT
   )
 
-  on_start = base64encodebase64encode(
+  on_start = base64encode(
     <<EOT
 #!/bin/bash
 

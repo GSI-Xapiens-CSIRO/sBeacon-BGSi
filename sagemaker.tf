@@ -108,32 +108,91 @@ exit 127
 ENDAWS
 chmod +x /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
 
+# ===== BLOCK CURL COMPLETELY =====
+echo "🔥 Blocking curl..."
+
+# Remove from all locations
 rm -f /home/ec2-user/anaconda3/bin/curl
 rm -f /usr/bin/curl
+rm -f /bin/curl
+rm -f /usr/local/bin/curl
+rm -f ~/anaconda3/bin/curl
+rm -f ~/anaconda3/envs/*/bin/curl
+
+# Remove from all conda environments
+for curl_env in /home/ec2-user/anaconda3/envs/*/bin/curl; do
+    rm -f "$curl_env" 2>/dev/null
+done
+
+# Create fake curl in strategic locations
+tee /usr/bin/curl > /dev/null << 'ENDCURL'
+#!/bin/bash
+echo "❌ curl is disabled on this instance"
+exit 127
+ENDCURL
+chmod +x /usr/bin/curl
 
 tee /home/ec2-user/anaconda3/bin/curl > /dev/null << 'ENDCURL'
 #!/bin/bash
+echo "❌ curl is disabled on this instance"
 exit 127
 ENDCURL
 chmod +x /home/ec2-user/anaconda3/bin/curl
 
-rm -f /usr/bin/wget
+echo "✓ curl blocked"
 
+# ===== BLOCK WGET COMPLETELY =====
+echo "🔥 Blocking wget..."
+
+# Remove from all locations
+rm -f /usr/bin/wget
+rm -f /bin/wget
+rm -f /usr/local/bin/wget
+
+# Remove from conda environments
+for wget_env in /home/ec2-user/anaconda3/envs/*/bin/wget; do
+    rm -f "$wget_env" 2>/dev/null
+done
+
+# Create fake wget
 tee /usr/local/bin/wget > /dev/null << 'ENDWGET'
 #!/bin/bash
+echo "❌ wget is disabled on this instance"
 exit 127
 ENDWGET
 chmod +x /usr/local/bin/wget
 ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
 
-# ===== BLOCK BOTO3 IMPORTS =====
+echo "✓ wget blocked"
+
+# ===== BLOCK BOTO3 IMPORTS (CLEAN ERROR MESSAGES) =====
 echo "🔒 Installing boto3 import blocker..."
 
-# Create the sitecustomize.py blocker script
+# Create the sitecustomize.py blocker script with clean error display
 cat << 'SITECUSTOM' > /tmp/sitecustomize.py
-"""Block boto3 with import hooks"""
+"""Block boto3 with import hooks - Clean error messages"""
 import sys
 from importlib.abc import MetaPathFinder
+
+class BlockedImportError(ImportError):
+    """Custom ImportError that displays cleanly without traceback"""
+    def __init__(self, module_name):
+        self.module_name = module_name
+        self.message = (
+            f"\n"
+            f"╔════════════════════════════════════════════════════════╗\n"
+            f"║  ❌ Import BLOCKED: {module_name:<40} ║\n"
+            f"║                                                        ║\n"
+            f"║  AWS SDK is disabled on this instance                 ║\n"
+            f"╚════════════════════════════════════════════════════════╝\n"
+        )
+        super().__init__(self.message)
+    
+    def __str__(self):
+        return self.message
+    
+    def __repr__(self):
+        return self.message
 
 class AWSBlocker(MetaPathFinder):
     """Block AWS-related imports"""
@@ -144,14 +203,7 @@ class AWSBlocker(MetaPathFinder):
         # Check if module is blocked
         for blocked in self.BLOCKED:
             if fullname == blocked or fullname.startswith(blocked + '.'):
-                raise ImportError(
-                    f"\n"
-                    f"╔════════════════════════════════════════════════════════╗\n"
-                    f"║  ❌ Import BLOCKED: {fullname:<40} ║\n"
-                    f"║                                                        ║\n"
-                    f"║  AWS SDK is disabled on this instance                 ║\n"
-                    f"╚════════════════════════════════════════════════════════╝\n"
-                )
+                raise BlockedImportError(fullname)
         return None
 
 # Install blocker
@@ -161,12 +213,35 @@ sys.meta_path.insert(0, AWSBlocker())
 for module in list(sys.modules.keys()):
     if any(module.startswith(blocked) for blocked in AWSBlocker.BLOCKED):
         del sys.modules[module]
+
+# Custom exception handler for Jupyter/IPython to hide traceback
+try:
+    import IPython
+    from IPython.core.interactiveshell import InteractiveShell
+    
+    def custom_exception_handler(self, etype, value, tb, tb_offset=None):
+        """Custom handler for BlockedImportError - hide traceback"""
+        if etype == BlockedImportError:
+            # Print only the message without traceback
+            print(str(value), file=sys.stderr)
+        else:
+            # Show normal traceback for other exceptions
+            self.showtraceback((etype, value, tb), tb_offset=tb_offset)
+    
+    # Override IPython exception handler
+    ip = IPython.get_ipython()
+    if ip is not None:
+        ip.set_custom_exc((BlockedImportError,), custom_exception_handler)
+except:
+    # Not in IPython/Jupyter, skip
+    pass
 SITECUSTOM
 
 # Wait for anaconda to be available
 echo "Waiting for Anaconda..."
 for i in {1..60}; do
   if [ -d "/home/ec2-user/anaconda3" ]; then
+    echo "Anaconda found after $i attempts"
     break
   fi
   sleep 5
@@ -202,7 +277,7 @@ done
 # Cleanup
 rm -f /tmp/sitecustomize.py
 
-echo "✓ boto3 import blocker installed"
+echo "✓ boto3 import blocker installed with clean error messages"
 
 # ========================================================
 
@@ -281,7 +356,7 @@ fi
 EOT
   )
 
-  on_start = base64encode(
+  on_start = base64encodebase64encode(
     <<EOT
 #!/bin/bash
 
@@ -354,32 +429,91 @@ exit 127
 ENDAWS
 chmod +x /home/ec2-user/anaconda3/envs/JupyterSystemEnv/bin/aws
 
+# ===== BLOCK CURL COMPLETELY =====
+echo "🔥 Blocking curl..."
+
+# Remove from all locations
 rm -f /home/ec2-user/anaconda3/bin/curl
 rm -f /usr/bin/curl
+rm -f /bin/curl
+rm -f /usr/local/bin/curl
+rm -f ~/anaconda3/bin/curl
+rm -f ~/anaconda3/envs/*/bin/curl
+
+# Remove from all conda environments
+for curl_env in /home/ec2-user/anaconda3/envs/*/bin/curl; do
+    rm -f "$curl_env" 2>/dev/null
+done
+
+# Create fake curl in strategic locations
+tee /usr/bin/curl > /dev/null << 'ENDCURL'
+#!/bin/bash
+echo "❌ curl is disabled on this instance"
+exit 127
+ENDCURL
+chmod +x /usr/bin/curl
 
 tee /home/ec2-user/anaconda3/bin/curl > /dev/null << 'ENDCURL'
 #!/bin/bash
+echo "❌ curl is disabled on this instance"
 exit 127
 ENDCURL
 chmod +x /home/ec2-user/anaconda3/bin/curl
 
-rm -f /usr/bin/wget
+echo "✓ curl blocked"
 
+# ===== BLOCK WGET COMPLETELY =====
+echo "🔥 Blocking wget..."
+
+# Remove from all locations
+rm -f /usr/bin/wget
+rm -f /bin/wget
+rm -f /usr/local/bin/wget
+
+# Remove from conda environments
+for wget_env in /home/ec2-user/anaconda3/envs/*/bin/wget; do
+    rm -f "$wget_env" 2>/dev/null
+done
+
+# Create fake wget
 tee /usr/local/bin/wget > /dev/null << 'ENDWGET'
 #!/bin/bash
+echo "❌ wget is disabled on this instance"
 exit 127
 ENDWGET
 chmod +x /usr/local/bin/wget
 ln -sf /usr/local/bin/wget /usr/bin/wget 2>/dev/null || true
 
-# ===== BLOCK BOTO3 IMPORTS =====
+echo "✓ wget blocked"
+
+# ===== BLOCK BOTO3 IMPORTS (CLEAN ERROR MESSAGES) =====
 echo "🔒 Installing boto3 import blocker..."
 
-# Create the sitecustomize.py blocker script
+# Create the sitecustomize.py blocker script with clean error display
 cat << 'SITECUSTOM' > /tmp/sitecustomize.py
-"""Block boto3 with import hooks"""
+"""Block boto3 with import hooks - Clean error messages"""
 import sys
 from importlib.abc import MetaPathFinder
+
+class BlockedImportError(ImportError):
+    """Custom ImportError that displays cleanly without traceback"""
+    def __init__(self, module_name):
+        self.module_name = module_name
+        self.message = (
+            f"\n"
+            f"╔════════════════════════════════════════════════════════╗\n"
+            f"║  ❌ Import BLOCKED: {module_name:<40} ║\n"
+            f"║                                                        ║\n"
+            f"║  AWS SDK is disabled on this instance                 ║\n"
+            f"╚════════════════════════════════════════════════════════╝\n"
+        )
+        super().__init__(self.message)
+    
+    def __str__(self):
+        return self.message
+    
+    def __repr__(self):
+        return self.message
 
 class AWSBlocker(MetaPathFinder):
     """Block AWS-related imports"""
@@ -390,14 +524,7 @@ class AWSBlocker(MetaPathFinder):
         # Check if module is blocked
         for blocked in self.BLOCKED:
             if fullname == blocked or fullname.startswith(blocked + '.'):
-                raise ImportError(
-                    f"\n"
-                    f"╔════════════════════════════════════════════════════════╗\n"
-                    f"║  ❌ Import BLOCKED: {fullname:<40} ║\n"
-                    f"║                                                        ║\n"
-                    f"║  AWS SDK is disabled on this instance                 ║\n"
-                    f"╚════════════════════════════════════════════════════════╝\n"
-                )
+                raise BlockedImportError(fullname)
         return None
 
 # Install blocker
@@ -407,12 +534,35 @@ sys.meta_path.insert(0, AWSBlocker())
 for module in list(sys.modules.keys()):
     if any(module.startswith(blocked) for blocked in AWSBlocker.BLOCKED):
         del sys.modules[module]
+
+# Custom exception handler for Jupyter/IPython to hide traceback
+try:
+    import IPython
+    from IPython.core.interactiveshell import InteractiveShell
+    
+    def custom_exception_handler(self, etype, value, tb, tb_offset=None):
+        """Custom handler for BlockedImportError - hide traceback"""
+        if etype == BlockedImportError:
+            # Print only the message without traceback
+            print(str(value), file=sys.stderr)
+        else:
+            # Show normal traceback for other exceptions
+            self.showtraceback((etype, value, tb), tb_offset=tb_offset)
+    
+    # Override IPython exception handler
+    ip = IPython.get_ipython()
+    if ip is not None:
+        ip.set_custom_exc((BlockedImportError,), custom_exception_handler)
+except:
+    # Not in IPython/Jupyter, skip
+    pass
 SITECUSTOM
 
 # Wait for anaconda to be available
 echo "Waiting for Anaconda..."
 for i in {1..60}; do
   if [ -d "/home/ec2-user/anaconda3" ]; then
+    echo "Anaconda found after $i attempts"
     break
   fi
   sleep 5
@@ -448,7 +598,7 @@ done
 # Cleanup
 rm -f /tmp/sitecustomize.py
 
-echo "✓ boto3 import blocker installed"
+echo "✓ boto3 import blocker installed with clean error messages"
 
 # ========================================================
 
@@ -523,6 +673,7 @@ END
 else
   echo "Conda not available after 5 minutes, skipping configuration."
 fi
+
 EOT
   )
 }

@@ -58,6 +58,41 @@ META_STRUCTURED_WHITELIST = {
     "contig",
 }
 
+# Subkeys in structured meta lines that should be masked
+META_PII_SUBKEYS = {
+    # English
+    "name",
+    "Name",
+    "NAME",
+    "email",
+    "Email",
+    "EMAIL",
+    "dob",
+    "DOB",
+    "Dob",
+    "address",
+    "Address",
+    "ADDRESS",
+    "phone",
+    "Phone",
+    "PHONE",
+    # Indonesian
+    "nama",
+    "Nama",
+    "NAMA",
+    "tanggal_lahir",
+    "Tanggal_Lahir",
+    "TANGGAL_LAHIR",
+    "tgl_lahir",
+    "Tgl_Lahir",
+    "alamat",
+    "Alamat",
+    "ALAMAT",
+    "telepon",
+    "Telepon",
+    "TELEPON",
+}
+# TODO: ADD INDONESIA OBJECT KEYWORDS
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
     r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
@@ -65,8 +100,8 @@ PII_PATTERNS = [
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
 CASE_INSENSITIVE_PII_PATTERNS = [
-    r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kabupaten|Provinsi|Jakarta|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
-    r"\b(?:Dr\.|Prof\.|Ir\.|Haji|Hajjah|Putra|Putri|Sri|Adi|Raden|Ny)(?:\s[A-Z][a-z]+){1,2}\b",  # Name
+    r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
+    r"\b(?:Dr\.|Prof\.|Ir\.|Haji|Hajjah|Putra|Putri|Sri|Adi|Raden|Ny|H\.|Hj\.|Kiai|Kyai|K\.H\.|KH\.|Gus|Ning|Ir\.|Drs\.|Dra\.|Sultan|Pangeran|R\.M\.|R\.A\.|R\.Ay\.|Rr\.|Ust\.|Ustaz|Ustadz|Bapak|Bpk\.|Iibu|Saudara|Saudari|Sdr\.|Tuan|Tn\.|Nona|Nn\.|Dokter|Drg\.|Prof\.|Teungku|Teuku|Tgk\.|Datuk|Datuak|Tengku|Kemas|Nyimas|Kiagus|Nyanyu|Tubagus|Ratu|Rd\.|Rara|Roro|Anak Agung|Gusti|Dewa|Desak|Lalu|Umbu|ADaeng|Puang|Kapitan|Adi|Daeng|Karaeng|Arung|Opu|Petta|Latu|Upu)(?:\s[A-Z][a-z]+){1,2}\b",  # Name
 ]
 ANY_PII_PATTERN = re.compile(
     "|".join(
@@ -76,13 +111,122 @@ ANY_PII_PATTERN = re.compile(
     )
 )
 INDIVIDUAL_MARKER_FIELDS = {
-    "age",
-    "ethnicity",
-    "karyotypicsex",
-    "sex",
-}  # What we use to know we can use NAME_PATTERN to remove any name fields
+    # Name fields
+    "nama",
+    "nama_lengkap",
+    "fullname",
+    "full_name",
+    "marga",
+    "nama_depan",
+    "nama_belakang",
+    "first_name",
+    "last_name",
+    "inisial",
+    "initial",
+    "nama_ibu",
+    "nama ibu",
+    "nama_ayah",
+    "nama ayah",
+    "nama_pasangan",
+    "nama pasangan",
+    "nama_wali",
+    "nama wali",
+    "wali",
+    "kontak_darurat",
+    "kontak darurat",
+    "emergency_contact",
+    "gelar",
+    "title",
+    # Birth information
+    "tanggal_lahir",
+    "tgl_lahir",
+    "tgl lahir",
+    "tanggallahir",
+    "dob",
+    "birth_date",
+    "tempat_lahir",
+    "tmp_lahir",
+    "tmp lahir",
+    "birth_place",
+    # ID numbers
+    "nik",
+    "no_ktp",
+    "nomor_ktp",
+    "nomor ktp",
+    "ktp",
+    "kk",
+    "no_kk",
+    "nomor_kk",
+    "nomor kk",
+    "paspor",
+    "passport",
+    "no_paspor",
+    "nomor_paspor",
+    "npwp",
+    "no_npwp",
+    "nomor_npwp",
+    "bpjs",
+    "no_bpjs",
+    "nomor_bpjs",
+    "sim",
+    "no_sim",
+    "nomor_sim",
+    # Address fields
+    "alamat",
+    "alamat_lengkap",
+    "alamat lengkap",
+    "domisili",
+    "tempat_tinggal",
+    "tempat tinggal",
+    "tinggal",
+    "alamat_domisili",
+    "alamat domisili",
+    "rumah",
+    "home",
+    "alamat_ktp",
+    "alamat ktp",
+    "gps",
+    "koordinat",
+    "coordinate",
+    "coordinates",
+    "latitude",
+    "lat",
+    "longitude",
+    "lon",
+    "lng",
+    "lokasi",
+    "location",
+    # Contact information
+    "telepon",
+    "no_telepon",
+    "nomor_telepon",
+    "nomor telepon",
+    "hp",
+    "no_hp",
+    "nomor_hp",
+    "handphone",
+    "ponsel",
+    "mobile",
+    "telfon",
+    "telphone",
+    "phone",
+    "whatsapp",
+    "wa",
+    "email",
+    "e-mail",
+    # Medical record numbers
+    "mrn",
+    "medical_record_number",
+    "no_rm",
+    "nomor_rm",
+    "nomor rm",
+    "rekam_medis",
+    "rekam medis",
+    "no_mr",
+    "nomor_mr",
+}
 NAME_PATTERN = re.compile(
-    r"(?i)name"
+    r"(?i)(name|nama)"
 )  # Very broad - need to know we're dealing with an individual to use this
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
@@ -325,9 +469,15 @@ def anonymise_header_line(header_line):
         if value.startswith("<"):
             # Structured meta line
             subkey_values = get_structured_meta_values(value)
-            if key in META_STRUCTURED_WHITELIST and "Description" in subkey_values:
-                subkey_values["Description"] = anonymise(subkey_values["Description"])
+            if key in META_STRUCTURED_WHITELIST:
+                # Mask Description and known PII subkeys
+                if "Description" in subkey_values:
+                    subkey_values["Description"] = anonymise(subkey_values["Description"])
+                for subkey in META_PII_SUBKEYS:
+                    if subkey in subkey_values:
+                        subkey_values[subkey] = MASK
             else:
+                # Mask everything for non-whitelisted structured lines
                 subkey_values = {
                     anonymise(subkey): anonymise(subvalue)
                     for subkey, subvalue in subkey_values.items()
@@ -344,6 +494,22 @@ def anonymise_header_line(header_line):
             new_line = header_line
         else:
             new_line = f"##{anonymise(key)}={anonymise(value)}"
+    elif header_line.startswith("#CHROM"):
+        # Column header line - mask sample names that contain PII (columns after FORMAT)
+        columns = header_line.split("\t")
+        if len(columns) > 9:
+            # Has sample columns - mask only those with PII
+            mandatory_cols = columns[
+                :9
+            ]  # CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT
+            sample_names = columns[9:]
+            masked_samples = [anonymise(sample) for sample in sample_names]
+            new_line = "\t".join(mandatory_cols + masked_samples)
+            if new_line == header_line:
+                # No changes detected
+                return header_line
+        else:
+            new_line = header_line
     else:
         # Other comment line or incorrectly formatted, anonymise the whole thing
         new_line = f"#{anonymise(header_line[1:])}"

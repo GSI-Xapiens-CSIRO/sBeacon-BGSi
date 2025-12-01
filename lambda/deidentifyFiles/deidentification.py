@@ -534,16 +534,12 @@ def anonymise_header_line(header_line):
     if header_line.startswith("##") and header_line.count("="):
         # Is a meta line
         key, value = header_line[2:].split("=", 1)
-        print(f"DEBUG: Raw header line: {header_line[:100]}...")
         if value.startswith("<"):
             # Structured meta line
-            print(f"DEBUG: Raw value before parsing: {value[:150]}...")
             try:
                 subkey_values = get_structured_meta_values(value)
-                print(f"DEBUG: Processing structured meta line, key={key}")
-                print(f"DEBUG: subkey_values keys: {list(subkey_values.keys())}")
             except Exception as e:
-                print(f"DEBUG: ERROR parsing structured meta line: {e}")
+                print(f"ERROR parsing structured meta line: {e}")
                 raise
             if key in META_STRUCTURED_WHITELIST:
                 # Mask Description and dynamically detect PII in all subkey values
@@ -552,7 +548,6 @@ def anonymise_header_line(header_line):
                         subkey_values["Description"]
                     )
 
-                print(f"DEBUG: Checking for PII in all subkey values...")
                 # Dynamic masking: check both subkey name AND value for PII
                 for subkey, subvalue in list(subkey_values.items()):
                     # Skip standard VCF fields that should not be masked
@@ -561,16 +556,22 @@ def anonymise_header_line(header_line):
 
                     # Method 1: Check if subkey name is in PII list
                     if subkey in META_PII_SUBKEYS:
-                        print(f"DEBUG: Subkey name '{subkey}' is PII field, masking value")
-                        subkey_values[subkey] = MASK
+                        # Preserve quote structure if present
+                        if isinstance(subvalue, str) and subvalue.startswith('"') and subvalue.endswith('"'):
+                            subkey_values[subkey] = f'"{MASK}"'
+                        else:
+                            subkey_values[subkey] = MASK
                         continue
 
                     # Method 2: Check if subvalue contains PII patterns
                     if isinstance(subvalue, str):
                         masked_value = anonymise(subvalue)
                         if masked_value != subvalue:
-                            print(f"DEBUG: Subkey '{subkey}' value contains PII: '{subvalue[:50]}...' -> MASK")
-                            subkey_values[subkey] = MASK
+                            # Preserve quote structure if present
+                            if subvalue.startswith('"') and subvalue.endswith('"'):
+                                subkey_values[subkey] = f'"{MASK}"'
+                            else:
+                                subkey_values[subkey] = MASK
             else:
                 # Mask everything for non-whitelisted structured lines
                 subkey_values = {
@@ -647,54 +648,42 @@ def get_output_type(file_path):
 
 
 def process_header(file_path):
-    # First, read the raw file to see all lines
-    print(f"DEBUG: Reading raw file directly: {file_path}")
-    raw_header_count = 0
-    with open(file_path, 'r') as f:
-        for line in f:
-            if line.startswith('#'):
-                raw_header_count += 1
-                print(f"DEBUG: Raw file line {raw_header_count}: {line[:150].rstrip()}")
-            else:
-                break  # Stop at first data line
-    print(f"DEBUG: Total raw header lines in file: {raw_header_count}")
-
-    print(f"DEBUG: Now reading with bcftools...")
-    view_process = CheckedProcess(
-        args=["bcftools", "view", "--header-only", "--no-version", file_path],
-        stdout=subprocess.PIPE,
-        error_message="Reading header failed",
-    )
+    # Read the raw file directly to handle non-standard VCF lines
     header_changes = False
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
-    bcftools_line_count = 0
-    for line in view_process.stdout:
-        bcftools_line_count += 1
-        full_length = len(line)
-        line = line.rstrip("\r\n")
-        if len(line) == full_length:
-            # No line ending, has view_process crashed?
-            view_process.check()
-        line = line.rstrip("\r\n")
-        if line.startswith("##INFO=<"):
-            # INFO line, add to whitelist if Type is not "String"
-            info_attributes = get_structured_meta_values(line[7:])
-            if info_attributes.get("Type", "String") != "String":
-                info_whitelist.add(info_attributes.get("ID"))
-        new_line = anonymise_header_line(remove_nested_angle_brackets(line))
-        header_lines.append(new_line)
-        if new_line != line:
-            header_changes = True
-    view_process.check()
-    print(f"DEBUG: Total lines read by bcftools: {bcftools_line_count}")
-    print(f"DEBUG: Difference: {raw_header_count - bcftools_line_count} lines missing from bcftools output")
+
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                line = line.rstrip("\r\n")
+
+                # Extract INFO whitelist entries
+                if line.startswith("##INFO=<"):
+                    try:
+                        info_attributes = get_structured_meta_values(line[7:])
+                        if info_attributes.get("Type", "String") != "String":
+                            info_id = info_attributes.get("ID")
+                            if info_id:
+                                info_whitelist.add(info_id)
+                    except Exception as e:
+                        print(f"Could not parse INFO line for whitelist: {e}")
+
+                # Anonymise the header line
+                new_line = anonymise_header_line(remove_nested_angle_brackets(line))
+                header_lines.append(new_line)
+                if new_line != line:
+                    header_changes = True
+            else:
+                break  # Stop at first data line
+
     if header_changes:
         print("Header PII detected, creating anonymised header")
         with open(f"{WORKING_DIR}/{HEADER_PATH}", "w") as header_file:
             print("\n".join(header_lines), file=header_file)
     else:
         print("No PII detected in header")
+
     return info_whitelist, header_lines, header_changes
 
 

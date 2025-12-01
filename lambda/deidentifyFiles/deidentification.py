@@ -293,12 +293,69 @@ NAME_PATTERN = re.compile(
     r"(?i)(name|nama)"
 )  # Very broad - need to know we're dealing with an individual to use this
 METADATA_KEY_PII_PATTERNS = [
-    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
-    r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
-    r"(?i)\b(?:alamat|address|rumah|home|domisili|residence|tempat[_ ]tinggal|lokasi|location)\b",
-    r"(?i)\b(?:telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)\b",
-    r"(?i)\b(?:email|e-mail|e_mail|surel)\b",
+    # Personal name fields (explicit list - handles both _ and space)
+    r"(?i)^(nama_lengkap|nama lengkap|fullname|full_name|full name)$",
+    r"(?i)^(nama_depan|nama depan|first_name|first name|given_name|given name)$",
+    r"(?i)^(nama_belakang|nama belakang|last_name|last name|family_name|family name)$",
+    r"(?i)^(nama_tengah|nama tengah|middle_name|middle name)$",
+    r"(?i)^(nama_ibu|nama ibu)$",
+    r"(?i)^(nama_ayah|nama ayah)$",
+    r"(?i)^(nama_pasangan|nama pasangan)$",
+    r"(?i)^(nama_wali|nama wali)$",
+    r"(?i)^(nama|name|surname|marga|wali|inisial|initial)$",
+    r"(?i)^(gelar|title)$",
+    r"(?i)^(kontak_darurat|kontak darurat|emergency_contact|emergency contact)$",
+    # Birth date fields
+    r"(?i)^(tanggal_lahir|tanggal lahir|tgl_lahir|tgl lahir|tanggallahir)$",
+    r"(?i)^(dob|birth_date|birth date|date_of_birth|date of birth)$",
+    # Birth place fields
+    r"(?i)^(tempat_lahir|tempat lahir|tmp_lahir|tmp lahir|birth_place|birth place|place_of_birth|place of birth)$",
+    # ID fields - Passport
+    r"(?i)^(passport|paspor|no_paspor|no paspor|nomor_paspor|nomor paspor)$",
+    # ID fields - NPWP
+    r"(?i)^(npwp|no_npwp|no npwp|nomor_npwp|nomor npwp)$",
+    # ID fields - SIM
+    r"(?i)^(sim|no_sim|no sim|nomor_sim|nomor sim)$",
+    # License plate
+    r"(?i)^(nopol|no_pol|plat_number|plat number|plate_number|plate number)$",
+    # Address fields (including tinggal)
+    r"(?i)^(alamat|address|rumah|home)$",
+    r"(?i)^(alamat_lengkap|alamat lengkap|alamat_domisili|alamat domisili|alamat_ktp|alamat ktp)$",
+    r"(?i)^(domisili|residence|tempat_tinggal|tempat tinggal|tinggal)$",
+    r"(?i)^(lokasi|location)$",
+    # GPS coordinates
+    r"(?i)^(gps|koordinat|coordinate|coordinates)$",
+    r"(?i)^(latitude|lat|longitude|lon|lng)$",
+    # Phone fields
+    r"(?i)^(telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)$",
+    r"(?i)^(no_telepon|no telepon|nomor_telepon|nomor telepon|nomer_telepon|nomer telepon)$",
+    r"(?i)^(no_hp|no hp|nomor_hp|nomor hp|nomer_hp|nomer hp)$",
+    # Email
+    r"(?i)^(email|e-mail|e_mail|surel)$",
+    # Medical record numbers
+    r"(?i)^(mrn|medical_record_number|medical record number)$",
+    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
+    r"(?i)^(rekam_medis|rekam medis)$",
+    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
 ]
+
+# Medical record field patterns (separate list for special masking)
+MEDICAL_RECORD_PATTERNS = [
+    r"(?i)^(mrn|medical_record_number|medical record number)$",
+    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
+    r"(?i)^(rekam_medis|rekam medis)$",
+    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
+]
+
+def mask_medical_record(value):
+    """Mask medical record number while preserving prefix like RM-, MR-, MRN-"""
+    if isinstance(value, str):
+        # Match patterns like RM-, MR-, MRN- at the start
+        match = re.match(r'^(RM-|MR-|MRN-)', value, re.IGNORECASE)
+        if match:
+            prefix = match.group(1)
+            return f"{prefix}{MASK}"
+    return MASK
 
 GENOMIC_SUFFIX_TYPES = {
     ".bcf": "u",
@@ -928,8 +985,13 @@ def process_tabular(input_path, output_path, delimiter):
 
         # Mark which columns are PII (should be masked)
         pii_columns = set()
+        medical_record_columns = set()
         for idx, col_name in enumerate(header):
-            if any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
+            # Check if it's a medical record field
+            if any(re.match(pattern, col_name) for pattern in MEDICAL_RECORD_PATTERNS):
+                pii_columns.add(idx)
+                medical_record_columns.add(idx)
+            elif any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
                 pii_columns.add(idx)
             elif is_individual and NAME_PATTERN.search(col_name):
                 pii_columns.add(idx)
@@ -945,8 +1007,12 @@ def process_tabular(input_path, output_path, delimiter):
                 masked_row = []
                 for idx, value in enumerate(row):
                     if idx in pii_columns:
-                        # Mask PII column values
-                        masked_row.append(MASK)
+                        # Use special masking for medical records (preserve prefix)
+                        if idx in medical_record_columns:
+                            masked_row.append(mask_medical_record(value))
+                        else:
+                            # Mask other PII column values completely
+                            masked_row.append(MASK)
                     else:
                         # Anonymise non-PII columns (for any embedded PII in values)
                         masked_row.append(anonymise(value))
@@ -1025,8 +1091,12 @@ def process_json(input_path, output_path):
             elif event == "map_key":
                 if value.casefold() in INDIVIDUAL_MARKER_FIELDS:
                     stack[-1]["is_individual"] = True
+                # Check if it's a medical record field (needs special masking)
+                if any(re.match(pattern, value) for pattern in MEDICAL_RECORD_PATTERNS):
+                    stack[-1]["mask_next_value"] = True
+                    stack[-1]["is_medical_record"] = True
                 # If the key matches a PII pattern, mark it for masking instead of skipping
-                if any(
+                elif any(
                     re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
                     stack[-1]["mask_next_value"] = True
@@ -1049,9 +1119,16 @@ def process_json(input_path, output_path):
 
                 # Check if we should mask this value
                 should_mask = stack and stack[-1].get("mask_next_value", False)
+                is_medical_record = stack and stack[-1].get("is_medical_record", False)
                 if should_mask:
                     stack[-1]["mask_next_value"] = False
-                    outfile.write(json.dumps(MASK))
+                    if is_medical_record:
+                        stack[-1]["is_medical_record"] = False
+                        # Use special masking for medical records (preserve prefix)
+                        outfile.write(json.dumps(mask_medical_record(value)))
+                    else:
+                        # Mask other PII completely
+                        outfile.write(json.dumps(MASK))
                 elif event == "string":
                     outfile.write(json.dumps(anonymise(value)))
                 else:

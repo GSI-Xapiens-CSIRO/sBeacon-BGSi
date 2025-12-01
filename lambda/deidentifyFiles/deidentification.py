@@ -60,42 +60,82 @@ META_STRUCTURED_WHITELIST = {
 
 # Subkeys in structured meta lines that should be masked
 META_PII_SUBKEYS = {
-    # English
+    # English - Name
     "name",
     "Name",
     "NAME",
+    "fullname",
+    "FullName",
+    "full_name",
+    "Full_Name",
+    # English - Email
     "email",
     "Email",
     "EMAIL",
+    "e-mail",
+    "E-mail",
+    "E-Mail",
+    # English - DOB
     "dob",
     "DOB",
     "Dob",
+    "birth_date",
+    "Birth_Date",
+    "birthdate",
+    "BirthDate",
+    # English - Address
     "address",
     "Address",
     "ADDRESS",
+    "home",
+    "Home",
+    "HOME",
+    # English - Phone
     "phone",
     "Phone",
     "PHONE",
-    # Indonesian
+    "telephone",
+    "Telephone",
+    "mobile",
+    "Mobile",
+    # Indonesian - Nama
     "nama",
     "Nama",
     "NAMA",
+    "nama_lengkap",
+    "Nama_Lengkap",
+    # Indonesian - Tanggal Lahir
     "tanggal_lahir",
     "Tanggal_Lahir",
     "TANGGAL_LAHIR",
     "tgl_lahir",
     "Tgl_Lahir",
+    "TGL_LAHIR",
+    # Indonesian - Alamat
     "alamat",
     "Alamat",
     "ALAMAT",
+    "rumah",
+    "Rumah",
+    "RUMAH",
+    # Indonesian - Telepon
     "telepon",
     "Telepon",
     "TELEPON",
+    "telfon",
+    "Telfon",
+    "TELFON",
+    "telphone",
+    "Telphone",
+    "hp",
+    "HP",
 }
 # TODO: ADD INDONESIA OBJECT KEYWORDS
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
+    r"\b(\+?62|0)[\s-]?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}\b",  # Mobile phone (Indonesia)
+    r"\b0\d{1,3}[\s-]?\d{6,8}\b",  # Fixed line phone (any area code)
+    r"\b\d{10,13}\b",  # General phone number (10-13 digits)
     r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
@@ -214,6 +254,31 @@ INDIVIDUAL_MARKER_FIELDS = {
     "wa",
     "email",
     "e-mail",
+    # Demographic information
+    "age",
+    "umur",
+    "usia",
+    "ethnicity",
+    "etnicities",
+    "etnis",
+    "etnisitas",
+    "suku",
+    "nationality",
+    "kewarganegaraan",
+    "warganegara",
+    "citizenship",
+    "race",
+    "ras",
+    "religion",
+    "agama",
+    "kepercayaan",
+    "sex",
+    "gender",
+    "jenis_kelamin",
+    "jeniskelamin",
+    "kelamin",
+    "jk",
+    "karyotypicsex",
     # Medical record numbers
     "mrn",
     "medical_record_number",
@@ -231,6 +296,9 @@ NAME_PATTERN = re.compile(
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
+    r"(?i)\b(?:alamat|address|rumah|home|domisili|residence|tempat[_ ]tinggal|lokasi|location)\b",
+    r"(?i)\b(?:telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)\b",
+    r"(?i)\b(?:email|e-mail|e_mail|surel)\b",
 ]
 
 GENOMIC_SUFFIX_TYPES = {
@@ -466,16 +534,43 @@ def anonymise_header_line(header_line):
     if header_line.startswith("##") and header_line.count("="):
         # Is a meta line
         key, value = header_line[2:].split("=", 1)
+        print(f"DEBUG: Raw header line: {header_line[:100]}...")
         if value.startswith("<"):
             # Structured meta line
-            subkey_values = get_structured_meta_values(value)
+            print(f"DEBUG: Raw value before parsing: {value[:150]}...")
+            try:
+                subkey_values = get_structured_meta_values(value)
+                print(f"DEBUG: Processing structured meta line, key={key}")
+                print(f"DEBUG: subkey_values keys: {list(subkey_values.keys())}")
+            except Exception as e:
+                print(f"DEBUG: ERROR parsing structured meta line: {e}")
+                raise
             if key in META_STRUCTURED_WHITELIST:
-                # Mask Description and known PII subkeys
+                # Mask Description and dynamically detect PII in all subkey values
                 if "Description" in subkey_values:
-                    subkey_values["Description"] = anonymise(subkey_values["Description"])
-                for subkey in META_PII_SUBKEYS:
-                    if subkey in subkey_values:
+                    subkey_values["Description"] = anonymise(
+                        subkey_values["Description"]
+                    )
+
+                print(f"DEBUG: Checking for PII in all subkey values...")
+                # Dynamic masking: check both subkey name AND value for PII
+                for subkey, subvalue in list(subkey_values.items()):
+                    # Skip standard VCF fields that should not be masked
+                    if subkey in {"ID", "Number", "Type", "Description"}:
+                        continue
+
+                    # Method 1: Check if subkey name is in PII list
+                    if subkey in META_PII_SUBKEYS:
+                        print(f"DEBUG: Subkey name '{subkey}' is PII field, masking value")
                         subkey_values[subkey] = MASK
+                        continue
+
+                    # Method 2: Check if subvalue contains PII patterns
+                    if isinstance(subvalue, str):
+                        masked_value = anonymise(subvalue)
+                        if masked_value != subvalue:
+                            print(f"DEBUG: Subkey '{subkey}' value contains PII: '{subvalue[:50]}...' -> MASK")
+                            subkey_values[subkey] = MASK
             else:
                 # Mask everything for non-whitelisted structured lines
                 subkey_values = {
@@ -552,6 +647,19 @@ def get_output_type(file_path):
 
 
 def process_header(file_path):
+    # First, read the raw file to see all lines
+    print(f"DEBUG: Reading raw file directly: {file_path}")
+    raw_header_count = 0
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                raw_header_count += 1
+                print(f"DEBUG: Raw file line {raw_header_count}: {line[:150].rstrip()}")
+            else:
+                break  # Stop at first data line
+    print(f"DEBUG: Total raw header lines in file: {raw_header_count}")
+
+    print(f"DEBUG: Now reading with bcftools...")
     view_process = CheckedProcess(
         args=["bcftools", "view", "--header-only", "--no-version", file_path],
         stdout=subprocess.PIPE,
@@ -560,7 +668,9 @@ def process_header(file_path):
     header_changes = False
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
+    bcftools_line_count = 0
     for line in view_process.stdout:
+        bcftools_line_count += 1
         full_length = len(line)
         line = line.rstrip("\r\n")
         if len(line) == full_length:
@@ -577,6 +687,8 @@ def process_header(file_path):
         if new_line != line:
             header_changes = True
     view_process.check()
+    print(f"DEBUG: Total lines read by bcftools: {bcftools_line_count}")
+    print(f"DEBUG: Difference: {raw_header_count - bcftools_line_count} lines missing from bcftools output")
     if header_changes:
         print("Header PII detected, creating anonymised header")
         with open(f"{WORKING_DIR}/{HEADER_PATH}", "w") as header_file:

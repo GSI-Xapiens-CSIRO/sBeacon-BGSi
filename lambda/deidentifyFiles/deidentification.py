@@ -60,42 +60,82 @@ META_STRUCTURED_WHITELIST = {
 
 # Subkeys in structured meta lines that should be masked
 META_PII_SUBKEYS = {
-    # English
+    # English - Name
     "name",
     "Name",
     "NAME",
+    "fullname",
+    "FullName",
+    "full_name",
+    "Full_Name",
+    # English - Email
     "email",
     "Email",
     "EMAIL",
+    "e-mail",
+    "E-mail",
+    "E-Mail",
+    # English - DOB
     "dob",
     "DOB",
     "Dob",
+    "birth_date",
+    "Birth_Date",
+    "birthdate",
+    "BirthDate",
+    # English - Address
     "address",
     "Address",
     "ADDRESS",
+    "home",
+    "Home",
+    "HOME",
+    # English - Phone
     "phone",
     "Phone",
     "PHONE",
-    # Indonesian
+    "telephone",
+    "Telephone",
+    "mobile",
+    "Mobile",
+    # Indonesian - Nama
     "nama",
     "Nama",
     "NAMA",
+    "nama_lengkap",
+    "Nama_Lengkap",
+    # Indonesian - Tanggal Lahir
     "tanggal_lahir",
     "Tanggal_Lahir",
     "TANGGAL_LAHIR",
     "tgl_lahir",
     "Tgl_Lahir",
+    "TGL_LAHIR",
+    # Indonesian - Alamat
     "alamat",
     "Alamat",
     "ALAMAT",
+    "rumah",
+    "Rumah",
+    "RUMAH",
+    # Indonesian - Telepon
     "telepon",
     "Telepon",
     "TELEPON",
+    "telfon",
+    "Telfon",
+    "TELFON",
+    "telphone",
+    "Telphone",
+    "hp",
+    "HP",
 }
 # TODO: ADD INDONESIA OBJECT KEYWORDS
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
+    r"\b(\+?62|0)[\s-]?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}\b",  # Mobile phone (Indonesia)
+    r"\b0\d{1,3}[\s-]?\d{6,8}\b",  # Fixed line phone (any area code)
+    r"\b\d{10,13}\b",  # General phone number (10-13 digits)
     r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
@@ -214,6 +254,31 @@ INDIVIDUAL_MARKER_FIELDS = {
     "wa",
     "email",
     "e-mail",
+    # Demographic information
+    "age",
+    "umur",
+    "usia",
+    "ethnicity",
+    "etnicities",
+    "etnis",
+    "etnisitas",
+    "suku",
+    "nationality",
+    "kewarganegaraan",
+    "warganegara",
+    "citizenship",
+    "race",
+    "ras",
+    "religion",
+    "agama",
+    "kepercayaan",
+    "sex",
+    "gender",
+    "jenis_kelamin",
+    "jeniskelamin",
+    "kelamin",
+    "jk",
+    "karyotypicsex",
     # Medical record numbers
     "mrn",
     "medical_record_number",
@@ -231,6 +296,9 @@ NAME_PATTERN = re.compile(
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
+    r"(?i)\b(?:alamat|address|rumah|home|domisili|residence|tempat[_ ]tinggal|lokasi|location)\b",
+    r"(?i)\b(?:telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)\b",
+    r"(?i)\b(?:email|e-mail|e_mail|surel)\b",
 ]
 
 GENOMIC_SUFFIX_TYPES = {
@@ -468,14 +536,42 @@ def anonymise_header_line(header_line):
         key, value = header_line[2:].split("=", 1)
         if value.startswith("<"):
             # Structured meta line
-            subkey_values = get_structured_meta_values(value)
+            try:
+                subkey_values = get_structured_meta_values(value)
+            except Exception as e:
+                print(f"ERROR parsing structured meta line: {e}")
+                raise
             if key in META_STRUCTURED_WHITELIST:
-                # Mask Description and known PII subkeys
+                # Mask Description and dynamically detect PII in all subkey values
                 if "Description" in subkey_values:
-                    subkey_values["Description"] = anonymise(subkey_values["Description"])
-                for subkey in META_PII_SUBKEYS:
-                    if subkey in subkey_values:
-                        subkey_values[subkey] = MASK
+                    subkey_values["Description"] = anonymise(
+                        subkey_values["Description"]
+                    )
+
+                # Dynamic masking: check both subkey name AND value for PII
+                for subkey, subvalue in list(subkey_values.items()):
+                    # Skip standard VCF fields that should not be masked
+                    if subkey in {"ID", "Number", "Type", "Description"}:
+                        continue
+
+                    # Method 1: Check if subkey name is in PII list
+                    if subkey in META_PII_SUBKEYS:
+                        # Preserve quote structure if present
+                        if isinstance(subvalue, str) and subvalue.startswith('"') and subvalue.endswith('"'):
+                            subkey_values[subkey] = f'"{MASK}"'
+                        else:
+                            subkey_values[subkey] = MASK
+                        continue
+
+                    # Method 2: Check if subvalue contains PII patterns
+                    if isinstance(subvalue, str):
+                        masked_value = anonymise(subvalue)
+                        if masked_value != subvalue:
+                            # Preserve quote structure if present
+                            if subvalue.startswith('"') and subvalue.endswith('"'):
+                                subkey_values[subkey] = f'"{MASK}"'
+                            else:
+                                subkey_values[subkey] = MASK
             else:
                 # Mask everything for non-whitelisted structured lines
                 subkey_values = {
@@ -552,37 +648,42 @@ def get_output_type(file_path):
 
 
 def process_header(file_path):
-    view_process = CheckedProcess(
-        args=["bcftools", "view", "--header-only", "--no-version", file_path],
-        stdout=subprocess.PIPE,
-        error_message="Reading header failed",
-    )
+    # Read the raw file directly to handle non-standard VCF lines
     header_changes = False
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
-    for line in view_process.stdout:
-        full_length = len(line)
-        line = line.rstrip("\r\n")
-        if len(line) == full_length:
-            # No line ending, has view_process crashed?
-            view_process.check()
-        line = line.rstrip("\r\n")
-        if line.startswith("##INFO=<"):
-            # INFO line, add to whitelist if Type is not "String"
-            info_attributes = get_structured_meta_values(line[7:])
-            if info_attributes.get("Type", "String") != "String":
-                info_whitelist.add(info_attributes.get("ID"))
-        new_line = anonymise_header_line(remove_nested_angle_brackets(line))
-        header_lines.append(new_line)
-        if new_line != line:
-            header_changes = True
-    view_process.check()
+
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.startswith('#'):
+                line = line.rstrip("\r\n")
+
+                # Extract INFO whitelist entries
+                if line.startswith("##INFO=<"):
+                    try:
+                        info_attributes = get_structured_meta_values(line[7:])
+                        if info_attributes.get("Type", "String") != "String":
+                            info_id = info_attributes.get("ID")
+                            if info_id:
+                                info_whitelist.add(info_id)
+                    except Exception as e:
+                        print(f"Could not parse INFO line for whitelist: {e}")
+
+                # Anonymise the header line
+                new_line = anonymise_header_line(remove_nested_angle_brackets(line))
+                header_lines.append(new_line)
+                if new_line != line:
+                    header_changes = True
+            else:
+                break  # Stop at first data line
+
     if header_changes:
         print("Header PII detected, creating anonymised header")
         with open(f"{WORKING_DIR}/{HEADER_PATH}", "w") as header_file:
             print("\n".join(header_lines), file=header_file)
     else:
         print("No PII detected in header")
+
     return info_whitelist, header_lines, header_changes
 
 

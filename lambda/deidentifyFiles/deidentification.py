@@ -332,7 +332,30 @@ METADATA_KEY_PII_PATTERNS = [
     r"(?i)^(no_hp|no hp|nomor_hp|nomor hp|nomer_hp|nomer hp)$",
     # Email
     r"(?i)^(email|e-mail|e_mail|surel)$",
+    # Medical record numbers
+    r"(?i)^(mrn|medical_record_number|medical record number)$",
+    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
+    r"(?i)^(rekam_medis|rekam medis)$",
+    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
 ]
+
+# Medical record field patterns (separate list for special masking)
+MEDICAL_RECORD_PATTERNS = [
+    r"(?i)^(mrn|medical_record_number|medical record number)$",
+    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
+    r"(?i)^(rekam_medis|rekam medis)$",
+    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
+]
+
+def mask_medical_record(value):
+    """Mask medical record number while preserving prefix like RM-, MR-, MRN-"""
+    if isinstance(value, str):
+        # Match patterns like RM-, MR-, MRN- at the start
+        match = re.match(r'^(RM-|MR-|MRN-)', value, re.IGNORECASE)
+        if match:
+            prefix = match.group(1)
+            return f"{prefix}{MASK}"
+    return MASK
 
 GENOMIC_SUFFIX_TYPES = {
     ".bcf": "u",
@@ -962,8 +985,13 @@ def process_tabular(input_path, output_path, delimiter):
 
         # Mark which columns are PII (should be masked)
         pii_columns = set()
+        medical_record_columns = set()
         for idx, col_name in enumerate(header):
-            if any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
+            # Check if it's a medical record field
+            if any(re.match(pattern, col_name) for pattern in MEDICAL_RECORD_PATTERNS):
+                pii_columns.add(idx)
+                medical_record_columns.add(idx)
+            elif any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
                 pii_columns.add(idx)
             elif is_individual and NAME_PATTERN.search(col_name):
                 pii_columns.add(idx)
@@ -979,8 +1007,12 @@ def process_tabular(input_path, output_path, delimiter):
                 masked_row = []
                 for idx, value in enumerate(row):
                     if idx in pii_columns:
-                        # Mask PII column values
-                        masked_row.append(MASK)
+                        # Use special masking for medical records (preserve prefix)
+                        if idx in medical_record_columns:
+                            masked_row.append(mask_medical_record(value))
+                        else:
+                            # Mask other PII column values completely
+                            masked_row.append(MASK)
                     else:
                         # Anonymise non-PII columns (for any embedded PII in values)
                         masked_row.append(anonymise(value))
@@ -1059,8 +1091,12 @@ def process_json(input_path, output_path):
             elif event == "map_key":
                 if value.casefold() in INDIVIDUAL_MARKER_FIELDS:
                     stack[-1]["is_individual"] = True
+                # Check if it's a medical record field (needs special masking)
+                if any(re.match(pattern, value) for pattern in MEDICAL_RECORD_PATTERNS):
+                    stack[-1]["mask_next_value"] = True
+                    stack[-1]["is_medical_record"] = True
                 # If the key matches a PII pattern, mark it for masking instead of skipping
-                if any(
+                elif any(
                     re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
                     stack[-1]["mask_next_value"] = True
@@ -1083,9 +1119,16 @@ def process_json(input_path, output_path):
 
                 # Check if we should mask this value
                 should_mask = stack and stack[-1].get("mask_next_value", False)
+                is_medical_record = stack and stack[-1].get("is_medical_record", False)
                 if should_mask:
                     stack[-1]["mask_next_value"] = False
-                    outfile.write(json.dumps(MASK))
+                    if is_medical_record:
+                        stack[-1]["is_medical_record"] = False
+                        # Use special masking for medical records (preserve prefix)
+                        outfile.write(json.dumps(mask_medical_record(value)))
+                    else:
+                        # Mask other PII completely
+                        outfile.write(json.dumps(MASK))
                 elif event == "string":
                     outfile.write(json.dumps(anonymise(value)))
                 else:

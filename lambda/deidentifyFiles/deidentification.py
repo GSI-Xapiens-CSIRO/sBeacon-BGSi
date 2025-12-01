@@ -293,11 +293,45 @@ NAME_PATTERN = re.compile(
     r"(?i)(name|nama)"
 )  # Very broad - need to know we're dealing with an individual to use this
 METADATA_KEY_PII_PATTERNS = [
-    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
-    r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
-    r"(?i)\b(?:alamat|address|rumah|home|domisili|residence|tempat[_ ]tinggal|lokasi|location)\b",
-    r"(?i)\b(?:telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)\b",
-    r"(?i)\b(?:email|e-mail|e_mail|surel)\b",
+    # Personal name fields (explicit list - handles both _ and space)
+    r"(?i)^(nama_lengkap|nama lengkap|fullname|full_name|full name)$",
+    r"(?i)^(nama_depan|nama depan|first_name|first name|given_name|given name)$",
+    r"(?i)^(nama_belakang|nama belakang|last_name|last name|family_name|family name)$",
+    r"(?i)^(nama_tengah|nama tengah|middle_name|middle name)$",
+    r"(?i)^(nama_ibu|nama ibu)$",
+    r"(?i)^(nama_ayah|nama ayah)$",
+    r"(?i)^(nama_pasangan|nama pasangan)$",
+    r"(?i)^(nama_wali|nama wali)$",
+    r"(?i)^(nama|name|surname|marga|wali|inisial|initial)$",
+    r"(?i)^(gelar|title)$",
+    r"(?i)^(kontak_darurat|kontak darurat|emergency_contact|emergency contact)$",
+    # Birth date fields
+    r"(?i)^(tanggal_lahir|tanggal lahir|tgl_lahir|tgl lahir|tanggallahir)$",
+    r"(?i)^(dob|birth_date|birth date|date_of_birth|date of birth)$",
+    # Birth place fields
+    r"(?i)^(tempat_lahir|tempat lahir|tmp_lahir|tmp lahir|birth_place|birth place|place_of_birth|place of birth)$",
+    # ID fields - Passport
+    r"(?i)^(passport|paspor|no_paspor|no paspor|nomor_paspor|nomor paspor)$",
+    # ID fields - NPWP
+    r"(?i)^(npwp|no_npwp|no npwp|nomor_npwp|nomor npwp)$",
+    # ID fields - SIM
+    r"(?i)^(sim|no_sim|no sim|nomor_sim|nomor sim)$",
+    # License plate
+    r"(?i)^(nopol|no_pol|plat_number|plat number|plate_number|plate number)$",
+    # Address fields (including tinggal)
+    r"(?i)^(alamat|address|rumah|home)$",
+    r"(?i)^(alamat_lengkap|alamat lengkap|alamat_domisili|alamat domisili|alamat_ktp|alamat ktp)$",
+    r"(?i)^(domisili|residence|tempat_tinggal|tempat tinggal|tinggal)$",
+    r"(?i)^(lokasi|location)$",
+    # GPS coordinates
+    r"(?i)^(gps|koordinat|coordinate|coordinates)$",
+    r"(?i)^(latitude|lat|longitude|lon|lng)$",
+    # Phone fields
+    r"(?i)^(telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)$",
+    r"(?i)^(no_telepon|no telepon|nomor_telepon|nomor telepon|nomer_telepon|nomer telepon)$",
+    r"(?i)^(no_hp|no hp|nomor_hp|nomor hp|nomer_hp|nomer hp)$",
+    # Email
+    r"(?i)^(email|e-mail|e_mail|surel)$",
 ]
 
 GENOMIC_SUFFIX_TYPES = {

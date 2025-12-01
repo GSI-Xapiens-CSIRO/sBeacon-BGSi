@@ -918,29 +918,39 @@ def anonymise_vcf(input_path, output_path):
 
 
 def process_tabular(input_path, output_path, delimiter):
-    """Processes CSV/TSV files to deidentify PII and drop sensitive columns."""
+    """Processes CSV/TSV files to deidentify PII by masking sensitive column values."""
     with open(input_path, "r", newline="", encoding="utf-8") as infile:
         reader = csv.reader(infile, delimiter=delimiter)
         header = next(reader)
         is_individual = any(
             col_name.casefold() in INDIVIDUAL_MARKER_FIELDS for col_name in header
         )
-        columns_to_keep = [
-            idx
-            for idx, col_name in enumerate(header)
-            if not any(
-                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS
-            )
-            and not (is_individual and NAME_PATTERN.search(col_name))
-        ]
+
+        # Mark which columns are PII (should be masked)
+        pii_columns = set()
+        for idx, col_name in enumerate(header):
+            if any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
+                pii_columns.add(idx)
+            elif is_individual and NAME_PATTERN.search(col_name):
+                pii_columns.add(idx)
+
         with open(output_path, "w", newline="", encoding="utf-8") as outfile:
             writer = csv.writer(outfile, delimiter=delimiter)
 
-            filtered_header = [header[idx] for idx in columns_to_keep]
-            writer.writerow(filtered_header)
+            # Keep all columns (don't filter)
+            writer.writerow(header)
+
+            # Process each row
             for row in reader:
-                filtered_row = [anonymise(row[idx]) for idx in columns_to_keep]
-                writer.writerow(filtered_row)
+                masked_row = []
+                for idx, value in enumerate(row):
+                    if idx in pii_columns:
+                        # Mask PII column values
+                        masked_row.append(MASK)
+                    else:
+                        # Anonymise non-PII columns (for any embedded PII in values)
+                        masked_row.append(anonymise(value))
+                writer.writerow(masked_row)
 
 
 def process_json(input_path, output_path):

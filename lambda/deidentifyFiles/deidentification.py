@@ -1,6 +1,5 @@
 import argparse
 import csv
-import io
 import json
 import os
 import re
@@ -944,21 +943,6 @@ def process_tabular(input_path, output_path, delimiter):
                 writer.writerow(filtered_row)
 
 
-def outfile_after_element(stack, outfile):
-    if stack:
-        if "stored_outfile" in stack[-1]:
-            stack[-1].setdefault("name_strings", []).append(
-                outfile.getvalue().strip(",")
-            )
-            outfile.close()
-            outfile = stack[-1].pop("stored_outfile")
-        if stack[-1].get("skip_first"):
-            del stack[-1]["skip_first"]
-        else:
-            stack[-1]["first"] = False
-    return outfile
-
-
 def process_json(input_path, output_path):
     """Process JSON files to deidentify PII, writing results line-by-line and omitting sensitive keys"""
     with open(input_path, "r") as infile, open(output_path, "w") as outfile:
@@ -977,6 +961,13 @@ def process_json(input_path, output_path):
                 continue
 
             if event == "start_map":
+                # Check if we should mask this object
+                if stack and stack[-1].get("mask_next_value", False):
+                    stack[-1]["mask_next_value"] = False
+                    outfile.write(json.dumps(MASK))
+                    # Set keybuffer to skip the rest of this object
+                    keybuffer = prefix
+                    continue
                 if stack:
                     if stack[-1]["type"] == "object" and stack[-1].get("pending_key"):
                         outfile.write(":")
@@ -987,15 +978,22 @@ def process_json(input_path, output_path):
                 stack.append({"type": "object", "first": True, "pending_key": False})
 
             elif event == "end_map":
-                if "name_strings" in stack[-1] and not stack[-1].get("is_individual"):
-                    if not stack[-1]["first"]:
-                        outfile.write(",")
-                    outfile.write(",".join(stack[-1].pop("name_strings")))
                 outfile.write("}")
                 stack.pop()
-                outfile = outfile_after_element(stack, outfile)
+                if stack:
+                    if stack[-1].get("skip_first"):
+                        del stack[-1]["skip_first"]
+                    else:
+                        stack[-1]["first"] = False
 
             elif event == "start_array":
+                # Check if we should mask this array
+                if stack and stack[-1].get("mask_next_value", False):
+                    stack[-1]["mask_next_value"] = False
+                    outfile.write(json.dumps(MASK))
+                    # Set keybuffer to skip the rest of this array
+                    keybuffer = prefix
+                    continue
                 if stack:
                     if stack[-1]["type"] == "object" and stack[-1].get("pending_key"):
                         outfile.write(":")
@@ -1008,21 +1006,22 @@ def process_json(input_path, output_path):
             elif event == "end_array":
                 outfile.write("]")
                 stack.pop()
-                outfile = outfile_after_element(stack, outfile)
+                if stack:
+                    if stack[-1].get("skip_first"):
+                        del stack[-1]["skip_first"]
+                    else:
+                        stack[-1]["first"] = False
 
             elif event == "map_key":
                 if value.casefold() in INDIVIDUAL_MARKER_FIELDS:
                     stack[-1]["is_individual"] = True
-                # If the key matches a PII pattern, set the keybuffer to skip its subtree.
+                # If the key matches a PII pattern, mark it for masking instead of skipping
                 if any(
                     re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
-                    keybuffer = f"{prefix}.{value}"
-                    continue
-                if NAME_PATTERN.search(value):
-                    stack[-1]["stored_outfile"] = outfile
-                    outfile = io.StringIO()
-                    stack[-1]["skip_first"] = True
+                    stack[-1]["mask_next_value"] = True
+                    # Continue to write the key, but mark that value should be masked
+                # Note: Removed NAME_PATTERN special handling - now handled by METADATA_KEY_PII_PATTERNS
                 if stack and stack[-1]["type"] == "object":
                     if not stack[-1]["first"]:
                         outfile.write(",")
@@ -1037,11 +1036,23 @@ def process_json(input_path, output_path):
                     elif stack[-1]["type"] == "array":
                         if not stack[-1]["first"]:
                             outfile.write(",")
-                if event == "string":
+
+                # Check if we should mask this value
+                should_mask = stack and stack[-1].get("mask_next_value", False)
+                if should_mask:
+                    stack[-1]["mask_next_value"] = False
+                    outfile.write(json.dumps(MASK))
+                elif event == "string":
                     outfile.write(json.dumps(anonymise(value)))
                 else:
                     outfile.write(json.dumps(value))
-                outfile = outfile_after_element(stack, outfile)
+
+                # Update first flag for next element
+                if stack:
+                    if stack[-1].get("skip_first"):
+                        del stack[-1]["skip_first"]
+                    else:
+                        stack[-1]["first"] = False
 
         outfile.write("\n")
 

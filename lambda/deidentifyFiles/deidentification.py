@@ -108,8 +108,9 @@ INDIVIDUAL_MARKER_FIELDS = {
     "no_mr", "nomor_mr",
 }  # What we use to know we can use NAME_PATTERN to remove any name fields
 NAME_PATTERN = re.compile(
-    r"(?i)name"
-)  # Very broad - need to know we're dealing with an individual to use this
+    r"(?i)(?:^|[_\s])(?:name|nama|marga|initial|inisial|"
+    r"nama_ibu|nama_ayah|nama_pasangan|nama_wali|wali)(?:$|[_\s])"
+)
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",

@@ -82,6 +82,7 @@ META_PII_SUBKEYS = {
     "Birth_Date",
     "birthdate",
     "BirthDate",
+    "birthDate",
     # English - Address
     "address",
     "Address",

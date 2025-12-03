@@ -111,6 +111,11 @@ NAME_PATTERN = re.compile(
     r"(?i)(?:^|[_\s])(?:name|nama|marga|initial|inisial|"
     r"nama_ibu|nama_ayah|nama_pasangan|nama_wali|wali)(?:$|[_\s])"
 )
+NAME_VALUE_RE = re.compile(
+    r'("([^"]*?(?:name|nama|marga|inisial|initial|'
+    r'nama_ibu|nama_ayah|nama_pasangan|nama_wali|wali)[^"]*?)"\s*:\s*)"([^"]*)"',
+    re.I,
+)
 METADATA_KEY_PII_PATTERNS = [
     r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
     r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
@@ -755,9 +760,8 @@ def process_json(input_path, output_path):
                 if "name_strings" in stack[-1]:
                     if stack[-1].get("is_individual"):
                         names = [
-                            re.sub(
-                                r'("name"\s*:\s*)"(.*)"',
-                                lambda m: m.group(1) + json.dumps(anonymise(m.group(2))),
+                            NAME_VALUE_RE.sub(
+                                lambda m: m.group(1) + json.dumps(anonymise(m.group(3))),
                                 s,
                             )
                             for s in stack[-1].pop("name_strings")

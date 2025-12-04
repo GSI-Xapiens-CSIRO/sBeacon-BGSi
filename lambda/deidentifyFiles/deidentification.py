@@ -1,5 +1,6 @@
 import argparse
 import csv
+import io
 import json
 import os
 import re
@@ -57,89 +58,16 @@ META_STRUCTURED_WHITELIST = {
     "contig",
 }
 
-# Subkeys in structured meta lines that should be masked
-META_PII_SUBKEYS = {
-    # English - Name
-    "name",
-    "Name",
-    "NAME",
-    "fullname",
-    "FullName",
-    "full_name",
-    "Full_Name",
-    # English - Email
-    "email",
-    "Email",
-    "EMAIL",
-    "e-mail",
-    "E-mail",
-    "E-Mail",
-    # English - DOB
-    "dob",
-    "DOB",
-    "Dob",
-    "birth_date",
-    "Birth_Date",
-    "birthdate",
-    "BirthDate",
-    # English - Address
-    "address",
-    "Address",
-    "ADDRESS",
-    "home",
-    "Home",
-    "HOME",
-    # English - Phone
-    "phone",
-    "Phone",
-    "PHONE",
-    "telephone",
-    "Telephone",
-    "mobile",
-    "Mobile",
-    # Indonesian - Nama
-    "nama",
-    "Nama",
-    "NAMA",
-    "nama_lengkap",
-    "Nama_Lengkap",
-    # Indonesian - Tanggal Lahir
-    "tanggal_lahir",
-    "Tanggal_Lahir",
-    "TANGGAL_LAHIR",
-    "tgl_lahir",
-    "Tgl_Lahir",
-    "TGL_LAHIR",
-    # Indonesian - Alamat
-    "alamat",
-    "Alamat",
-    "ALAMAT",
-    "rumah",
-    "Rumah",
-    "RUMAH",
-    # Indonesian - Telepon
-    "telepon",
-    "Telepon",
-    "TELEPON",
-    "telfon",
-    "Telfon",
-    "TELFON",
-    "telphone",
-    "Telphone",
-    "hp",
-    "HP",
-}
-# TODO: ADD INDONESIA OBJECT KEYWORDS
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"\b(\+?62|0)[\s-]?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}\b",  # Mobile phone (Indonesia)
+    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
     r"\b0\d{1,3}[\s-]?\d{6,8}\b",  # Fixed line phone (any area code)
     r"\b\d{10,13}\b",  # General phone number (10-13 digits)
     r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
 ]
 CASE_INSENSITIVE_PII_PATTERNS = [
-    r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
+    r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kab.|Kab|Kabupaten|Kec|Kec.|Kecamatan|Prov.|Provinsi|Prov|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
     r"\b(?:Dr\.|Prof\.|Ir\.|Haji|Hajjah|Putra|Putri|Sri|Adi|Raden|Ny|H\.|Hj\.|Kiai|Kyai|K\.H\.|KH\.|Gus|Ning|Ir\.|Drs\.|Dra\.|Sultan|Pangeran|R\.M\.|R\.A\.|R\.Ay\.|Rr\.|Ust\.|Ustaz|Ustadz|Bapak|Bpk\.|Iibu|Saudara|Saudari|Sdr\.|Tuan|Tn\.|Nona|Nn\.|Dokter|Drg\.|Prof\.|Teungku|Teuku|Tgk\.|Datuk|Datuak|Tengku|Kemas|Nyimas|Kiagus|Nyanyu|Tubagus|Ratu|Rd\.|Rara|Roro|Anak Agung|Gusti|Dewa|Desak|Lalu|Umbu|ADaeng|Puang|Kapitan|Adi|Daeng|Karaeng|Arung|Opu|Petta|Latu|Upu)(?:\s[A-Z][a-z]+){1,2}\b",  # Name
 ]
 ANY_PII_PATTERN = re.compile(
@@ -150,212 +78,23 @@ ANY_PII_PATTERN = re.compile(
     )
 )
 INDIVIDUAL_MARKER_FIELDS = {
-    # Name fields
-    "nama",
-    "nama_lengkap",
-    "fullname",
-    "full_name",
-    "marga",
-    "nama_depan",
-    "nama_belakang",
-    "first_name",
-    "last_name",
-    "inisial",
-    "initial",
-    "nama_ibu",
-    "nama ibu",
-    "nama_ayah",
-    "nama ayah",
-    "nama_pasangan",
-    "nama pasangan",
-    "nama_wali",
-    "nama wali",
-    "wali",
-    "kontak_darurat",
-    "kontak darurat",
-    "emergency_contact",
-    "gelar",
-    "title",
-    # Birth information
-    "tanggal_lahir",
-    "tgl_lahir",
-    "tgl lahir",
-    "tanggallahir",
-    "dob",
-    "birth_date",
-    "tempat_lahir",
-    "tmp_lahir",
-    "tmp lahir",
-    "birth_place",
-    # ID numbers
-    "nik",
-    "no_ktp",
-    "nomor_ktp",
-    "nomor ktp",
-    "ktp",
-    "kk",
-    "no_kk",
-    "nomor_kk",
-    "nomor kk",
-    "paspor",
-    "passport",
-    "no_paspor",
-    "nomor_paspor",
-    "npwp",
-    "no_npwp",
-    "nomor_npwp",
-    "bpjs",
-    "no_bpjs",
-    "nomor_bpjs",
-    "sim",
-    "no_sim",
-    "nomor_sim",
-    # Address fields
-    "alamat",
-    "alamat_lengkap",
-    "alamat lengkap",
-    "domisili",
-    "tempat_tinggal",
-    "tempat tinggal",
-    "tinggal",
-    "alamat_domisili",
-    "alamat domisili",
-    "rumah",
-    "home",
-    "alamat_ktp",
-    "alamat ktp",
-    "gps",
-    "koordinat",
-    "coordinate",
-    "coordinates",
-    "latitude",
-    "lat",
-    "longitude",
-    "lon",
-    "lng",
-    "lokasi",
-    "location",
-    # Contact information
-    "telepon",
-    "no_telepon",
-    "nomor_telepon",
-    "nomor telepon",
-    "hp",
-    "no_hp",
-    "nomor_hp",
-    "handphone",
-    "ponsel",
-    "mobile",
-    "telfon",
-    "telphone",
-    "phone",
-    "whatsapp",
-    "wa",
-    "email",
-    "e-mail",
-    # Demographic information
     "age",
     "umur",
-    "usia",
     "ethnicity",
-    "etnicities",
     "etnis",
-    "etnisitas",
-    "suku",
-    "nationality",
-    "kewarganegaraan",
-    "warganegara",
-    "citizenship",
-    "race",
-    "ras",
-    "religion",
-    "agama",
-    "kepercayaan",
-    "sex",
-    "gender",
-    "jenis_kelamin",
-    "jeniskelamin",
-    "kelamin",
-    "jk",
     "karyotypicsex",
-    # Medical record numbers
-    "mrn",
-    "medical_record_number",
-    "no_rm",
-    "nomor_rm",
-    "nomor rm",
-    "rekam_medis",
-    "rekam medis",
-    "no_mr",
-    "nomor_mr",
-}
+    "sex",
+    "jenis kelamin",
+    "jenis_kelamin",
+}  # What we use to know we can use NAME_PATTERN to remove any name fields
 NAME_PATTERN = re.compile(
-    r"(?i)(name|nama)"
+    r"(?i)(?:^|[_\s])(?:name|nama|marga|initial|inisial|"
+    r"nama_lengkap|fullname|full_name|nama_depan|nama_belakang|first_name|last_name|nama_ibu|nama ibu|nama_ayah|nama ayah|nama_pasangan|nama pasangan|nama_wali|nama wali|wali|kontak_darurat|kontak darurat|emergency_contact|gelar|title)(?:$|[_\s])"
 )  # Very broad - need to know we're dealing with an individual to use this
 METADATA_KEY_PII_PATTERNS = [
-    # Personal name fields (explicit list - handles both _ and space)
-    r"(?i)^(nama_lengkap|nama lengkap|fullname|full_name|full name)$",
-    r"(?i)^(nama_depan|nama depan|first_name|first name|given_name|given name)$",
-    r"(?i)^(nama_belakang|nama belakang|last_name|last name|family_name|family name)$",
-    r"(?i)^(nama_tengah|nama tengah|middle_name|middle name)$",
-    r"(?i)^(nama_ibu|nama ibu)$",
-    r"(?i)^(nama_ayah|nama ayah)$",
-    r"(?i)^(nama_pasangan|nama pasangan)$",
-    r"(?i)^(nama_wali|nama wali)$",
-    r"(?i)^(nama|name|surname|marga|wali|inisial|initial)$",
-    r"(?i)^(gelar|title)$",
-    r"(?i)^(kontak_darurat|kontak darurat|emergency_contact|emergency contact)$",
-    # Birth date fields
-    r"(?i)^(tanggal_lahir|tanggal lahir|tgl_lahir|tgl lahir|tanggallahir)$",
-    r"(?i)^(dob|birth_date|birth date|date_of_birth|date of birth)$",
-    # Birth place fields
-    r"(?i)^(tempat_lahir|tempat lahir|tmp_lahir|tmp lahir|birth_place|birth place|place_of_birth|place of birth)$",
-    # ID fields - Passport
-    r"(?i)^(passport|paspor|no_paspor|no paspor|nomor_paspor|nomor paspor)$",
-    # ID fields - NPWP
-    r"(?i)^(npwp|no_npwp|no npwp|nomor_npwp|nomor npwp)$",
-    # ID fields - SIM
-    r"(?i)^(sim|no_sim|no sim|nomor_sim|nomor sim)$",
-    # License plate
-    r"(?i)^(nopol|no_pol|plat_number|plat number|plate_number|plate number)$",
-    # Address fields (including tinggal)
-    r"(?i)^(alamat|address|rumah|home)$",
-    r"(?i)^(alamat_lengkap|alamat lengkap|alamat_domisili|alamat domisili|alamat_ktp|alamat ktp)$",
-    r"(?i)^(domisili|residence|tempat_tinggal|tempat tinggal|tinggal)$",
-    r"(?i)^(lokasi|location)$",
-    # GPS coordinates
-    r"(?i)^(gps|koordinat|coordinate|coordinates)$",
-    r"(?i)^(latitude|lat|longitude|lon|lng)$",
-    # Phone fields
-    r"(?i)^(telepon|telfon|telphone|phone|handphone|hp|mobile|ponsel|whatsapp|wa)$",
-    r"(?i)^(no_telepon|no telepon|nomor_telepon|nomor telepon|nomer_telepon|nomer telepon)$",
-    r"(?i)^(no_hp|no hp|nomor_hp|nomor hp|nomer_hp|nomer hp)$",
-    # Email
-    r"(?i)^(email|e-mail|e_mail|surel)$",
-    # Medical record numbers
-    r"(?i)^(mrn|medical_record_number|medical record number)$",
-    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
-    r"(?i)^(rekam_medis|rekam medis)$",
-    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
+    r"(?i)\b(?:(?:full|first|last|middle|given|family|sur)[_ -]?name|nama(?:[_ -](?:lengkap|depan|belakang|tengah))?|nama|surname)\b",
+    r"(?i)\b(?:(?:plate|license|vehicle|registration|number)_(?:plate|number|nopol|polisi|registrasi)|(?:nomor|plat)_(?:plat|nomor|polisi|registrasi)|nopol(?:_id)?|vehicle_nopol|registration_nopol|plat_number|plateno)\b",
 ]
-
-# Medical record field patterns (separate list for special masking)
-MEDICAL_RECORD_PATTERNS = [
-    r"(?i)^(mrn|medical_record_number|medical record number)$",
-    r"(?i)^(no_rm|no rm|nomor_rm|nomor rm|nomer_rm|nomer rm)$",
-    r"(?i)^(rekam_medis|rekam medis)$",
-    r"(?i)^(no_mr|no mr|nomor_mr|nomor mr|nomer_mr|nomer mr)$",
-]
-
-def mask_medical_record(value):
-    """Mask medical record number while preserving prefix like RM-, MR-, MRN-"""
-    if isinstance(value, str):
-        # Match patterns like RM-, MR-, MRN- at the start
-        match = re.match(r'^(RM-|MR-|MRN-)', value, re.IGNORECASE)
-        if match:
-            prefix = match.group(1)
-            return f"{prefix}{MASK}"
-    return MASK
 
 GENOMIC_SUFFIX_TYPES = {
     ".bcf": "u",
@@ -592,44 +331,10 @@ def anonymise_header_line(header_line):
         key, value = header_line[2:].split("=", 1)
         if value.startswith("<"):
             # Structured meta line
-            try:
-                subkey_values = get_structured_meta_values(value)
-            except Exception as e:
-                print(f"ERROR parsing structured meta line: {e}")
-                raise
-            if key in META_STRUCTURED_WHITELIST:
-                # Mask Description and dynamically detect PII in all subkey values
-                if "Description" in subkey_values:
-                    subkey_values["Description"] = anonymise(
-                        subkey_values["Description"]
-                    )
-
-                # Dynamic masking: check both subkey name AND value for PII
-                for subkey, subvalue in list(subkey_values.items()):
-                    # Skip standard VCF fields that should not be masked
-                    if subkey in {"ID", "Number", "Type", "Description"}:
-                        continue
-
-                    # Method 1: Check if subkey name is in PII list
-                    if subkey in META_PII_SUBKEYS:
-                        # Preserve quote structure if present
-                        if isinstance(subvalue, str) and subvalue.startswith('"') and subvalue.endswith('"'):
-                            subkey_values[subkey] = f'"{MASK}"'
-                        else:
-                            subkey_values[subkey] = MASK
-                        continue
-
-                    # Method 2: Check if subvalue contains PII patterns
-                    if isinstance(subvalue, str):
-                        masked_value = anonymise(subvalue)
-                        if masked_value != subvalue:
-                            # Preserve quote structure if present
-                            if subvalue.startswith('"') and subvalue.endswith('"'):
-                                subkey_values[subkey] = f'"{MASK}"'
-                            else:
-                                subkey_values[subkey] = MASK
+            subkey_values = get_structured_meta_values(value)
+            if key in META_STRUCTURED_WHITELIST and "Description" in subkey_values:
+                subkey_values["Description"] = anonymise(subkey_values["Description"])
             else:
-                # Mask everything for non-whitelisted structured lines
                 subkey_values = {
                     anonymise(subkey): anonymise(subvalue)
                     for subkey, subvalue in subkey_values.items()
@@ -646,22 +351,6 @@ def anonymise_header_line(header_line):
             new_line = header_line
         else:
             new_line = f"##{anonymise(key)}={anonymise(value)}"
-    elif header_line.startswith("#CHROM"):
-        # Column header line - mask sample names that contain PII (columns after FORMAT)
-        columns = header_line.split("\t")
-        if len(columns) > 9:
-            # Has sample columns - mask only those with PII
-            mandatory_cols = columns[
-                :9
-            ]  # CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT
-            sample_names = columns[9:]
-            masked_samples = [anonymise(sample) for sample in sample_names]
-            new_line = "\t".join(mandatory_cols + masked_samples)
-            if new_line == header_line:
-                # No changes detected
-                return header_line
-        else:
-            new_line = header_line
     else:
         # Other comment line or incorrectly formatted, anonymise the whole thing
         new_line = f"#{anonymise(header_line[1:])}"
@@ -704,42 +393,37 @@ def get_output_type(file_path):
 
 
 def process_header(file_path):
-    # Read the raw file directly to handle non-standard VCF lines
+    view_process = CheckedProcess(
+        args=["bcftools", "view", "--header-only", "--no-version", file_path],
+        stdout=subprocess.PIPE,
+        error_message="Reading header failed",
+    )
     header_changes = False
     info_whitelist = INFO_RESERVED_KEYS.copy()
     header_lines = []
-
-    with open(file_path, 'r') as f:
-        for line in f:
-            if line.startswith('#'):
-                line = line.rstrip("\r\n")
-
-                # Extract INFO whitelist entries
-                if line.startswith("##INFO=<"):
-                    try:
-                        info_attributes = get_structured_meta_values(line[7:])
-                        if info_attributes.get("Type", "String") != "String":
-                            info_id = info_attributes.get("ID")
-                            if info_id:
-                                info_whitelist.add(info_id)
-                    except Exception as e:
-                        print(f"Could not parse INFO line for whitelist: {e}")
-
-                # Anonymise the header line
-                new_line = anonymise_header_line(remove_nested_angle_brackets(line))
-                header_lines.append(new_line)
-                if new_line != line:
-                    header_changes = True
-            else:
-                break  # Stop at first data line
-
+    for line in view_process.stdout:
+        full_length = len(line)
+        line = line.rstrip("\r\n")
+        if len(line) == full_length:
+            # No line ending, has view_process crashed?
+            view_process.check()
+        line = line.rstrip("\r\n")
+        if line.startswith("##INFO=<"):
+            # INFO line, add to whitelist if Type is not "String"
+            info_attributes = get_structured_meta_values(line[7:])
+            if info_attributes.get("Type", "String") != "String":
+                info_whitelist.add(info_attributes.get("ID"))
+        new_line = anonymise_header_line(remove_nested_angle_brackets(line))
+        header_lines.append(new_line)
+        if new_line != line:
+            header_changes = True
+    view_process.check()
     if header_changes:
         print("Header PII detected, creating anonymised header")
         with open(f"{WORKING_DIR}/{HEADER_PATH}", "w") as header_file:
             print("\n".join(header_lines), file=header_file)
     else:
         print("No PII detected in header")
-
     return info_whitelist, header_lines, header_changes
 
 
@@ -975,48 +659,44 @@ def anonymise_vcf(input_path, output_path):
 
 
 def process_tabular(input_path, output_path, delimiter):
-    """Processes CSV/TSV files to deidentify PII by masking sensitive column values."""
+    """Processes CSV/TSV files to deidentify PII and drop sensitive columns."""
     with open(input_path, "r", newline="", encoding="utf-8") as infile:
         reader = csv.reader(infile, delimiter=delimiter)
         header = next(reader)
         is_individual = any(
             col_name.casefold() in INDIVIDUAL_MARKER_FIELDS for col_name in header
         )
-
-        # Mark which columns are PII (should be masked)
-        pii_columns = set()
-        medical_record_columns = set()
-        for idx, col_name in enumerate(header):
-            # Check if it's a medical record field
-            if any(re.match(pattern, col_name) for pattern in MEDICAL_RECORD_PATTERNS):
-                pii_columns.add(idx)
-                medical_record_columns.add(idx)
-            elif any(re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS):
-                pii_columns.add(idx)
-            elif is_individual and NAME_PATTERN.search(col_name):
-                pii_columns.add(idx)
-
+        columns_to_keep = [
+            idx
+            for idx, col_name in enumerate(header)
+            if not any(
+                re.match(pattern, col_name) for pattern in METADATA_KEY_PII_PATTERNS
+            )
+            and not (is_individual and NAME_PATTERN.search(col_name))
+        ]
         with open(output_path, "w", newline="", encoding="utf-8") as outfile:
             writer = csv.writer(outfile, delimiter=delimiter)
 
-            # Keep all columns (don't filter)
-            writer.writerow(header)
-
-            # Process each row
+            filtered_header = [header[idx] for idx in columns_to_keep]
+            writer.writerow(filtered_header)
             for row in reader:
-                masked_row = []
-                for idx, value in enumerate(row):
-                    if idx in pii_columns:
-                        # Use special masking for medical records (preserve prefix)
-                        if idx in medical_record_columns:
-                            masked_row.append(mask_medical_record(value))
-                        else:
-                            # Mask other PII column values completely
-                            masked_row.append(MASK)
-                    else:
-                        # Anonymise non-PII columns (for any embedded PII in values)
-                        masked_row.append(anonymise(value))
-                writer.writerow(masked_row)
+                filtered_row = [anonymise(row[idx]) for idx in columns_to_keep]
+                writer.writerow(filtered_row)
+
+
+def outfile_after_element(stack, outfile):
+    if stack:
+        if "stored_outfile" in stack[-1]:
+            stack[-1].setdefault("name_strings", []).append(
+                outfile.getvalue().strip(",")
+            )
+            outfile.close()
+            outfile = stack[-1].pop("stored_outfile")
+        if stack[-1].get("skip_first"):
+            del stack[-1]["skip_first"]
+        else:
+            stack[-1]["first"] = False
+    return outfile
 
 
 def process_json(input_path, output_path):
@@ -1037,13 +717,6 @@ def process_json(input_path, output_path):
                 continue
 
             if event == "start_map":
-                # Check if we should mask this object
-                if stack and stack[-1].get("mask_next_value", False):
-                    stack[-1]["mask_next_value"] = False
-                    outfile.write(json.dumps(MASK))
-                    # Set keybuffer to skip the rest of this object
-                    keybuffer = prefix
-                    continue
                 if stack:
                     if stack[-1]["type"] == "object" and stack[-1].get("pending_key"):
                         outfile.write(":")
@@ -1054,22 +727,15 @@ def process_json(input_path, output_path):
                 stack.append({"type": "object", "first": True, "pending_key": False})
 
             elif event == "end_map":
+                if "name_strings" in stack[-1] and not stack[-1].get("is_individual"):
+                    if not stack[-1]["first"]:
+                        outfile.write(",")
+                    outfile.write(",".join(stack[-1].pop("name_strings")))
                 outfile.write("}")
                 stack.pop()
-                if stack:
-                    if stack[-1].get("skip_first"):
-                        del stack[-1]["skip_first"]
-                    else:
-                        stack[-1]["first"] = False
+                outfile = outfile_after_element(stack, outfile)
 
             elif event == "start_array":
-                # Check if we should mask this array
-                if stack and stack[-1].get("mask_next_value", False):
-                    stack[-1]["mask_next_value"] = False
-                    outfile.write(json.dumps(MASK))
-                    # Set keybuffer to skip the rest of this array
-                    keybuffer = prefix
-                    continue
                 if stack:
                     if stack[-1]["type"] == "object" and stack[-1].get("pending_key"):
                         outfile.write(":")
@@ -1082,26 +748,21 @@ def process_json(input_path, output_path):
             elif event == "end_array":
                 outfile.write("]")
                 stack.pop()
-                if stack:
-                    if stack[-1].get("skip_first"):
-                        del stack[-1]["skip_first"]
-                    else:
-                        stack[-1]["first"] = False
+                outfile = outfile_after_element(stack, outfile)
 
             elif event == "map_key":
                 if value.casefold() in INDIVIDUAL_MARKER_FIELDS:
                     stack[-1]["is_individual"] = True
-                # Check if it's a medical record field (needs special masking)
-                if any(re.match(pattern, value) for pattern in MEDICAL_RECORD_PATTERNS):
-                    stack[-1]["mask_next_value"] = True
-                    stack[-1]["is_medical_record"] = True
-                # If the key matches a PII pattern, mark it for masking instead of skipping
-                elif any(
+                # If the key matches a PII pattern, set the keybuffer to skip its subtree.
+                if any(
                     re.match(pattern, value) for pattern in METADATA_KEY_PII_PATTERNS
                 ):
-                    stack[-1]["mask_next_value"] = True
-                    # Continue to write the key, but mark that value should be masked
-                # Note: Removed NAME_PATTERN special handling - now handled by METADATA_KEY_PII_PATTERNS
+                    keybuffer = f"{prefix}.{value}"
+                    continue
+                if NAME_PATTERN.search(value):
+                    stack[-1]["stored_outfile"] = outfile
+                    outfile = io.StringIO()
+                    stack[-1]["skip_first"] = True
                 if stack and stack[-1]["type"] == "object":
                     if not stack[-1]["first"]:
                         outfile.write(",")
@@ -1116,30 +777,11 @@ def process_json(input_path, output_path):
                     elif stack[-1]["type"] == "array":
                         if not stack[-1]["first"]:
                             outfile.write(",")
-
-                # Check if we should mask this value
-                should_mask = stack and stack[-1].get("mask_next_value", False)
-                is_medical_record = stack and stack[-1].get("is_medical_record", False)
-                if should_mask:
-                    stack[-1]["mask_next_value"] = False
-                    if is_medical_record:
-                        stack[-1]["is_medical_record"] = False
-                        # Use special masking for medical records (preserve prefix)
-                        outfile.write(json.dumps(mask_medical_record(value)))
-                    else:
-                        # Mask other PII completely
-                        outfile.write(json.dumps(MASK))
-                elif event == "string":
+                if event == "string":
                     outfile.write(json.dumps(anonymise(value)))
                 else:
                     outfile.write(json.dumps(value))
-
-                # Update first flag for next element
-                if stack:
-                    if stack[-1].get("skip_first"):
-                        del stack[-1]["skip_first"]
-                    else:
-                        stack[-1]["first"] = False
+                outfile = outfile_after_element(stack, outfile)
 
         outfile.write("\n")
 

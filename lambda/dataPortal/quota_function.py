@@ -60,7 +60,7 @@ def store_quota(event, context):
 
 """
 This module provides Lambda functions to store and retrieve quota information.
-
+ 
 Functions:
     get_quota(event, context, IdentityUser):
         Retrieves quota information for a given user.

@@ -2,6 +2,8 @@ locals {
   project_users_uid_index        = "uid-index"
   clinic_jobs_project_name_index = "project-name-index"
   cli_uploads_project_name_index = "cli-uploads-project-name-index"
+  user_roles_role_id_index       = "role-id-index"
+  role_permissions_perm_id_index = "permission-id-index"
 }
 
 # 
@@ -326,5 +328,179 @@ resource "aws_dynamodb_table" "dataportal_cli_upload" {
     hash_key        = "project_name"
     range_key       = "uid"
     projection_type = "ALL"
+  }
+}
+
+#
+# RBAC Tables
+#
+
+# Roles table
+resource "aws_dynamodb_table" "roles" {
+  name         = "sbeacon-dataportal-roles"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "role_id"
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+
+  attribute {
+    name = "role_id"
+    type = "S"
+  }
+}
+
+# Permissions table
+resource "aws_dynamodb_table" "permissions" {
+  name         = "sbeacon-dataportal-permissions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "permission_id"
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+
+  attribute {
+    name = "permission_id"
+    type = "S"
+  }
+}
+
+# Role Permissions table
+# Maps role to permission strings (e.g. "project_onboarding.create", "project_onboarding.read")
+# If the row exists, the role has that permission
+resource "aws_dynamodb_table" "role_permissions" {
+  name         = "sbeacon-dataportal-role-permissions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "role_id"
+  range_key    = "permission_id"
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+
+  attribute {
+    name = "role_id"
+    type = "S"
+  }
+
+  attribute {
+    name = "permission_id"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = local.role_permissions_perm_id_index
+    hash_key        = "permission_id"
+    range_key       = "role_id"
+    projection_type = "ALL"
+  }
+}
+
+# User Roles table
+resource "aws_dynamodb_table" "user_roles" {
+  name         = "sbeacon-dataportal-user-roles"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "uid"
+  range_key    = "role_id"
+
+  tags = merge(var.common-tags, var.common-tags-backup)
+
+  attribute {
+    name = "uid"
+    type = "S"
+  }
+
+  attribute {
+    name = "role_id"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = local.user_roles_role_id_index
+    hash_key        = "role_id"
+    range_key       = "uid"
+    projection_type = "ALL"
+  }
+}
+
+#
+# RBAC Seed Data
+#
+
+locals {
+  rbac_permissions = [
+    "project_onboarding",
+    "project_management",
+    "notebook_management",
+    "file_management",
+    "my_project",
+    "my_data",
+    "my_notebook",
+    "sbeacon_query",
+    "sbeacon_filter",
+    "clinical_workflow_execution",
+    "igv_viewer",
+    "clinic_workflow_result",
+    "clinic_workflow_annotation",
+    "clinic_result_validation",
+    "clinic_request_report",
+    "report_validation",
+    "generate_report",
+    "faq",
+    "admin",
+    "profile",
+  ]
+
+  rbac_access_types = ["create", "read", "update", "delete", "download"]
+
+  # Generate all permission strings: resource.action
+  rbac_permission_strings = flatten([
+    for perm in local.rbac_permissions : [
+      for access in local.rbac_access_types : "${perm}.${access}"
+    ]
+  ])
+}
+
+# Seed: permissions master list
+resource "aws_dynamodb_table_item" "seed_permissions" {
+  for_each   = toset(local.rbac_permission_strings)
+  table_name = aws_dynamodb_table.permissions.name
+  hash_key   = aws_dynamodb_table.permissions.hash_key
+
+  item = jsonencode({
+    permission_id = { S = each.value }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}
+
+# Seed: admin role
+resource "aws_dynamodb_table_item" "seed_role_admin" {
+  table_name = aws_dynamodb_table.roles.name
+  hash_key   = aws_dynamodb_table.roles.hash_key
+
+  item = jsonencode({
+    role_id     = { S = "admin" }
+    role_name   = { S = "Administrator" }
+    description = { S = "Full access to all resources" }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}
+
+# Seed: admin gets all permissions
+resource "aws_dynamodb_table_item" "seed_admin_permissions" {
+  for_each   = toset(local.rbac_permission_strings)
+  table_name = aws_dynamodb_table.role_permissions.name
+  hash_key   = aws_dynamodb_table.role_permissions.hash_key
+  range_key  = aws_dynamodb_table.role_permissions.range_key
+
+  item = jsonencode({
+    role_id       = { S = "admin" }
+    permission_id = { S = each.value }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
   }
 }

@@ -276,6 +276,30 @@ class DynamoDBEnvironment:
     def DYNAMO_USER_INFO_TABLE(self):
         return os.environ["DYNAMO_USER_INFO_TABLE"]
 
+    @property
+    def DYNAMO_ROLES_TABLE(self):
+        return os.environ["DYNAMO_ROLES_TABLE"]
+
+    @property
+    def DYNAMO_PERMISSIONS_TABLE(self):
+        return os.environ["DYNAMO_PERMISSIONS_TABLE"]
+
+    @property
+    def DYNAMO_ROLE_PERMISSIONS_TABLE(self):
+        return os.environ["DYNAMO_ROLE_PERMISSIONS_TABLE"]
+
+    @property
+    def DYNAMO_USER_ROLES_TABLE(self):
+        return os.environ["DYNAMO_USER_ROLES_TABLE"]
+
+    @property
+    def DYNAMO_USER_ROLES_ROLE_ID_INDEX(self):
+        return os.environ["DYNAMO_USER_ROLES_ROLE_ID_INDEX"]
+
+    @property
+    def DYNAMO_ROLE_PERMISSIONS_PERM_ID_INDEX(self):
+        return os.environ["DYNAMO_ROLE_PERMISSIONS_PERM_ID_INDEX"]
+
 
 # class SnsEnvironment:
 #     @property

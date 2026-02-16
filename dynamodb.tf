@@ -484,6 +484,7 @@ resource "aws_dynamodb_table_item" "seed_role_admin" {
     role_id     = { S = random_uuid.admin_role_id.result }
     role_name   = { S = "Administrator" }
     description = { S = "Full access to all resources" }
+    is_active   = { BOOL = true }
   })
 
   lifecycle {

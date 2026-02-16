@@ -68,15 +68,22 @@ locals {
   }
   # dynamodb variables
   dynamodb_variables = {
-    DYNAMO_ONTOLOGIES_TABLE        = aws_dynamodb_table.ontologies.name
-    DYNAMO_ANSCESTORS_TABLE        = aws_dynamodb_table.anscestor_terms.name
-    DYNAMO_DESCENDANTS_TABLE       = aws_dynamodb_table.descendant_terms.name
-    DYNAMO_PROJECT_USERS_TABLE     = aws_dynamodb_table.project_users.name
-    DYNAMO_PROJECT_USERS_UID_INDEX = local.project_users_uid_index
-    DYNAMO_QUOTA_USER_TABLE        = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
-    DYNAMO_DATAPORTAL_LOCKS_TABLE  = aws_dynamodb_table.dataportal_locks_table.name
-    DYNAMO_JUPYTER_INSTANCES_TABLE = aws_dynamodb_table.juptyer_notebooks.name
-    DYNAMO_USER_INFO_TABLE         = aws_dynamodb_table.sbeacon_dataportal_users_info.name
+    DYNAMO_ONTOLOGIES_TABLE                  = aws_dynamodb_table.ontologies.name
+    DYNAMO_ANSCESTORS_TABLE                  = aws_dynamodb_table.anscestor_terms.name
+    DYNAMO_DESCENDANTS_TABLE                 = aws_dynamodb_table.descendant_terms.name
+    DYNAMO_PROJECT_USERS_TABLE               = aws_dynamodb_table.project_users.name
+    DYNAMO_PROJECT_USERS_UID_INDEX           = local.project_users_uid_index
+    DYNAMO_QUOTA_USER_TABLE                  = aws_dynamodb_table.sbeacon-dataportal-users-quota.name
+    DYNAMO_DATAPORTAL_LOCKS_TABLE            = aws_dynamodb_table.dataportal_locks_table.name
+    DYNAMO_JUPYTER_INSTANCES_TABLE           = aws_dynamodb_table.juptyer_notebooks.name
+    DYNAMO_USER_INFO_TABLE                   = aws_dynamodb_table.sbeacon_dataportal_users_info.name
+    # RBAC Tables
+    DYNAMO_ROLES_TABLE                       = aws_dynamodb_table.roles.name
+    DYNAMO_PERMISSIONS_TABLE                 = aws_dynamodb_table.permissions.name
+    DYNAMO_ROLE_PERMISSIONS_TABLE            = aws_dynamodb_table.role_permissions.name
+    DYNAMO_USER_ROLES_TABLE                  = aws_dynamodb_table.user_roles.name
+    DYNAMO_USER_ROLES_ROLE_ID_INDEX          = local.user_roles_role_id_index
+    DYNAMO_ROLE_PERMISSIONS_PERM_ID_INDEX    = local.role_permissions_perm_id_index
   }
   # layers
   binaries_layer         = "${aws_lambda_layer_version.binaries_layer.layer_arn}:${aws_lambda_layer_version.binaries_layer.version}"

@@ -457,6 +457,9 @@ locals {
   ])
 }
 
+# Generate UUID for admin role (created once, stored in state)
+resource "random_uuid" "admin_role_id" {}
+
 # Seed: permissions master list
 resource "aws_dynamodb_table_item" "seed_permissions" {
   for_each   = toset(local.rbac_permission_strings)
@@ -478,7 +481,7 @@ resource "aws_dynamodb_table_item" "seed_role_admin" {
   hash_key   = aws_dynamodb_table.roles.hash_key
 
   item = jsonencode({
-    role_id     = { S = "admin" }
+    role_id     = { S = random_uuid.admin_role_id.result }
     role_name   = { S = "Administrator" }
     description = { S = "Full access to all resources" }
   })
@@ -496,8 +499,24 @@ resource "aws_dynamodb_table_item" "seed_admin_permissions" {
   range_key  = aws_dynamodb_table.role_permissions.range_key
 
   item = jsonencode({
-    role_id       = { S = "admin" }
+    role_id       = { S = random_uuid.admin_role_id.result }
     permission_id = { S = each.value }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}
+
+# Seed: assign admin role to default cognito admin user
+resource "aws_dynamodb_table_item" "seed_admin_user_role" {
+  table_name = aws_dynamodb_table.user_roles.name
+  hash_key   = aws_dynamodb_table.user_roles.hash_key
+  range_key  = aws_dynamodb_table.user_roles.range_key
+
+  item = jsonencode({
+    uid     = { S = var.cognito-admin-user-sub }
+    role_id = { S = random_uuid.admin_role_id.result }
   })
 
   lifecycle {

@@ -361,13 +361,13 @@ data "aws_iam_policy_document" "admin-lambda-access" {
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
       aws_dynamodb_table.sbeacon_dataportal_users_info.arn,
       # RBAC tables
-      aws_dynamodb_table.sbeacon-dataportal-roles.arn,
-      aws_dynamodb_table.sbeacon-dataportal-permissions.arn,
-      aws_dynamodb_table.sbeacon-dataportal-role-permissions.arn,
-      aws_dynamodb_table.sbeacon-dataportal-user-roles.arn,
+      aws_dynamodb_table.roles.arn,
+      aws_dynamodb_table.permissions.arn,
+      aws_dynamodb_table.role_permissions.arn,
+      aws_dynamodb_table.user_roles.arn,
       # RBAC GSIs
-      "${aws_dynamodb_table.sbeacon-dataportal-role-permissions.arn}/index/*",
-      "${aws_dynamodb_table.sbeacon-dataportal-user-roles.arn}/index/*",
+      "${aws_dynamodb_table.role_permissions.arn}/index/*",
+      "${aws_dynamodb_table.user_roles.arn}/index/*",
     ]
   }
   statement {
@@ -378,9 +378,9 @@ data "aws_iam_policy_document" "admin-lambda-access" {
     ]
     resources = [
       # RBAC tables - need write access
-      aws_dynamodb_table.sbeacon-dataportal-roles.arn,
-      aws_dynamodb_table.sbeacon-dataportal-role-permissions.arn,
-      aws_dynamodb_table.sbeacon-dataportal-user-roles.arn,
+      aws_dynamodb_table.roles.arn,
+      aws_dynamodb_table.role_permissions.arn,
+      aws_dynamodb_table.user_roles.arn,
     ]
   }
   statement {

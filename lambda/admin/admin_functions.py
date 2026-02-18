@@ -1031,46 +1031,64 @@ def assign_user_role(event, context):
         )
 
 
-@router.attach("/admin/users/{uid}/roles/{role_id}", "delete", authenticate_admin)
-def remove_user_role(event, context):
+@router.attach("/admin/users/{uid}/roles", "put", authenticate_admin)
+def set_user_role(event, context):
     """
-    Remove a role from a user
+    Set/replace user's role (1 user = 1 role)
+    Removes existing role and assigns new one
+
+    Body:
+    {
+        "role_id": "uuid-of-role"
+    }
     """
     uid = event["pathParameters"]["uid"]
-    role_id = event["pathParameters"]["role_id"]
-    authorizer_uid = event["requestContext"]["authorizer"]["claims"]["sub"]
+    body_dict = json.loads(event.get("body"))
+    new_role_id = body_dict.get("role_id")
 
-    # Prevent admin from removing their own admin role
-    if uid == authorizer_uid:
-        try:
-            role = Role.get(role_id)
-            if "admin" in role.role_name.lower():
-                print(f"Admin {uid} attempted to remove their own admin role")
-                return {
-                    "success": False,
-                    "message": "Administrators cannot remove their own admin role."
-                }
-        except:
-            pass
+    if not new_role_id:
+        raise BeaconError(
+            error_code="BeaconMissingRoleId",
+            error_message="Role ID is required."
+        )
 
     try:
-        success = remove_role_from_user(uid, role_id)
+        # Verify new role exists and is active
+        new_role = Role.get(new_role_id)
+        if not new_role.is_active:
+            raise BeaconError(
+                error_code="RoleNotActive",
+                error_message=f"Role {new_role.role_name} is not active."
+            )
+
+        # Get current roles and remove them
+        current_roles = get_user_roles(uid)
+        for role_data in current_roles:
+            remove_role_from_user(uid, role_data["role_id"])
+
+        # Assign new role
+        success = assign_role_to_user(uid, new_role_id)
 
         if success:
-            print(f"Role {role_id} removed from user {uid}")
+            print(f"Role {new_role.role_name} set for user {uid}")
             return {
                 "success": True,
-                "message": "Role removed successfully"
+                "message": f"Role {new_role.role_name} assigned successfully",
+                "role": new_role.to_dict()
             }
         else:
-            return {
-                "success": False,
-                "message": "User does not have this role"
-            }
-    except Exception as e:
-        print(f"Error removing role from user: {e}")
+            raise Exception("Failed to assign role")
+    except Role.DoesNotExist:
         raise BeaconError(
-            error_code="BeaconErrorRemovingRole",
-            error_message="Error removing role from user."
+            error_code="RoleNotFound",
+            error_message=f"Role with ID {new_role_id} not found."
+        )
+    except BeaconError:
+        raise
+    except Exception as e:
+        print(f"Error setting user role: {e}")
+        raise BeaconError(
+            error_code="BeaconErrorSettingRole",
+            error_message="Error setting user role."
         )
 

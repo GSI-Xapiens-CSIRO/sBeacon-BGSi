@@ -34,6 +34,7 @@ class Role(Model):
 
     role_id = UnicodeAttribute(hash_key=True)
     role_name = UnicodeAttribute(attr_name="role_name")
+    role_name_lower = UnicodeAttribute(attr_name="role_name_lower")
     description = UnicodeAttribute(attr_name="description", default="")
     is_active = BooleanAttribute(attr_name="is_active", default=True)
 
@@ -314,6 +315,7 @@ def create_role(role_name: str, description: str = "", is_active: bool = True) -
         role_id = str(uuid.uuid4())
         role = Role(role_id)
         role.role_name = role_name
+        role.role_name_lower = role_name.lower()
         role.description = description
         role.is_active = is_active
         role.save()
@@ -380,15 +382,48 @@ def get_role_permissions(role_id: str) -> List[str]:
     return [rp.permission_id for rp in role_permissions]
 
 
-def list_all_roles() -> List[Dict[str, str]]:
+def list_all_roles(limit: int = None, last_evaluated_key: dict = None, search_term: str = None, status_filter: str = None) -> tuple:
     """
-    List all roles in the system.
+    List all roles in the system with pagination and filtering.
+    
+    Args:
+        limit: Number of items to return
+        last_evaluated_key: Key to continue from previous scan
+        search_term: Search term for role name (case-insensitive)
+        status_filter: Filter by status - "active", "inactive", or None for all
     
     Returns:
-        List of role dictionaries
+        Tuple of (list of role dictionaries, last_evaluated_key)
     """
-    roles = list(Role.scan())
-    return [role.to_dict() for role in roles]
+    params = {}
+    if limit:
+        params['limit'] = limit
+    if last_evaluated_key:
+        params['last_evaluated_key'] = last_evaluated_key
+    
+    # Build filter condition
+    filter_conditions = []
+    
+    if search_term:
+        search_lower = search_term.lower()
+        filter_conditions.append(Role.role_name_lower.contains(search_lower))
+    
+    if status_filter == "active":
+        filter_conditions.append(Role.is_active == True)
+    elif status_filter == "inactive":
+        filter_conditions.append(Role.is_active == False)
+    
+    # Combine filters
+    if filter_conditions:
+        combined_filter = filter_conditions[0]
+        for condition in filter_conditions[1:]:
+            combined_filter = combined_filter & condition
+        params['filter_condition'] = combined_filter
+    
+    roles_result = Role.scan(**params)
+    roles = [role.to_dict() for role in roles_result]
+    
+    return roles, roles_result.last_evaluated_key
 
 
 def list_all_permissions() -> List[str]:

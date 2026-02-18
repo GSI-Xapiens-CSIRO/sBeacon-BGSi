@@ -1,6 +1,7 @@
 import json
 import random
 import string
+import traceback
 
 import boto3
 from botocore.exceptions import ClientError
@@ -473,40 +474,67 @@ def get_roles(event, context):
     Get all roles in the system with their permission counts
     Optional query params:
       - status: "active" | "inactive" | "all" (default: "all")
+      - search: search term for role name (case-insensitive)
+      - limit: number of items to return (default: 10)
+      - last_evaluated_key: pagination key from previous request
     """
     try:
         query_params = event.get("queryStringParameters") or {}
         status_filter = query_params.get("status", "all").lower()
-        
-        roles = list_all_roles()
-        
-        # Filter by status if requested
-        if status_filter == "active":
-            roles = [r for r in roles if r.get("is_active", True)]
-        elif status_filter == "inactive":
-            roles = [r for r in roles if not r.get("is_active", True)]
-        
+        search_term = query_params.get("search", None)
+        limit = int(query_params.get("limit", 10))
+        last_evaluated_key = query_params.get("last_evaluated_key", None)
+
+        # Parse last_evaluated_key if provided
+        if last_evaluated_key:
+            last_evaluated_key = json.loads(last_evaluated_key)
+
+        # Set status filter for helper function
+        status = None if status_filter == "all" else status_filter
+
+        # Get roles with pagination
+        roles, next_key = list_all_roles(
+            limit=limit,
+            last_evaluated_key=last_evaluated_key,
+            search_term=search_term,
+            status_filter=status
+        )
+
         # Enrich with permission count and user count
         for role in roles:
             role_id = role["role_id"]
-            permissions = get_role_permissions(role_id)
-            users = get_users_by_role(role_id)
-            
-            role["permission_count"] = len(permissions)
-            role["user_count"] = len(users)
+            try:
+                permissions = get_role_permissions(role_id)
+                role["permission_count"] = len(permissions)
+            except Exception as e:
+                print(f"Error getting permissions for role {role_id}: {e}")
+                role["permission_count"] = 0
+
+            try:
+                users = get_users_by_role(role_id)
+                role["user_count"] = len(users)
+            except Exception as e:
+                print(f"Error getting users for role {role_id}: {e}")
+                role["user_count"] = 0
+
             role["status"] = "Active" if role.get("is_active", True) else "Inactive"
-        
+
+        # Format last_evaluated_key for response
+        formatted_key = json.dumps(next_key) if next_key else None
+
         return {
             "success": True,
             "roles": roles,
-            "total": len(roles)
+            "total": len(roles),
+            "last_evaluated_key": formatted_key
         }
     except Exception as e:
         print(f"Error getting roles: {e}")
-        raise BeaconError(
-            error_code="BeaconErrorGettingRoles",
-            error_message="Error retrieving roles from database."
-        )
+        print(f"Traceback: {traceback.format_exc()}")
+        return {
+            "success": False,
+            "message": "Error retrieving roles from database."
+        }
 
 
 @router.attach("/admin/roles/{role_id}", "get", authenticate_admin)
@@ -515,23 +543,23 @@ def get_role_details(event, context):
     Get detailed information about a specific role including all permissions
     """
     role_id = event["pathParameters"]["role_id"]
-    
+
     try:
         role = Role.get(role_id)
         role_dict = role.to_dict()
-        
+
         # Get all permissions for this role
         permissions = get_role_permissions(role_id)
-        
+
         # Get all users with this role
         users = get_users_by_role(role_id)
-        
+
         role_dict["permissions"] = permissions
         role_dict["users"] = users
         role_dict["permission_count"] = len(permissions)
         role_dict["user_count"] = len(users)
         role_dict["status"] = "Active" if role_dict.get("is_active", True) else "Inactive"
-        
+
         return {
             "success": True,
             "role": role_dict
@@ -553,7 +581,7 @@ def get_role_details(event, context):
 def create_new_role(event, context):
     """
     Create a new role with specified permissions
-    
+
     Body:
     {
         "role_name": "Data Manager",
@@ -566,111 +594,137 @@ def create_new_role(event, context):
     description = body_dict.get("description", "")
     is_active = body_dict.get("is_active", True)
     permissions = body_dict.get("permissions", [])
-    
+
     if not role_name:
-        raise BeaconError(
-            error_code="BeaconMissingRoleName",
-            error_message="Role name is required."
-        )
-    
+        return {
+            "success": False,
+            "message": "Role name is required."
+        }
+
     try:
+        # Check if role name already exists
+        existing_roles, _ = list_all_roles()
+        for existing_role in existing_roles:
+            if existing_role.get('role_name', '').lower() == role_name.lower():
+                return {
+                    "success": False,
+                    "message": f"Role name '{role_name}' already exists. Please use a different name."
+                }
+
         # Create the role
         role_id = create_role(role_name, description, is_active)
-        
+
         if not role_id:
-            raise Exception("Failed to create role")
-        
+            return {
+                "success": False,
+                "message": "Failed to create role in database."
+            }
+
         # Assign permissions to the role
         failed_permissions = []
         for permission_id in permissions:
             if not assign_permission_to_role(role_id, permission_id):
                 failed_permissions.append(permission_id)
-        
+
         if failed_permissions:
             print(f"Failed to assign permissions: {failed_permissions}")
-        
+
         print(f"Role {role_name} created successfully with ID {role_id}")
-        
+
         return {
             "success": True,
+            "message": f"Role '{role_name}' created successfully.",
             "role_id": role_id,
             "role_name": role_name,
             "is_active": is_active,
-            "role_name": role_name,
             "permissions_assigned": len(permissions) - len(failed_permissions),
             "permissions_failed": len(failed_permissions)
         }
     except Exception as e:
         print(f"Error creating role: {e}")
-        raise BeaconError(
-            error_code="BeaconErrorCreatingRole",
-            error_message="Error creating role in database."
-        )
+        print(f"Traceback: {traceback.format_exc()}")
+        return {
+            "success": False,
+            "message": "Error creating role in database."
+        }
 
 
 @router.attach("/admin/roles/{role_id}", "put", authenticate_admin)
 def update_role(event, context):
     """
     Update role details and permissions
-    
+
     Body:
-    {is_active": true,
+    {
+        "role_name": "Data Manager",
+        "description": "...",
+        "is_active": true,
         "permissions": ["project_onboarding.read", ...]  // Complete list
     }
     """
     role_id = event["pathParameters"]["role_id"]
     body_dict = json.loads(event.get("body"))
-    
+
     try:
         # Get existing role
         role = Role.get(role_id)
-        
-        # Update basic info if provided
+
+        # Check if role_name is being changed and if it already exists
         if "role_name" in body_dict:
-            role.role_name = body_dict["role_name"]
+            new_role_name = body_dict["role_name"]
+            if new_role_name.lower() != role.role_name.lower():
+                existing_roles, _ = list_all_roles()
+                for existing_role in existing_roles:
+                    if existing_role.get('role_id') != role_id and existing_role.get('role_name', '').lower() == new_role_name.lower():
+                        return {
+                            "success": False,
+                            "message": f"Role name '{new_role_name}' already exists. Please use a different name."
+                        }
+            role.role_name = new_role_name
+            role.role_name_lower = new_role_name.lower()
+
+        # Update basic info if provided
         if "description" in body_dict:
             role.description = body_dict["description"]
         if "is_active" in body_dict:
             role.is_active = body_dict["is_active"]
-            role.role_name = body_dict["role_name"]
-        if "description" in body_dict:
-            role.description = body_dict["description"]
-        
+
         role.save()
-        
+
         # Update permissions if provided
         if "permissions" in body_dict:
             new_permissions = set(body_dict["permissions"])
             current_permissions = set(get_role_permissions(role_id))
-            
+
             # Remove permissions that are no longer needed
             permissions_to_remove = current_permissions - new_permissions
             for permission_id in permissions_to_remove:
                 remove_permission_from_role(role_id, permission_id)
-            
+
             # Add new permissions
             permissions_to_add = new_permissions - current_permissions
             for permission_id in permissions_to_add:
                 assign_permission_to_role(role_id, permission_id)
-            
+
             print(f"Role {role_id} updated: +{len(permissions_to_add)} -{len(permissions_to_remove)} permissions")
-        
+
         return {
             "success": True,
-            "role_id": role_id,
-            "message": "Role updated successfully"
+            "message": "Role updated successfully.",
+            "role_id": role_id
         }
     except Role.DoesNotExist:
-        raise BeaconError(
-            error_code="RoleNotFound",
-            error_message=f"Role with ID {role_id} not found."
-        )
+        return {
+            "success": False,
+            "message": f"Role with ID {role_id} not found."
+        }
     except Exception as e:
         print(f"Error updating role: {e}")
-        raise BeaconError(
-            error_code="BeaconErrorUpdatingRole",
-            error_message="Error updating role in database."
-        )
+        print(f"Traceback: {traceback.format_exc()}")
+        return {
+            "success": False,
+            "message": "Error updating role in database."
+        }
 
 
 @router.attach("/admin/roles/{role_id}", "delete", authenticate_admin)
@@ -679,47 +733,48 @@ def delete_role(event, context):
     Delete a role (removes all user assignments and permissions)
     """
     role_id = event["pathParameters"]["role_id"]
-    
+
     try:
         # Check if role exists
         role = Role.get(role_id)
         role_name = role.role_name
-        
+
         # Get users with this role
         users_with_role = get_users_by_role(role_id)
-        
+
         if users_with_role:
             # Remove role from all users
             for uid in users_with_role:
                 remove_role_from_user(uid, role_id)
             print(f"Removed role from {len(users_with_role)} users")
-        
+
         # Remove all permissions from role
         permissions = get_role_permissions(role_id)
         for permission_id in permissions:
             remove_permission_from_role(role_id, permission_id)
-        
+
         # Delete the role
         role.delete()
-        
+
         print(f"Role {role_name} ({role_id}) deleted successfully")
-        
+
         return {
             "success": True,
-            "message": f"Role {role_name} deleted successfully",
+            "message": f"Role '{role_name}' deleted successfully.",
             "users_affected": len(users_with_role)
         }
     except Role.DoesNotExist:
-        raise BeaconError(
-            error_code="RoleNotFound",
-            error_message=f"Role with ID {role_id} not found."
-        )
+        return {
+            "success": False,
+            "message": f"Role with ID {role_id} not found."
+        }
     except Exception as e:
         print(f"Error deleting role: {e}")
-        raise BeaconError(
-            error_code="BeaconErrorDeletingRole",
-            error_message="Error deleting role from database."
-        )
+        print(f"Traceback: {traceback.format_exc()}")
+        return {
+            "success": False,
+            "message": "Error deleting role from database."
+        }
 
 
 @router.attach("/admin/roles/{role_id}/users", "get", authenticate_admin)
@@ -728,14 +783,14 @@ def get_role_users(event, context):
     Get all users assigned to a specific role
     """
     role_id = event["pathParameters"]["role_id"]
-    
+
     try:
         # Verify role exists
         role = Role.get(role_id)
-        
+
         # Get user IDs
         user_ids = get_users_by_role(role_id)
-        
+
         # Enrich with user details from Cognito
         users = []
         for uid in user_ids:
@@ -746,23 +801,23 @@ def get_role_users(event, context):
                     Filter=f'sub = "{uid}"',
                     Limit=1
                 )
-                
+
                 if response.get("Users"):
                     user = response["Users"][0]
                     users.append({
                         "uid": uid,
                         "username": user.get("Username"),
-                        "email": next((attr["Value"] for attr in user.get("Attributes", []) 
+                        "email": next((attr["Value"] for attr in user.get("Attributes", [])
                                       if attr["Name"] == "email"), None),
-                        "first_name": next((attr["Value"] for attr in user.get("Attributes", []) 
+                        "first_name": next((attr["Value"] for attr in user.get("Attributes", [])
                                            if attr["Name"] == "given_name"), None),
-                        "last_name": next((attr["Value"] for attr in user.get("Attributes", []) 
+                        "last_name": next((attr["Value"] for attr in user.get("Attributes", [])
                                           if attr["Name"] == "family_name"), None),
                     })
             except Exception as e:
                 print(f"Error getting user details for {uid}: {e}")
                 users.append({"uid": uid, "error": "User details not found"})
-        
+
         return {
             "success": True,
             "role_id": role_id,
@@ -791,7 +846,7 @@ def get_all_permissions(event, context):
     """
     try:
         permissions = list_all_permissions()
-        
+
         # Organize permissions by resource
         organized = {}
         for perm_id in permissions:
@@ -800,7 +855,7 @@ def get_all_permissions(event, context):
                 if resource not in organized:
                     organized[resource] = []
                 organized[resource].append(action)
-        
+
         return {
             "success": True,
             "permissions": permissions,
@@ -820,7 +875,7 @@ def get_permissions_matrix(event, context):
     """
     Get permissions formatted as a matrix for UI checkboxes
     Returns structure suitable for rendering permission table
-    
+
     Returns:
     {
       "actions": ["create", "read", "update", "delete", "download"],
@@ -839,10 +894,10 @@ def get_permissions_matrix(event, context):
     """
     try:
         permissions = list_all_permissions()
-        
+
         # Define standard actions
         standard_actions = ["create", "read", "update", "delete", "download"]
-        
+
         # Organize by resource
         resources_map = {}
         for perm_id in permissions:
@@ -851,7 +906,7 @@ def get_permissions_matrix(event, context):
                 if resource not in resources_map:
                     resources_map[resource] = {}
                 resources_map[resource][action] = perm_id
-        
+
         # Convert to array format with labels
         resource_labels = {
             "project_onboarding": "Project Onboarding",
@@ -875,7 +930,7 @@ def get_permissions_matrix(event, context):
             "admin": "Admin",
             "profile": "Profile",
         }
-        
+
         resources = []
         for resource_name, perms in sorted(resources_map.items()):
             resources.append({
@@ -883,7 +938,7 @@ def get_permissions_matrix(event, context):
                 "label": resource_labels.get(resource_name, resource_name.replace("_", " ").title()),
                 "permissions": perms
             })
-        
+
         return {
             "success": True,
             "actions": standard_actions,
@@ -910,10 +965,10 @@ def get_user_role_assignments(event, context):
     Get all roles assigned to a specific user
     """
     uid = event["pathParameters"]["uid"]
-    
+
     try:
         roles = get_user_roles(uid)
-        
+
         return {
             "success": True,
             "uid": uid,
@@ -932,7 +987,7 @@ def get_user_role_assignments(event, context):
 def assign_user_role(event, context):
     """
     Assign a role to a user
-    
+
     Body:
     {
         "role_id": "uuid-of-role"
@@ -941,20 +996,20 @@ def assign_user_role(event, context):
     uid = event["pathParameters"]["uid"]
     body_dict = json.loads(event.get("body"))
     role_id = body_dict.get("role_id")
-    
+
     if not role_id:
         raise BeaconError(
             error_code="BeaconMissingRoleId",
             error_message="Role ID is required."
         )
-    
+
     try:
         # Verify role exists
         role = Role.get(role_id)
-        
+
         # Assign role to user
         success = assign_role_to_user(uid, role_id)
-        
+
         if success:
             print(f"Role {role.role_name} assigned to user {uid}")
             return {
@@ -984,7 +1039,7 @@ def remove_user_role(event, context):
     uid = event["pathParameters"]["uid"]
     role_id = event["pathParameters"]["role_id"]
     authorizer_uid = event["requestContext"]["authorizer"]["claims"]["sub"]
-    
+
     # Prevent admin from removing their own admin role
     if uid == authorizer_uid:
         try:
@@ -997,10 +1052,10 @@ def remove_user_role(event, context):
                 }
         except:
             pass
-    
+
     try:
         success = remove_role_from_user(uid, role_id)
-        
+
         if success:
             print(f"Role {role_id} removed from user {uid}")
             return {

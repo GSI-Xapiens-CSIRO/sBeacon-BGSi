@@ -483,6 +483,7 @@ resource "aws_dynamodb_table_item" "seed_role_admin" {
   item = jsonencode({
     role_id     = { S = random_uuid.admin_role_id.result }
     role_name   = { S = "Administrator" }
+    role_name_lower = { S = "administrator" }
     description = { S = "Full access to all resources" }
     is_active   = { BOOL = true }
   })

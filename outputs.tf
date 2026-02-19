@@ -32,7 +32,52 @@ output "dynamo-clinic-jobs-table-arn" {
   value       = aws_dynamodb_table.clinic_jobs.arn
   description = "Dynamo clinic jobs table"
 }
+# RBAC Tables Outputs
+output "dynamo-roles-table" {
+  value       = aws_dynamodb_table.roles.name
+  description = "Dynamo roles table for RBAC"
+}
 
+output "dynamo-roles-table-arn" {
+  value       = aws_dynamodb_table.roles.arn
+  description = "Dynamo roles table ARN for RBAC"
+}
+
+output "dynamo-permissions-table" {
+  value       = aws_dynamodb_table.permissions.name
+  description = "Dynamo permissions table for RBAC"
+}
+
+output "dynamo-permissions-table-arn" {
+  value       = aws_dynamodb_table.permissions.arn
+  description = "Dynamo permissions table ARN for RBAC"
+}
+
+output "dynamo-role-permissions-table" {
+  value       = aws_dynamodb_table.role_permissions.name
+  description = "Dynamo role-permissions mapping table for RBAC"
+}
+
+output "dynamo-role-permissions-table-arn" {
+  value       = aws_dynamodb_table.role_permissions.arn
+  description = "Dynamo role-permissions mapping table ARN for RBAC"
+}
+
+output "dynamo-user-roles-table" {
+  value       = aws_dynamodb_table.user_roles.name
+  description = "Dynamo user-roles mapping table for RBAC"
+}
+
+output "dynamo-user-roles-table-arn" {
+  value       = aws_dynamodb_table.user_roles.arn
+  description = "Dynamo user-roles mapping table ARN for RBAC"
+}
+
+output "rbac-admin-role-id" {
+  value       = random_uuid.admin_role_id.result
+  description = "Admin role ID for RBAC system"
+  sensitive   = true
+}
 output "dynamo-clinic-jobs-stream-arn" {
   value       = aws_dynamodb_table.clinic_jobs.stream_arn
   description = "Dynammo clinic jobs table"

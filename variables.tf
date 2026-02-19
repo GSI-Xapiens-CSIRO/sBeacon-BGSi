@@ -241,6 +241,11 @@ variable "registration-email-lambda-function-arn" {
   description = "Lambda function ARN for sending registration emails"
 }
 
+variable "cognito-admin-user-sub" {
+  type        = string
+  description = "Cognito admin user's unique identifier (sub)"
+}
+
 # Throttling variables
 variable "method-max-request-rate" {
   type        = number

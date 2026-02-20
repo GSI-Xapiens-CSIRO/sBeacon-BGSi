@@ -525,3 +525,84 @@ resource "aws_dynamodb_table_item" "seed_admin_user_role" {
     ignore_changes = [item]
   }
 }
+
+#
+# Guest Role Seed Data
+#
+
+# Guest role permissions - read only for specific resources
+locals {
+  guest_permissions = [
+    "clinic_request_report",
+    "clinic_workflow_annotation",
+    "clinic_workflow_result",
+    "clinical_workflow_execution",
+    "faq",
+    "file_management",
+    "generate_report",
+    "igv_viewer",
+    "my_data",
+    "my_notebook",
+    "my_project",
+    "profile",
+  ]
+
+  # Guest only gets read permission
+  guest_permission_strings = [
+    for perm in local.guest_permissions : "${perm}.read"
+  ]
+}
+
+# Generate UUID for guest role
+resource "random_uuid" "guest_role_id" {}
+
+# Seed: guest role
+resource "aws_dynamodb_table_item" "seed_role_guest" {
+  table_name = aws_dynamodb_table.roles.name
+  hash_key   = aws_dynamodb_table.roles.hash_key
+
+  item = jsonencode({
+    role_id         = { S = random_uuid.guest_role_id.result }
+    role_name       = { S = "Guest" }
+    role_name_lower = { S = "guest" }
+    description     = { S = "Read-only access to basic resources" }
+    is_active       = { BOOL = true }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}
+
+# Seed: guest gets read permissions for specified resources
+resource "aws_dynamodb_table_item" "seed_guest_permissions" {
+  for_each   = toset(local.guest_permission_strings)
+  table_name = aws_dynamodb_table.role_permissions.name
+  hash_key   = aws_dynamodb_table.role_permissions.hash_key
+  range_key  = aws_dynamodb_table.role_permissions.range_key
+
+  item = jsonencode({
+    role_id       = { S = random_uuid.guest_role_id.result }
+    permission_id = { S = each.value }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}
+
+# Seed: assign guest role to default cognito guest user
+resource "aws_dynamodb_table_item" "seed_guest_user_role" {
+  table_name = aws_dynamodb_table.user_roles.name
+  hash_key   = aws_dynamodb_table.user_roles.hash_key
+  range_key  = aws_dynamodb_table.user_roles.range_key
+
+  item = jsonencode({
+    uid     = { S = var.cognito-guest-user-sub }
+    role_id = { S = random_uuid.guest_role_id.result }
+  })
+
+  lifecycle {
+    ignore_changes = [item]
+  }
+}

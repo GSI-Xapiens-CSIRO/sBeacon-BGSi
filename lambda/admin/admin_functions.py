@@ -218,6 +218,17 @@ def get_users(event, context):
         userinfo.to_dict()["uid"]: userinfo.to_dict() for userinfo in userinfo_data
     }
 
+    # Fetch user roles - query UserRole table for all users
+    user_roles_map = {}
+    for uid in keys:
+        try:
+            roles = get_user_roles(uid)
+            # Since 1 user = 1 role, get first role if exists
+            user_roles_map[uid] = roles[0] if roles else None
+        except Exception as e:
+            print(f"Error getting role for user {uid}: {e}")
+            user_roles_map[uid] = None
+
     data = []
 
     for user in users:
@@ -234,6 +245,7 @@ def get_users(event, context):
 
         user["UserInfo"] = userinfo_data
         user["Usage"] = usage_data
+        user["Role"] = user_roles_map.get(uid, None)
         # get MFA
         try:
             mfa = cognito_client.admin_get_user(

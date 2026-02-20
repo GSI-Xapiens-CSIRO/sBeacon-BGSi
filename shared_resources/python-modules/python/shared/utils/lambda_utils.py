@@ -324,6 +324,16 @@ class CognitoEnvironment:
     def COGNITO_REGISTRATION_EMAIL_LAMBDA(self):
         return os.environ["COGNITO_REGISTRATION_EMAIL_LAMBDA"]
 
+    @property
+    def COGNITO_CLIENT_ID(self):
+        return os.environ["COGNITO_CLIENT_ID"]
+
+
+
+    @property
+    def COGNITO_REGION(self):
+        return os.environ.get("COGNITO_REGION", "ap-southeast-3")
+
 
 class SesEnvironment:
     @property

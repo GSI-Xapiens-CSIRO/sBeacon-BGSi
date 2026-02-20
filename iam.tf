@@ -14,6 +14,20 @@ data "aws_iam_policy_document" "main-apigateway" {
 }
 
 #
+# Basic Execution Policy
+#
+data "aws_iam_policy_document" "lambda-basic-execution" {
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+
+#
 # submitDataset Lambda Function
 #
 data "aws_iam_policy_document" "lambda-submitDataset" {

@@ -246,6 +246,13 @@ variable "cognito-admin-user-sub" {
   description = "Cognito admin user's unique identifier (sub)"
 }
 
+variable "cognito-client-id" {
+  type        = string
+  description = "Cognito client Id."
+}
+
+
+
 # Throttling variables
 variable "method-max-request-rate" {
   type        = number

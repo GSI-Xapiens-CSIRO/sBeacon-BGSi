@@ -349,6 +349,22 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       aws_api_gateway_integration.projects,
       aws_api_gateway_integration_response.projects,
       aws_api_gateway_method_response.projects,
+      # CORS configurations - force redeploy when CORS headers change
+      filesha1("${path.module}/api-admin.tf"),
+      filesha1("${path.module}/api-analyses.tf"),
+      filesha1("${path.module}/api-biosamples.tf"),
+      filesha1("${path.module}/api-configuration.tf"),
+      filesha1("${path.module}/api-data-portal.tf"),
+      filesha1("${path.module}/api-datasets.tf"),
+      filesha1("${path.module}/api-entry-types.tf"),
+      filesha1("${path.module}/api-filtering-terms.tf"),
+      filesha1("${path.module}/api-genomics-variants.tf"),
+      filesha1("${path.module}/api-index.tf"),
+      filesha1("${path.module}/api-individuals.tf"),
+      filesha1("${path.module}/api-map.tf"),
+      filesha1("${path.module}/api-projects.tf"),
+      filesha1("${path.module}/api-resource-info.tf"),
+      filesha1("${path.module}/api-runs.tf"),
     ]))
   }
 }

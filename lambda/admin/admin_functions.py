@@ -2,6 +2,7 @@ import json
 import random
 import string
 import traceback
+import base64
 
 import boto3
 from botocore.exceptions import ClientError
@@ -27,6 +28,7 @@ from shared.dynamodb import (
     remove_role_from_user,
     get_user_roles,
     get_users_by_role,
+    get_user_permissions,
 )
 
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
@@ -1104,3 +1106,51 @@ def set_user_role(event, context):
             error_message="Error setting user role."
         )
 
+
+# ============================================================================
+# JWT Helper
+# ============================================================================
+
+def base64url_encode(input: bytes) -> str:
+    return base64.urlsafe_b64encode(input).decode("utf-8").replace("=", "")
+
+def create_jwt(payload: dict) -> str:
+    header = {"alg": "none", "typ": "JWT"}
+    
+    header_json = json.dumps(header, separators=(",", ":")).encode("utf-8")
+    payload_json = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    
+    header_b64 = base64url_encode(header_json)
+    payload_b64 = base64url_encode(payload_json)
+    
+    return f"{header_b64}.{payload_b64}."
+
+
+@router.attach("/admin/users/permissions", "get", authenticate_admin)
+def get_user_permissions_endpoint(event, context):
+    """
+    Get all permissions for a specific user, returned as a JWT
+    """
+    uid = event["requestContext"]["authorizer"]["claims"]["sub"]
+
+    try:
+        permissions = get_user_permissions(uid)
+        
+        # Create Payload
+        payload = {
+            "sub": uid,
+            "permissions": permissions
+        }
+        
+        token = create_jwt(payload)
+        
+        return {
+            "success": True,
+            "token": token
+        }
+    except Exception as e:
+        print(f"Error getting user permissions: {e}")
+        raise BeaconError(
+            error_code="BeaconErrorGettingUserPermissions",
+            error_message="Error retrieving user permissions."
+        )

@@ -430,7 +430,7 @@ module "cors-datasets" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-filtering_terms" {
@@ -439,7 +439,7 @@ module "cors-datasets-filtering_terms" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-filtering_terms.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-id" {
@@ -448,7 +448,7 @@ module "cors-datasets-id" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-id.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-id-filtering_terms" {
@@ -457,7 +457,7 @@ module "cors-datasets-id-filtering_terms" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-id-filtering_terms.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-id-biosamples" {
@@ -466,7 +466,7 @@ module "cors-datasets-id-biosamples" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-id-biosamples.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-id-g_variants" {
@@ -475,7 +475,7 @@ module "cors-datasets-id-g_variants" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-id-g_variants.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-datasets-id-individuals" {
@@ -484,7 +484,7 @@ module "cors-datasets-id-individuals" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.datasets-id-individuals.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 # wire up lambda datasets

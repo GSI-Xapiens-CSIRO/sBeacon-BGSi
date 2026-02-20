@@ -304,7 +304,7 @@ module "cors-individuals" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.individuals.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-individuals-filtering_terms" {
@@ -313,7 +313,7 @@ module "cors-individuals-filtering_terms" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.individuals-filtering_terms.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-individuals-id" {
@@ -322,7 +322,7 @@ module "cors-individuals-id" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.individuals-id.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-individuals-id-biosamples" {
@@ -331,7 +331,7 @@ module "cors-individuals-id-biosamples" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.individuals-id-biosamples.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 module "cors-individuals-id-g_variants" {
@@ -340,7 +340,7 @@ module "cors-individuals-id-g_variants" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.individuals-id-g_variants.id
-  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 }
 
 # wire up lambda individuals

@@ -73,7 +73,7 @@
 
 #   api_id          = aws_api_gateway_rest_api.BeaconApi.id
 #   api_resource_id = aws_api_gateway_resource.submit-dataset.id
-  # allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  # allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 # }
 
 # module "cors-submit-dataset-id" {
@@ -82,7 +82,7 @@
 
 #   api_id          = aws_api_gateway_rest_api.BeaconApi.id
 #   api_resource_id = aws_api_gateway_resource.submit-dataset-id.id
-  # allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
+  # allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "X-Permissions-Token"]
 # }
 
 # # wire up lambda submit-dataset

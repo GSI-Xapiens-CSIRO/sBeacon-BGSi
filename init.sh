@@ -87,7 +87,7 @@ pip install ijson==3.3.0 --target layers/python_libraries/python
 pip install jsons==1.6.3 --target layers/python_libraries/python
 pip install jsonschema==4.18.0 --target layers/python_libraries/python
 pip install markupsafe==2.0.1 --target layers/python_libraries/python
-pip install pydantic==2.0.2 --target layers/python_libraries/python
+pip install pydantic==2.9.2 --target layers/python_libraries/python
 pip install pyhumps==3.8.0 --target layers/python_libraries/python
 pip install pynamodb==6.0.0 --target layers/python_libraries/python
 pip install pyorc==0.9.0 --target layers/python_libraries/python

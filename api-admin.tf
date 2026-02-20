@@ -69,15 +69,7 @@ module "cors-admin-proxy" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.admin_proxy.id
-  
-  allow_headers = [
-    "Authorization",
-    "Content-Type",
-    "X-Amz-Date",
-    "X-Amz-Security-Token",
-    "X-Api-Key",
-    "X-Permissions-Token"
-  ]
+
 }
 
 resource "aws_lambda_permission" "APIadmin_proxy" {

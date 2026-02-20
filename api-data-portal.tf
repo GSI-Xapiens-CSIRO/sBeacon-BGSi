@@ -69,6 +69,7 @@ module "cors-dportal-proxy" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.dportal_proxy.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 resource "aws_lambda_permission" "APIdportal_proxy" {

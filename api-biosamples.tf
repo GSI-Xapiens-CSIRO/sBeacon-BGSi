@@ -367,6 +367,7 @@ module "cors-biosamples" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-biosamples-filtering_terms" {
@@ -375,6 +376,7 @@ module "cors-biosamples-filtering_terms" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples-filtering_terms.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-biosamples-id" {
@@ -383,6 +385,7 @@ module "cors-biosamples-id" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples-id.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-biosamples-id-analyses" {
@@ -391,6 +394,7 @@ module "cors-biosamples-id-analyses" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples-id-analyses.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-biosamples-id-g_variants" {
@@ -399,6 +403,7 @@ module "cors-biosamples-id-g_variants" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples-id-g_variants.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-biosamples-id-runs" {
@@ -407,6 +412,7 @@ module "cors-biosamples-id-runs" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.biosamples-id-runs.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 # wire up lambda biosamples

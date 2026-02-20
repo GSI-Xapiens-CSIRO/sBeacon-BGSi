@@ -241,6 +241,7 @@ module "cors-analyses" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.analyses.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-analyses-filtering_terms" {
@@ -249,6 +250,7 @@ module "cors-analyses-filtering_terms" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.analyses-filtering_terms.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-analyses-id" {
@@ -257,6 +259,7 @@ module "cors-analyses-id" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.analyses-id.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 module "cors-analyses-id-g_variants" {
@@ -265,6 +268,7 @@ module "cors-analyses-id-g_variants" {
 
   api_id          = aws_api_gateway_rest_api.BeaconApi.id
   api_resource_id = aws_api_gateway_resource.analyses-id-g_variants.id
+  allow_headers   = ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token", "x-permissions-token"]
 }
 
 # wire up lambda analyses

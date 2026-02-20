@@ -8,7 +8,10 @@ from .schemas import DefaultSchemas
 from shared.utils import ENV_BEACON
 
 
-HEADERS = {"Access-Control-Allow-Origin": "*"}
+HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    # "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,x-permissions-token",
+}
 
 
 class DateTimeEncoder(json.JSONEncoder):

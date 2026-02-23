@@ -58,7 +58,7 @@ def logout_all_sessions(email):
     )
 
 
-@router.attach("/admin/users", "post", require_permissions('admin.read'))
+@router.attach("/admin/users", "post", require_permissions('admin.create'))
 def add_user(event, context):
     body_dict = json.loads(event.get("body"))
     email = body_dict.get("email").lower()
@@ -180,7 +180,7 @@ def add_user(event, context):
     return res
 
 
-@router.attach("/admin/users", "get", require_permissions(''))
+@router.attach("/admin/users", "get", require_permissions('admin.read'))
 def get_users(event, context):
     pagination_token = (event.get("queryStringParameters") or dict()).get(
         "pagination_token", None

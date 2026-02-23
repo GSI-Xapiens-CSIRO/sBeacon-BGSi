@@ -1,24 +1,26 @@
 import json
 
 from utils.models import Projects
-from shared.apiutils import bundle_response
+from shared.apiutils import LambdaRouter, bundle_response
+
+router = LambdaRouter()
 
 
-def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
-
-    query_params = event.get('queryStringParameters', {})
+@router.attach("/projects", "get")
+@router.attach("/projects", "post")
+def get_projects(event, context):
+    query_params = event.get('queryStringParameters', {}) or {}
     params = {"limit": 10}
     search_term = None
 
-    if query_params:
-        limit = query_params.get("limit", None)
-        last_evaluated_key = query_params.get("last_evaluated_key", None)
-        search_term = query_params.get("search", None)
-        if limit:
-            params["limit"] = int(limit)
-        if last_evaluated_key:
-            params["last_evaluated_key"] = json.loads(last_evaluated_key)
+    limit = query_params.get("limit", None)
+    last_evaluated_key = query_params.get("last_evaluated_key", None)
+    search_term = query_params.get("search", None)
+    
+    if limit:
+        params["limit"] = int(limit)
+    if last_evaluated_key:
+        params["last_evaluated_key"] = json.loads(last_evaluated_key)
 
     if search_term:
         search_term = search_term.lower()
@@ -40,9 +42,8 @@ def lambda_handler(event, context):
         else projects.last_evaluated_key
     )
 
-    print("Returning Response: {}".format(json.dumps({
-        "data": data,
-        "last_evaluated_key": last_evaluated_key
-    })))
-
     return bundle_response(200, {"success": True, "data": data, "last_evaluated_key": last_evaluated_key})
+
+
+def lambda_handler(event, context):
+    return router.handle_route(event, context)

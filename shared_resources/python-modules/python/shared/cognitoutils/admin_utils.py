@@ -89,10 +89,14 @@ def get_permissions_from_event(event: dict) -> List[str]:
     Raises:
         AuthError: if token is missing or invalid
     """
-    headers = event.get("headers", {})
+    headers = event.get("headers", {}) or {}
     
-    # Header names can be lowercase or mixed case
-    token = headers.get("x-permissions-token") or headers.get("X-Permissions-Token")
+    # Header names can be any case - make case-insensitive lookup
+    headers_lower = {k.lower(): v for k, v in headers.items()}
+    token = headers_lower.get("x-permissions-token")
+    
+    print(f"[get_permissions_from_event] Available headers: {list(headers.keys())}")
+    print(f"[get_permissions_from_event] Token found: {bool(token)}")
     
     if not token:
         raise AuthError(
@@ -150,7 +154,9 @@ def require_permissions(required_permissions: Union[str, List[str]], require_all
     def middleware(event, context):
         try:
             permissions = get_permissions_from_event(event)
-        except AuthError:
+            print(f"[require_permissions] User permissions from token: {permissions}")
+        except AuthError as e:
+            print(f"[require_permissions] Failed to get permissions: {e}")
             raise AuthError(
                 error_code="Unauthorised",
                 error_message="Missing or invalid permissions token"
@@ -159,12 +165,24 @@ def require_permissions(required_permissions: Union[str, List[str]], require_all
         # Normalize to list
         required = [required_permissions] if isinstance(required_permissions, str) else required_permissions
         
+        # Filter out empty strings
+        required = [r for r in required if r]
+        
+        print(f"[require_permissions] Required permissions: {required}")
+        
+        # If no permissions required, allow access
+        if not required:
+            print("[require_permissions] No permissions required, allowing access")
+            return None
+        
         if require_all:
             # All permissions must be present
             has_access = all(perm in permissions for perm in required)
         else:
             # At least one permission must be present
             has_access = any(perm in permissions for perm in required)
+        
+        print(f"[require_permissions] Access granted: {has_access}")
         
         if not has_access:
             raise AuthError(

@@ -8,7 +8,7 @@ from pynamodb.exceptions import DoesNotExist
 from utils.s3_util import list_s3_prefix, list_s3_folder, delete_s3_objects
 from utils.cognito import get_user_from_attribute, get_user_attribute, list_users
 from utils.lambda_util import invoke_lambda_function
-from shared.cognitoutils import authenticate_manager
+from shared.cognitoutils import authenticate_manager, require_permissions
 from shared.apiutils import LambdaRouter, PortalError
 from shared.dynamodb.locks import acquire_lock
 from utils.models import (
@@ -27,7 +27,7 @@ INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 #
 # Files' Admin Functions
 #
-@router.attach("/dportal/admin/folders", "get", authenticate_manager)
+@router.attach("/dportal/admin/folders", "get", require_permissions('file_management.read'))
 def list_folders(event, context):
     folders = list_s3_folder(DPORTAL_BUCKET, "private/")
     identity_ids = [file.strip("/").split("/")[-1] for file in folders]
@@ -53,7 +53,7 @@ def list_folders(event, context):
     }
 
 
-@router.attach("/dportal/admin/folders/{folder}", "delete", authenticate_manager)
+@router.attach("/dportal/admin/folders/{folder}", "delete", require_permissions('file_management.delete'))
 def delete_folder(event, context):
     folder = event["pathParameters"]["folder"]
     keys = list_s3_prefix(DPORTAL_BUCKET, f"private/{folder}/")
@@ -67,7 +67,7 @@ def delete_folder(event, context):
 #
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "get", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}/users", "get", require_permissions('project_management.read'))
 def list_project_users(event, context):
     name = event["pathParameters"]["name"]
 
@@ -94,7 +94,7 @@ def list_project_users(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/users/{email}", "delete", authenticate_manager
+    "/dportal/admin/projects/{name}/users/{email}", "delete", require_permissions('project_management.delete')
 )
 def remove_project_user(event, context):
     name = event["pathParameters"]["name"]
@@ -110,7 +110,7 @@ def remove_project_user(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}/users", "post", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}/users", "post", require_permissions('project_management.update'))
 def add_user_to_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -139,7 +139,7 @@ def add_user_to_project(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/users/{email}/upload", "post", authenticate_manager
+    "/dportal/admin/projects/{name}/users/{email}/upload", "post", require_permissions('project_management.create')
 )
 def admin_user_cli_add_upload(event, context):
     name = event["pathParameters"]["name"]
@@ -174,7 +174,7 @@ def admin_user_cli_add_upload(event, context):
 @router.attach(
     "/dportal/admin/projects/{name}/users/{email}/upload/{upload_id}",
     "delete",
-    authenticate_manager,
+    require_permissions('project_management.delete'),
 )
 def admin_user_cli_remove_upload(event, context):
     email = event["pathParameters"]["email"]
@@ -198,7 +198,7 @@ def admin_user_cli_remove_upload(event, context):
 #
 
 
-@router.attach("/dportal/admin/projects/{name}/upload", "get", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}/upload", "get", require_permissions('project_management.read'))
 def admin_get_project_uploads(event, context):
     name = event["pathParameters"]["name"]
 
@@ -225,7 +225,7 @@ def admin_get_project_uploads(event, context):
 #
 
 
-@router.attach("/dportal/admin/projects/{name}", "delete", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}", "delete", require_permissions('project_management.delete'))
 def delete_project(event, context):
     name = event["pathParameters"]["name"]
 
@@ -270,7 +270,7 @@ def delete_project(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects/{name}", "put", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}", "put", require_permissions('project_management.update'))
 def update_project(event, context):
     name = event["pathParameters"]["name"]
     body_dict = json.loads(event.get("body"))
@@ -309,7 +309,7 @@ def update_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects/{name}/errors", "delete", authenticate_manager)
+@router.attach("/dportal/admin/projects/{name}/errors", "delete", require_permissions('project_management.delete'))
 def delete_project_errors(event, context):
     name = event["pathParameters"]["name"]
 
@@ -320,7 +320,7 @@ def delete_project_errors(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/admin/projects", "post", authenticate_manager)
+@router.attach("/dportal/admin/projects", "post", require_permissions('project_management.create'))
 def create_project(event, context):
     body_dict = json.loads(event.get("body"))
     name = body_dict.get("name").strip()
@@ -347,7 +347,7 @@ def create_project(event, context):
     return project.to_dict()
 
 
-@router.attach("/dportal/admin/projects", "get", authenticate_manager)
+@router.attach("/dportal/admin/projects", "get", require_permissions('project_management.read'))
 def list_projects(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     query_params = event.get("queryStringParameters", {})
@@ -390,7 +390,7 @@ def list_projects(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/ingest/{dataset}", "post", authenticate_manager
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "post", require_permissions('project_management.create')
 )
 def ingest_dataset_to_sbeacon(event, context):
     body_dict = json.loads(event.get("body"))
@@ -419,7 +419,7 @@ def ingest_dataset_to_sbeacon(event, context):
 
 
 @router.attach(
-    "/dportal/admin/projects/{name}/ingest/{dataset}", "delete", authenticate_manager
+    "/dportal/admin/projects/{name}/ingest/{dataset}", "delete", require_permissions('project_management.delete')
 )
 def un_ingest_dataset_from_sbeacon(event, context):
     project_name = event["pathParameters"]["name"]
@@ -450,7 +450,7 @@ def un_ingest_dataset_from_sbeacon(event, context):
     }
 
 
-@router.attach("/dportal/admin/sbeacon/index", "post", authenticate_manager)
+@router.attach("/dportal/admin/sbeacon/index", "post", require_permissions('project_management.create'))
 def index_sbeacon(event, context):
     request_id = event["requestContext"]["requestId"]
     payload = {

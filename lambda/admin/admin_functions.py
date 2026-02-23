@@ -263,7 +263,7 @@ def get_users(event, context):
     return {"users": data, "pagination_token": next_pagination_token}
 
 
-@router.attach("/admin/users/{email}", "delete", authenticate_admin)
+@router.attach("/admin/users/{email}", "delete", require_permissions('admin.delete'))
 def delete_user(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
@@ -356,7 +356,7 @@ def delete_user(event, context):
     return {"success": True}
 
 
-@router.attach("/admin/users/{email}/mfa", "delete", authenticate_admin)
+@router.attach("/admin/users/{email}/mfa", "delete", require_permissions('admin.delete'))
 def clear_user_mfa(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
@@ -381,7 +381,7 @@ def clear_user_mfa(event, context):
     return {"success": True}
 
 
-@router.attach("/admin/users/{email}/groups", "get", authenticate_admin)
+@router.attach("/admin/users/{email}/groups", "get", require_permissions('admin.read'))
 def user_groups(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
@@ -411,7 +411,7 @@ def user_groups(event, context):
     }
 
 
-@router.attach("/admin/users/{email}/groups", "post", authenticate_admin)
+@router.attach("/admin/users/{email}/groups", "post", require_permissions('admin.update'))
 def update_user_groups(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
@@ -481,7 +481,7 @@ def update_user_groups(event, context):
 # ============================================================================
 
 
-@router.attach("/admin/roles", "get", authenticate_admin)
+@router.attach("/admin/roles", "get", require_permissions('admin.read'))
 def get_roles(event, context):
     """
     Get all roles in the system with their permission counts
@@ -550,7 +550,7 @@ def get_roles(event, context):
         }
 
 
-@router.attach("/admin/roles/{role_id}", "get", authenticate_admin)
+@router.attach("/admin/roles/{role_id}", "get", require_permissions('admin.read'))
 def get_role_details(event, context):
     """
     Get detailed information about a specific role including all permissions
@@ -590,7 +590,7 @@ def get_role_details(event, context):
         )
 
 
-@router.attach("/admin/roles", "post", authenticate_admin)
+@router.attach("/admin/roles", "post", require_permissions('admin.create'))
 def create_new_role(event, context):
     """
     Create a new role with specified permissions
@@ -662,7 +662,7 @@ def create_new_role(event, context):
         }
 
 
-@router.attach("/admin/roles/{role_id}", "put", authenticate_admin)
+@router.attach("/admin/roles/{role_id}", "put", require_permissions('admin.update'))
 def update_role(event, context):
     """
     Update role details and permissions
@@ -740,7 +740,7 @@ def update_role(event, context):
         }
 
 
-@router.attach("/admin/roles/{role_id}", "delete", authenticate_admin)
+@router.attach("/admin/roles/{role_id}", "delete", require_permissions('admin.delete'))
 def delete_role(event, context):
     """
     Delete a role (removes all user assignments and permissions)
@@ -790,7 +790,7 @@ def delete_role(event, context):
         }
 
 
-@router.attach("/admin/roles/{role_id}/users", "get", authenticate_admin)
+@router.attach("/admin/roles/{role_id}/users", "get", require_permissions('admin.read'))
 def get_role_users(event, context):
     """
     Get all users assigned to a specific role
@@ -851,7 +851,7 @@ def get_role_users(event, context):
         )
 
 
-@router.attach("/admin/permissions", "get", authenticate_admin)
+@router.attach("/admin/permissions", "get", require_permissions('admin.read'))
 def get_all_permissions(event, context):
     """
     Get all available permissions in the system
@@ -883,7 +883,7 @@ def get_all_permissions(event, context):
         )
 
 
-@router.attach("/admin/permissions/matrix", "get", authenticate_admin)
+@router.attach("/admin/permissions/matrix", "get", require_permissions('admin.read'))
 def get_permissions_matrix(event, context):
     """
     Get permissions formatted as a matrix for UI checkboxes
@@ -972,7 +972,7 @@ def get_permissions_matrix(event, context):
 # ============================================================================
 
 
-@router.attach("/admin/users/{uid}/roles", "get", authenticate_admin)
+@router.attach("/admin/users/{uid}/roles", "get", require_permissions('admin.read'))
 def get_user_role_assignments(event, context):
     """
     Get all roles assigned to a specific user
@@ -996,7 +996,7 @@ def get_user_role_assignments(event, context):
         )
 
 
-@router.attach("/admin/users/{uid}/roles", "post", authenticate_admin)
+@router.attach("/admin/users/{uid}/roles", "post", require_permissions('admin.create'))
 def assign_user_role(event, context):
     """
     Assign a role to a user
@@ -1044,7 +1044,7 @@ def assign_user_role(event, context):
         )
 
 
-@router.attach("/admin/users/{uid}/roles", "put", authenticate_admin)
+@router.attach("/admin/users/{uid}/roles", "put", require_permissions('admin.update'))
 def set_user_role(event, context):
     """
     Set/replace user's role (1 user = 1 role)
@@ -1106,7 +1106,7 @@ def set_user_role(event, context):
         )
 
 
-@router.attach("/admin/users/permissions", "get", authenticate_admin)
+@router.attach("/admin/users/permissions", "get", require_permissions('admin.read'))
 def get_user_permissions_endpoint(event, context):
     """
     Get all permissions for a specific user, returned as a JWT

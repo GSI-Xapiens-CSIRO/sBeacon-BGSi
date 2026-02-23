@@ -2,13 +2,12 @@ import json
 import random
 import string
 import traceback
-import base64
 
 import boto3
 from botocore.exceptions import ClientError
 from markupsafe import escape
 
-from shared.cognitoutils import authenticate_admin
+from shared.cognitoutils import authenticate_admin, create_permissions_token, require_permissions
 from shared.apiutils import BeaconError, LambdaRouter
 from shared.utils.lambda_utils import ENV_COGNITO, ENV_DYNAMO
 from shared.dynamodb import Quota, UsageMap
@@ -59,7 +58,7 @@ def logout_all_sessions(email):
     )
 
 
-@router.attach("/admin/users", "post", authenticate_admin)
+@router.attach("/admin/users", "post", require_permissions('admin.read'))
 def add_user(event, context):
     body_dict = json.loads(event.get("body"))
     email = body_dict.get("email").lower()
@@ -181,7 +180,7 @@ def add_user(event, context):
     return res
 
 
-@router.attach("/admin/users", "get", authenticate_admin)
+@router.attach("/admin/users", "get", require_permissions(''))
 def get_users(event, context):
     pagination_token = (event.get("queryStringParameters") or dict()).get(
         "pagination_token", None
@@ -1107,25 +1106,6 @@ def set_user_role(event, context):
         )
 
 
-# ============================================================================
-# JWT Helper
-# ============================================================================
-
-def base64url_encode(input: bytes) -> str:
-    return base64.urlsafe_b64encode(input).decode("utf-8").replace("=", "")
-
-def create_jwt(payload: dict) -> str:
-    header = {"alg": "none", "typ": "JWT"}
-    
-    header_json = json.dumps(header, separators=(",", ":")).encode("utf-8")
-    payload_json = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-    
-    header_b64 = base64url_encode(header_json)
-    payload_b64 = base64url_encode(payload_json)
-    
-    return f"{header_b64}.{payload_b64}."
-
-
 @router.attach("/admin/users/permissions", "get", authenticate_admin)
 def get_user_permissions_endpoint(event, context):
     """
@@ -1142,7 +1122,7 @@ def get_user_permissions_endpoint(event, context):
             "permissions": permissions
         }
         
-        token = create_jwt(payload)
+        token = create_permissions_token(payload)
         
         return {
             "success": True,

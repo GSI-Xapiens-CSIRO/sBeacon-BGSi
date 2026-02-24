@@ -11,7 +11,7 @@ router = LambdaRouter()
 
 def require_permission_and_quota(event, context):
     """Combined middleware for permission check and quota"""
-    require_permissions('sbeacon_query.read')(event, context)
+    require_permissions('sbeacon_query.create')(event, context)
     require_quota(event, context)
 
 

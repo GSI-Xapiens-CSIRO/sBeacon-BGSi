@@ -1106,7 +1106,7 @@ def set_user_role(event, context):
         )
 
 
-@router.attach("/admin/users/permissions", "get", require_permissions('admin.read'))
+@router.attach("/admin/users/permissions", "get")
 def get_user_permissions_endpoint(event, context):
     """
     Get all permissions for a specific user, returned as a JWT

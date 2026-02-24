@@ -1106,6 +1106,25 @@ def set_user_role(event, context):
         )
 
 
+# ============================================================================
+# JWT Helper
+# ============================================================================
+
+def base64url_encode(input: bytes) -> str:
+    return base64.urlsafe_b64encode(input).decode("utf-8").replace("=", "")
+
+def create_jwt(payload: dict) -> str:
+    header = {"alg": "none", "typ": "JWT"}
+    
+    header_json = json.dumps(header, separators=(",", ":")).encode("utf-8")
+    payload_json = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    
+    header_b64 = base64url_encode(header_json)
+    payload_b64 = base64url_encode(payload_json)
+    
+    return f"{header_b64}.{payload_b64}."
+
+
 @router.attach("/admin/users/permissions", "get")
 def get_user_permissions_endpoint(event, context):
     """

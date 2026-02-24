@@ -1,7 +1,7 @@
 import os
 
 from utils.cognito import search_users_from_attribute, get_user_attribute
-from shared.cognitoutils import authenticate_manager
+from shared.cognitoutils import authenticate_manager, require_permissions
 from shared.apiutils import LambdaRouter, PortalError
 
 
@@ -15,7 +15,7 @@ INDEXER_LAMBDA = os.environ.get("INDEXER_LAMBDA")
 #
 # Files' User Functions
 #
-@router.attach("/dportal/admin/users", "get", authenticate_manager)
+@router.attach("/dportal/admin/users", "get", require_permissions('project_management.read'))
 def search_users(event, context):
     query_params = event.get("queryStringParameters", {})
     search = query_params.get("search", "")

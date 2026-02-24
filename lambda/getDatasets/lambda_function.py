@@ -1,5 +1,5 @@
-import json
-from urllib.parse import unquote
+from shared.apiutils import LambdaRouter, parse_request, bundle_response, require_quota
+from shared.cognitoutils import require_permissions
 
 from route_datasets import route as route_datasets
 from route_datasets_id import route as route_datasets_id
@@ -7,54 +7,71 @@ from route_datasets_id_g_variants import route as route_datasets_id_g_variants
 from route_datasets_id_biosamples import route as route_datasets_id_biosamples
 from route_datasets_id_individuals import route as route_datasets_id_individuals
 from route_datasets_id_filtering_terms import route as route_datasets_id_filtering_terms
-from shared.apiutils import bundle_response, parse_request
-from shared.dynamodb import Quota
+
+router = LambdaRouter()
+
+
+def require_permission_and_quota(event, context):
+    """Combined middleware for permission check and quota"""
+    require_permissions('sbeacon_query.create')(event, context)
+    require_quota(event, context)
+
+
+@router.attach("/datasets", "post", require_permission_and_quota)
+def get_datasets(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    return route_datasets(request_params)
+
+
+@router.attach("/datasets/{id}", "post", require_permission_and_quota)
+def get_datasets_by_id(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    dataset_id = event["pathParameters"]["id"]
+    return route_datasets_id(request_params, dataset_id)
+
+
+@router.attach("/datasets/{id}/g_variants", "post", require_permission_and_quota)
+def get_datasets_g_variants(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    dataset_id = event["pathParameters"]["id"]
+    return route_datasets_id_g_variants(request_params, dataset_id)
+
+
+@router.attach("/datasets/{id}/biosamples", "post", require_permission_and_quota)
+def get_datasets_biosamples(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    dataset_id = event["pathParameters"]["id"]
+    return route_datasets_id_biosamples(request_params, dataset_id)
+
+
+@router.attach("/datasets/{id}/individuals", "post", require_permission_and_quota)
+def get_datasets_individuals(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    dataset_id = event["pathParameters"]["id"]
+    return route_datasets_id_individuals(request_params, dataset_id)
+
+
+@router.attach("/datasets/{id}/filtering_terms", "post", require_permission_and_quota)
+def get_datasets_filtering_terms(event, context):
+    request_params, errors, status = parse_request(event)
+    if errors:
+        return bundle_response(status, errors)
+    dataset_id = event["pathParameters"]["id"]
+    return route_datasets_id_filtering_terms(request_params, dataset_id)
 
 
 def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
-    request_params, errors, status = parse_request(event)
-    sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-
-    try:
-        quota = Quota.get(sub)
-
-        if not quota.user_has_quota():
-            return bundle_response(
-                403, {"error": "User has exceeded quota", "code": "QUOTA_EXCEEDED"}
-            )
-        else:
-            quota.increment_quota()
-    except Quota.DoesNotExist:
-        return bundle_response(
-            403, {"error": "User does not have a quota", "code": "NO_QUOTA"}
-        )
-
-    if errors:
-        return bundle_response(status, errors)
-
-    if event["resource"] == "/datasets":
-        return route_datasets(request_params)
-
-    elif event["resource"] == "/datasets/{id}":
-        dataset_id = unquote(event["pathParameters"]["id"])
-        return route_datasets_id(request_params, dataset_id)
-
-    elif event["resource"] == "/datasets/{id}/g_variants":
-        dataset_id = unquote(event["pathParameters"]["id"])
-        return route_datasets_id_g_variants(request_params, dataset_id)
-
-    elif event["resource"] == "/datasets/{id}/biosamples":
-        dataset_id = unquote(event["pathParameters"]["id"])
-        return route_datasets_id_biosamples(request_params, dataset_id)
-
-    elif event["resource"] == "/datasets/{id}/individuals":
-        dataset_id = unquote(event["pathParameters"]["id"])
-        return route_datasets_id_individuals(request_params, dataset_id)
-
-    elif event["resource"] == "/datasets/{id}/filtering_terms":
-        dataset_id = unquote(event["pathParameters"]["id"])
-        return route_datasets_id_filtering_terms(request_params, dataset_id)
+    return router.handle_route(event, context)
 
 
 if __name__ == "__main__":

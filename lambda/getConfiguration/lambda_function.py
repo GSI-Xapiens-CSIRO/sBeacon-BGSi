@@ -1,10 +1,13 @@
-import json
+from shared.apiutils import LambdaRouter, configuration, bundle_response
 
-from shared.apiutils import configuration, bundle_response
+router = LambdaRouter()
+
+
+@router.attach("/configuration", "post")
+def get_configuration(event, context):
+    response = configuration()
+    return bundle_response(200, response)
 
 
 def lambda_handler(event, context):
-    print("Event Received: {}".format(json.dumps(event)))
-    response = configuration()
-    print("Returning Response: {}".format(json.dumps(response)))
-    return bundle_response(200, response)
+    return router.handle_route(event, context)

@@ -1,12 +1,13 @@
 import json
 
 from shared.apiutils import LambdaRouter
+from shared.cognitoutils import require_permissions
 from shared.dynamodb import UserInfo
 
 router = LambdaRouter()
 
 
-@router.attach("/dportal/userinfo", "post")
+@router.attach("/dportal/userinfo", "post", require_permissions(['profile.update', 'profile.create']))
 def store_user_info(event, context):
     try:
         if isinstance(event["body"], str):
@@ -43,7 +44,7 @@ def store_user_info(event, context):
         return {"success": False, "message": f"An error occurred: {str(e)}"}
 
 
-@router.attach("/dportal/userinfo/{uid}", "get")
+@router.attach("/dportal/userinfo/{uid}", "get", require_permissions('profile.read'))
 def get_user_info(event, context):
     uid = event["pathParameters"]["uid"]
 

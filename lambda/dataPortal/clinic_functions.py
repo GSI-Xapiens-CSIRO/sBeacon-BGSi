@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timezone
 
 from shared.apiutils import LambdaRouter, PortalError
+from shared.cognitoutils import require_permissions
 from utils.models import (
     Projects,
     ProjectUsers,
@@ -88,7 +89,7 @@ HUB_CONFIGS = {
 }
 
 
-@router.attach("/dportal/projects/{project}/clinical-workflows", "get")
+@router.attach("/dportal/projects/{project}/clinical-workflows", "get", require_permissions('clinical_workflow_execution.read'))
 def list_jobs(event, context):
     print(f"Event received: {json.dumps(event)}")
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -165,6 +166,7 @@ def list_jobs(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}",
     "get",
+    require_permissions('clinical_workflow_execution.read'),
 )
 def get_job(event, context):
     selected_job = event["pathParameters"]["job_id"]
@@ -226,6 +228,7 @@ def get_job(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}",
     "delete",
+    require_permissions('clinical_workflow_execution.delete'),
 )
 def delete_jobid(event, context):
     selected_job = event["pathParameters"]["job_id"]
@@ -273,7 +276,8 @@ def delete_jobid(event, context):
 
 
 @router.attach(
-    "/dportal/projects/{project}/clinical-workflows/{job_id}/annotations", "post"
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/annotations", "post",
+    require_permissions('clinic_workflow_annotation.create'),
 )
 def save_annotations(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -310,7 +314,8 @@ def save_annotations(event, context):
 
 
 @router.attach(
-    "/dportal/projects/{project}/clinical-workflows/{job_id}/annotations", "get"
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/annotations", "get",
+    require_permissions('clinic_workflow_annotation.read'),
 )
 def get_annotations(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -373,6 +378,7 @@ def get_annotations(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/annotations/{name}",
     "delete",
+    require_permissions('clinic_workflow_annotation.delete'),
 )
 def delete_annotations(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -400,7 +406,8 @@ def delete_annotations(event, context):
 
 
 @router.attach(
-    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants", "post"
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants", "post",
+    require_permissions('clinic_workflow_result.create'),
 )
 def save_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -446,7 +453,8 @@ def save_variants(event, context):
 
 
 @router.attach(
-    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants", "get"
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/variants", "get",
+    require_permissions('clinic_workflow_result.read'),
 )
 def get_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -519,6 +527,7 @@ def get_variants(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/variants/{name}",
     "delete",
+    require_permissions('clinic_workflow_result.delete'),
 )
 def delete_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -548,6 +557,7 @@ def delete_variants(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/variants/{name}/validation",
     "post",
+    require_permissions('clinic_result_validation.create'),
 )
 def validate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -597,6 +607,7 @@ def validate_variants(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/variants/{name}/validation",
     "delete",
+    require_permissions('clinic_result_validation.delete'),
 )
 def invalidate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -644,6 +655,7 @@ def invalidate_variants(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/validation",
     "post",
+    require_permissions('clinic_result_validation.create'),
 )
 def validate_job_for_negative_reporting(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -695,6 +707,7 @@ def validate_job_for_negative_reporting(event, context):
 @router.attach(
     "/dportal/projects/{project}/clinical-workflows/{job_id}/validation",
     "delete",
+    require_permissions('clinic_result_validation.delete'),
 )
 def invalidate_job_for_negative_reporting(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -741,7 +754,10 @@ def invalidate_job_for_negative_reporting(event, context):
     }
 
 
-@router.attach("/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post")
+@router.attach(
+    "/dportal/projects/{project}/clinical-workflows/{job_id}/report", "post",
+    require_permissions('generate_report.create'),
+)
 def generate_report(event, context):
     print(f"Generating report for lab: {HUB_NAME}")
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]

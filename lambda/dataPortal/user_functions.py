@@ -2,6 +2,7 @@ import os
 import json
 
 from shared.apiutils import LambdaRouter, PortalError
+from shared.cognitoutils import require_permissions
 from utils.models import Projects, ProjectUsers, SavedQueries
 from utils.s3_util import get_presigned_url
 from utils.lambda_util import invoke_lambda_function
@@ -11,7 +12,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 COHORT_MAKER_LAMBDA = os.environ.get("COHORT_MAKER_LAMBDA")
 
 
-@router.attach("/dportal/projects", "get")
+@router.attach("/dportal/projects", "get", require_permissions('my_project.read'))
 def list_all_projects(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     query_params = event.get("queryStringParameters", {})
@@ -48,7 +49,7 @@ def list_all_projects(event, context):
     return {"success": True, "data": projects, "last_evaluated_key": last_evaluated_key}
 
 
-@router.attach("/dportal/my-projects", "get")
+@router.attach("/dportal/my-projects", "get", require_permissions('my_project.read'))
 def list_my_projects(event, context):
     query_params = event.get("queryStringParameters", {})
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
@@ -72,7 +73,7 @@ def list_my_projects(event, context):
     return {"success": True, "data": data, "last_evaluated_key": last_evaluated_key}
 
 
-@router.attach("/dportal/projects/{name}/file", "get")
+@router.attach("/dportal/projects/{name}/file", "get", require_permissions('my_project.download'))
 def get_file_presigned_url(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -96,7 +97,7 @@ def get_file_presigned_url(event, context):
     return get_presigned_url(DPORTAL_BUCKET, f"projects/{name}/project-files/{prefix}")
 
 
-@router.attach("/dportal/queries", "get")
+@router.attach("/dportal/queries", "get", require_permissions('sbeacon_query.read'))
 def get_saved_queries(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     entries = [
@@ -111,7 +112,7 @@ def get_saved_queries(event, context):
     return entries
 
 
-@router.attach("/dportal/queries", "post")
+@router.attach("/dportal/queries", "post", require_permissions('sbeacon_query.create'))
 def save_query(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     body_dict = json.loads(event.get("body"))
@@ -126,7 +127,7 @@ def save_query(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/queries/{name}", "delete")
+@router.attach("/dportal/queries/{name}", "delete", require_permissions('sbeacon_query.delete'))
 def delete_query(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -140,7 +141,7 @@ def delete_query(event, context):
     return {"success": True}
 
 
-@router.attach("/dportal/cohort", "post")
+@router.attach("/dportal/cohort", "post", require_permissions('sbeacon_query.create'))
 def create_cohort(event, context):
     body_dict = json.loads(event.get("body"))
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]

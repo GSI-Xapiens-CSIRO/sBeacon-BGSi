@@ -103,6 +103,10 @@ class LambdaRouter:
             response = handler(event, context)
             print("Response Body: {}".format(json.dumps(response, cls=DateTimeEncoder)))
 
+            # If response is already wrapped (has statusCode), return as-is
+            if isinstance(response, dict) and "statusCode" in response:
+                return response
+            
             return bundle_response(200, response)
 
         except ClientError as error:

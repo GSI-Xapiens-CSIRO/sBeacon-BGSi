@@ -1,5 +1,4 @@
 import csv
-import json
 
 from smart_open import open as sopen
 
@@ -7,19 +6,21 @@ from shared.athena import run_custom_query
 from shared.dynamodb import Ontology
 from shared.utils import ENV_ATHENA
 from shared.apiutils import (
+    LambdaRouter,
     build_filtering_terms_response,
     parse_request,
     bundle_response,
 )
 
+router = LambdaRouter()
 
-def lambda_handler(event, context):
-    print("event received", event)
+
+@router.attach("/filtering_terms", "post")
+def get_filtering_terms(event, context):
     request, errors, status = parse_request(event)
-
     if errors:
         return bundle_response(status, errors)
-
+    
     query = f"""
     SELECT DISTINCT term, label, type 
     FROM "{ENV_ATHENA.ATHENA_TERMS_TABLE}"
@@ -49,9 +50,11 @@ def lambda_handler(event, context):
         ontology.attribute_values for ontology in Ontology.batch_get(ontologies)
     ]
     response = build_filtering_terms_response(filteringTerms, resources, request)
-
-    print("Returning Response: {}".format(json.dumps(response)))
     return bundle_response(200, response)
+
+
+def lambda_handler(event, context):
+    return router.handle_route(event, context)
 
 
 if __name__ == "__main__":

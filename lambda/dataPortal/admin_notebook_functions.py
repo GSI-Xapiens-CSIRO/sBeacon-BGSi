@@ -8,7 +8,7 @@ from shared.apiutils import LambdaRouter, PortalError
 from utils.models import InstanceStatus, JupyterInstances
 from utils.cognito import list_users, get_user_from_attribute, get_user_attribute
 from utils.sagemaker import list_all_notebooks
-from shared.cognitoutils import authenticate_manager
+from shared.cognitoutils import authenticate_manager, require_permissions
 
 router = LambdaRouter()
 cognito_client = boto3.client("cognito-idp")
@@ -22,7 +22,7 @@ DPORTAL_BUCKET = os.environ.get("DPORTAL_BUCKET")
 #
 
 
-@router.attach("/dportal/admin/notebooks", "get", authenticate_manager)
+@router.attach("/dportal/admin/notebooks", "get", require_permissions('notebook_management.read'))
 def list_notebooks(event, context):
     query_params = event.get("queryStringParameters", {})
     if query_params:
@@ -87,7 +87,7 @@ def list_notebooks(event, context):
     return response
 
 
-@router.attach("/dportal/admin/notebooks/{name}", "get", authenticate_manager)
+@router.attach("/dportal/admin/notebooks/{name}", "get", require_permissions('notebook_management.read'))
 def get_notebook_status(event, context):
     notebook_name = event["pathParameters"]["name"]
 
@@ -106,7 +106,7 @@ def get_notebook_status(event, context):
     }
 
 
-@router.attach("/dportal/admin/notebooks/{name}/stop", "post", authenticate_manager)
+@router.attach("/dportal/admin/notebooks/{name}/stop", "post", require_permissions('notebook_management.update'))
 def stop_notebook(event, context):
     notebook_name = event["pathParameters"]["name"]
 
@@ -127,7 +127,7 @@ def stop_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/admin/notebooks/{name}/delete", "post", authenticate_manager)
+@router.attach("/dportal/admin/notebooks/{name}/delete", "post", require_permissions('notebook_management.delete'))
 def delete_my_notebook(event, context):
     notebook_name = event["pathParameters"]["name"]
 

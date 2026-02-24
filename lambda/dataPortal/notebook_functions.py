@@ -4,13 +4,14 @@ import os
 import boto3
 
 from shared.apiutils import LambdaRouter, PortalError
+from shared.cognitoutils import require_permissions
 from utils.models import JupyterInstances, InstanceStatus
 
 sagemaker_client = boto3.client("sagemaker")
 router = LambdaRouter()
 
 
-@router.attach("/dportal/notebooks", "post")
+@router.attach("/dportal/notebooks", "post", require_permissions('my_notebook.create'))
 def create_notebook(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     body_dict = json.loads(event.get("body"))
@@ -43,7 +44,7 @@ def create_notebook(event, context):
     return entry.attribute_values
 
 
-@router.attach("/dportal/notebooks", "get")
+@router.attach("/dportal/notebooks", "get", require_permissions('my_notebook.read'))
 def list_my_notebooks(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     notebooks = [
@@ -53,7 +54,7 @@ def list_my_notebooks(event, context):
     return notebooks
 
 
-@router.attach("/dportal/notebooks/{name}", "get")
+@router.attach("/dportal/notebooks/{name}", "get", require_permissions('my_notebook.read'))
 def get_my_notebook_status(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -72,7 +73,7 @@ def get_my_notebook_status(event, context):
     }
 
 
-@router.attach("/dportal/notebooks/{name}/stop", "post")
+@router.attach("/dportal/notebooks/{name}/stop", "post", require_permissions('my_notebook.update'))
 def stop_my_notebook(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -95,7 +96,7 @@ def stop_my_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/notebooks/{name}/start", "post")
+@router.attach("/dportal/notebooks/{name}/start", "post", require_permissions('my_notebook.update'))
 def start_my_notebook(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -117,7 +118,7 @@ def start_my_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/notebooks/{name}/delete", "post")
+@router.attach("/dportal/notebooks/{name}/delete", "post", require_permissions('my_notebook.delete'))
 def delete_my_notebook(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -140,7 +141,7 @@ def delete_my_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/notebooks/{name}", "put")
+@router.attach("/dportal/notebooks/{name}", "put", require_permissions('my_notebook.update'))
 def update_my_notebook(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]
@@ -166,7 +167,7 @@ def update_my_notebook(event, context):
     return response
 
 
-@router.attach("/dportal/notebooks/{name}/url", "get")
+@router.attach("/dportal/notebooks/{name}/url", "get", require_permissions('my_notebook.read'))
 def get_url(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
     name = event["pathParameters"]["name"]

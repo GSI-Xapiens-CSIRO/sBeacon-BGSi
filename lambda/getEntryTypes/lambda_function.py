@@ -3,7 +3,6 @@ from shared.apiutils import LambdaRouter, entry_types, bundle_response
 router = LambdaRouter()
 
 
-@router.attach("/entry_types", "get")
 @router.attach("/entry_types", "post")
 def get_entry_types(event, context):
     response = entry_types()

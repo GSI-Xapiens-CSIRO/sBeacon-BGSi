@@ -6,7 +6,6 @@ from shared.apiutils import LambdaRouter, bundle_response
 router = LambdaRouter()
 
 
-@router.attach("/projects", "get")
 @router.attach("/projects", "post")
 def get_projects(event, context):
     query_params = event.get('queryStringParameters', {}) or {}

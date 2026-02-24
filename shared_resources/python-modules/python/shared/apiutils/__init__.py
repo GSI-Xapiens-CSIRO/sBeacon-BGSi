@@ -25,3 +25,4 @@ from .responses import (
 )
 from .router import AuthError, BeaconError, PortalError, LambdaRouter
 from .schemas import DefaultSchemas
+from .quota import require_quota

@@ -15,7 +15,6 @@ from shared.apiutils import (
 router = LambdaRouter()
 
 
-@router.attach("/filtering_terms", "get")
 @router.attach("/filtering_terms", "post")
 def get_filtering_terms(event, context):
     request, errors, status = parse_request(event)

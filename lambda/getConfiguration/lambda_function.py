@@ -3,7 +3,6 @@ from shared.apiutils import LambdaRouter, configuration, bundle_response
 router = LambdaRouter()
 
 
-@router.attach("/configuration", "get")
 @router.attach("/configuration", "post")
 def get_configuration(event, context):
     response = configuration()

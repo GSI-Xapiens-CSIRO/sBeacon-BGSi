@@ -3,7 +3,6 @@ from shared.apiutils import LambdaRouter, beacon_map, bundle_response
 router = LambdaRouter()
 
 
-@router.attach("/map", "get")
 @router.attach("/map", "post")
 def get_map(event, context):
     response = beacon_map()

@@ -8,7 +8,6 @@ from shared.apiutils import (
 router = LambdaRouter()
 
 
-@router.attach("/", "get")
 @router.attach("/", "post")
 def get_info(event, context):
     request_params, errors, status = parse_request(event)

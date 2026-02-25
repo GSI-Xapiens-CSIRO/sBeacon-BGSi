@@ -60,12 +60,14 @@ class Permission(Model):
         region = REGION
 
     permission_id = UnicodeAttribute(hash_key=True)
-    disabled = BooleanAttribute(default=False)
+    disabled = BooleanAttribute(default=False, null=True)
 
     def to_dict(self):
+        # Handle missing disabled field for old data (backward compatibility)
+        disabled_value = self.disabled if self.disabled is not None else False
         return {
             "permission_id": self.permission_id,
-            "disabled": self.disabled,
+            "disabled": disabled_value,
         }
 
 

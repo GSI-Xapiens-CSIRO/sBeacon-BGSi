@@ -902,7 +902,7 @@ def get_permissions_matrix(event, context):
             "actions": standard_actions,
             "resources": resources,
             "total_resources": len(resources),
-            "total_permissions": len(existing_permissions)
+            "total_permissions": len(all_permissions)
         }
     except Exception as e:
         print(f"Error getting permissions matrix: {e}")

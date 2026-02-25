@@ -561,16 +561,6 @@ def delete_variants(event, context):
 )
 def validate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = (
-        event["requestContext"]["authorizer"]["claims"].get(
-            "custom:is_medical_director", "false"
-        )
-        == "true"
-    )
-
-    if not is_medical_director:
-        raise PortalError(403, "User is not a medical director")
-
     body = json.loads(event["body"])
     project = event["pathParameters"]["project"]
     job_id = event["pathParameters"]["job_id"]
@@ -611,16 +601,6 @@ def validate_variants(event, context):
 )
 def invalidate_variants(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = (
-        event["requestContext"]["authorizer"]["claims"].get(
-            "custom:is_medical_director", "false"
-        )
-        == "true"
-    )
-
-    if not is_medical_director:
-        raise PortalError(403, "User is not a medical director")
-
     project = event["pathParameters"]["project"]
     job_id = event["pathParameters"]["job_id"]
     name = event["pathParameters"]["name"]
@@ -659,16 +639,6 @@ def invalidate_variants(event, context):
 )
 def validate_job_for_negative_reporting(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = (
-        event["requestContext"]["authorizer"]["claims"].get(
-            "custom:is_medical_director", "false"
-        )
-        == "true"
-    )
-
-    if not is_medical_director:
-        raise PortalError(403, "User is not a medical director")
-
     body = json.loads(event["body"])
     project = event["pathParameters"]["project"]
     job_id = event["pathParameters"]["job_id"]
@@ -711,16 +681,6 @@ def validate_job_for_negative_reporting(event, context):
 )
 def invalidate_job_for_negative_reporting(event, context):
     sub = event["requestContext"]["authorizer"]["claims"]["sub"]
-    is_medical_director = (
-        event["requestContext"]["authorizer"]["claims"].get(
-            "custom:is_medical_director", "false"
-        )
-        == "true"
-    )
-
-    if not is_medical_director:
-        raise PortalError(403, "User is not a medical director")
-
     project = event["pathParameters"]["project"]
     job_id = event["pathParameters"]["job_id"]
 

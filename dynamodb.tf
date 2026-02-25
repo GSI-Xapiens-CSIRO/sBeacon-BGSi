@@ -424,50 +424,71 @@ resource "aws_dynamodb_table" "user_roles" {
 #
 
 locals {
-  rbac_permissions = [
-    "project_onboarding",
-    "project_management",
-    "notebook_management",
-    "file_management",
-    "my_project",
-    "my_data",
-    "my_notebook",
-    "sbeacon_query",
-    "sbeacon_filter",
-    "clinical_workflow_execution",
-    "igv_viewer",
-    "clinic_workflow_result",
-    "clinic_workflow_annotation",
-    "clinic_result_validation",
-    "clinic_request_report",
-    "report_validation",
-    "generate_report",
-    "faq",
-    "admin",
-    "profile",
+  # Define valid permissions per resource
+  rbac_valid_permissions = {
+    project_onboarding        = ["create"]
+    project_management        = ["create", "read", "update", "delete"]
+    notebook_management       = ["create", "read", "update", "delete"]
+    file_management           = ["create", "read", "update", "delete"]
+    my_project                = ["read", "download"]
+    my_data                   = ["create", "read", "update", "delete", "download"]
+    my_notebook               = ["create", "read", "update", "delete"]
+    sbeacon_query             = ["create", "read", "update"]
+    sbeacon_filter            = ["create", "read", "update"]
+    clinical_workflow_execution = ["create", "read", "update"]
+    igv_viewer                = ["create", "read", "update"]
+    clinic_workflow_result    = ["create", "read", "update"]
+    clinic_workflow_annotation = ["create", "read", "update", "delete"]
+    clinic_result_validation  = ["create", "read", "update", "delete", "download"]
+    clinic_request_report     = ["create", "read", "update"]
+    report_validation         = ["create", "read", "update"]
+    generate_report           = ["create", "read", "update"]
+    faq                       = ["read", "update"]
+    admin                     = ["create", "read", "update", "delete", "download"]
+    profile                   = ["create", "read", "update"]
+  }
+
+  # All resources
+  rbac_resources = keys(local.rbac_valid_permissions)
+  
+  # All standard actions
+  rbac_actions = ["create", "read", "update", "delete", "download"]
+
+  # Generate ALL permission combinations (resource x action = 100 permissions)
+  # Each permission has a disabled flag: true if invalid, false if valid
+  rbac_all_permissions = {
+    for pair in flatten([
+      for resource in local.rbac_resources : [
+        for action in local.rbac_actions : {
+          permission_id = "${resource}.${action}"
+          resource      = resource
+          action        = action
+          # Check if this action is in the valid list for this resource
+          disabled      = !contains(local.rbac_valid_permissions[resource], action)
+        }
+      ]
+    ]) : pair.permission_id => pair
+  }
+
+  # Valid permissions only (for admin role assignment)
+  rbac_valid_permission_ids = [
+    for perm_id, perm in local.rbac_all_permissions : perm_id
+    if !perm.disabled
   ]
-
-  rbac_access_types = ["create", "read", "update", "delete", "download"]
-
-  # Generate all permission strings: resource.action
-  rbac_permission_strings = flatten([
-    for perm in local.rbac_permissions : [
-      for access in local.rbac_access_types : "${perm}.${access}"
-    ]
-  ])
 }
 
 # Generate UUID for admin role (created once, stored in state)
 resource "random_uuid" "admin_role_id" {}
 
-# Seed: permissions master list
+# Seed: permissions master list (all 100 combinations with disabled flag)
 resource "aws_dynamodb_table_item" "seed_permissions" {
-  for_each   = toset(local.rbac_permission_strings)
+  for_each   = local.rbac_all_permissions
   table_name = aws_dynamodb_table.permissions.name
   hash_key   = aws_dynamodb_table.permissions.hash_key
 
   item = jsonencode({
-    permission_id = { S = each.value }
+    permission_id = { S = each.value.permission_id }
+    disabled      = { BOOL = each.value.disabled }
   })
 
   lifecycle {
@@ -493,9 +514,9 @@ resource "aws_dynamodb_table_item" "seed_role_admin" {
   }
 }
 
-# Seed: admin gets all permissions
+# Seed: admin gets all valid (non-disabled) permissions
 resource "aws_dynamodb_table_item" "seed_admin_permissions" {
-  for_each   = toset(local.rbac_permission_strings)
+  for_each   = toset(local.rbac_valid_permission_ids)
   table_name = aws_dynamodb_table.role_permissions.name
   hash_key   = aws_dynamodb_table.role_permissions.hash_key
   range_key  = aws_dynamodb_table.role_permissions.range_key

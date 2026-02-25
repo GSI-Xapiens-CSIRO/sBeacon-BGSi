@@ -51,6 +51,8 @@ class Permission(Model):
     """
     Permissions table - stores all available permissions
     PK: permission_id (e.g., "project_onboarding.create")
+    Attributes:
+      - disabled: true if this permission combination is invalid
     """
 
     class Meta:
@@ -58,10 +60,14 @@ class Permission(Model):
         region = REGION
 
     permission_id = UnicodeAttribute(hash_key=True)
+    disabled = BooleanAttribute(default=False, null=True)
 
     def to_dict(self):
+        # Handle missing disabled field for old data (backward compatibility)
+        disabled_value = self.disabled if self.disabled is not None else False
         return {
             "permission_id": self.permission_id,
+            "disabled": disabled_value,
         }
 
 
@@ -435,6 +441,17 @@ def list_all_permissions() -> List[str]:
     """
     permissions = list(Permission.scan())
     return [perm.permission_id for perm in permissions]
+
+
+def list_all_permissions_with_disabled() -> List[dict]:
+    """
+    List all permissions in the system with disabled flag.
+    
+    Returns:
+        List of dicts: {"permission_id": str, "disabled": bool}
+    """
+    permissions = list(Permission.scan())
+    return [perm.to_dict() for perm in permissions]
 
 
 # ============================================================================

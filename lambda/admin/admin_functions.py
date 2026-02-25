@@ -65,12 +65,12 @@ def add_user(event, context):
     email = body_dict.get("email").lower()
     first_name = body_dict.get("first_name")
     last_name = body_dict.get("last_name")
-    groups = body_dict.get("groups")
+    role_id = body_dict.get("role_id")  # RBAC role for application permissions
 
-    if not all([email, first_name, last_name, groups]):
+    if not all([email, first_name, last_name, role_id]):
         raise BeaconError(
             error_code="BeaconAddUserMissingAttribute",
-            error_message="Missing required attributes!",
+            error_message="Missing required attributes (email, first_name, last_name, role_id)!",
         )
 
     lower_case = random.choices(string.ascii_lowercase, k=2)
@@ -107,20 +107,46 @@ def add_user(event, context):
         )
 
     try:
-        # add user to groups
-        for group_name, chosen in groups.items():
-            if chosen:
-                cognito_client.admin_add_user_to_group(
-                    UserPoolId=USER_POOL_ID, Username=email, GroupName=group_name
-                )
-    except:
+        # Auto-assign all users to administrators group for S3 access
+        # Group name "administrators" matches aws_cognito_user_group.admin_group in cognito/cognito.tf
+        cognito_client.admin_add_user_to_group(
+            UserPoolId=USER_POOL_ID, 
+            Username=email, 
+            GroupName="administrators"
+        )
+    except Exception as e:
+        print(f"Error adding user to administrators group: {e}")
         cognito_client.admin_delete_user(
             UserPoolId=USER_POOL_ID,
             Username=email,
         )
         raise BeaconError(
             error_code="BeaconErrorAddingUserToGroups",
-            error_message="Error adding user to the requested groups.",
+            error_message="Error adding user to administrators group.",
+        )
+
+    # Get user sub for RBAC role assignment
+    sub = next(
+        (attr["Value"] for attr in cognito_user["User"]["Attributes"] if attr["Name"] == "sub"),
+        None
+    )
+    
+    if not sub:
+        cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=email)
+        raise BeaconError(
+            error_code="BeaconErrorGettingUserSub",
+            error_message="Error retrieving user ID.",
+        )
+
+    try:
+        # Assign RBAC role for application permissions
+        assign_role_to_user(sub, role_id)
+    except Exception as e:
+        print(f"Error assigning RBAC role: {e}")
+        cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=email)
+        raise BeaconError(
+            error_code="BeaconErrorAssigningRole",
+            error_message="Error assigning role to user.",
         )
 
     try:

@@ -25,6 +25,7 @@ from .rbac import (
     get_role_permissions,
     list_all_roles,
     list_all_permissions,
+    list_all_permissions_with_disabled,
     # Resource-Action Helpers
     check_resource_action,
     get_user_resources_by_action,

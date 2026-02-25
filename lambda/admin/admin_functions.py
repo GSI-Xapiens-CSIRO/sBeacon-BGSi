@@ -23,6 +23,7 @@ from shared.dynamodb import (
     get_role_permissions,
     list_all_roles,
     list_all_permissions,
+    list_all_permissions_with_disabled,
     assign_role_to_user,
     remove_role_from_user,
     get_user_roles,
@@ -65,7 +66,6 @@ def add_user(event, context):
     first_name = body_dict.get("first_name")
     last_name = body_dict.get("last_name")
     groups = body_dict.get("groups")
-    attributes = body_dict.get("attributes", {})
 
     if not all([email, first_name, last_name, groups]):
         raise BeaconError(
@@ -112,20 +112,6 @@ def add_user(event, context):
             if chosen:
                 cognito_client.admin_add_user_to_group(
                     UserPoolId=USER_POOL_ID, Username=email, GroupName=group_name
-                )
-        # update user attributes
-        if "isMedicalDirector" in attributes:
-            is_medical_director = attributes["isMedicalDirector"]
-            if is_medical_director:
-                cognito_client.admin_update_user_attributes(
-                    UserPoolId=USER_POOL_ID,
-                    Username=email,
-                    UserAttributes=[
-                        {
-                            "Name": "custom:is_medical_director",
-                            "Value": "true" if is_medical_director == True else "false",
-                        }
-                    ],
                 )
     except:
         cognito_client.admin_delete_user(
@@ -390,23 +376,12 @@ def user_groups(event, context):
     response = cognito_client.admin_list_groups_for_user(
         Username=username, UserPoolId=USER_POOL_ID
     )
-    user = cognito_client.admin_get_user(
-        UserPoolId=USER_POOL_ID,
-        Username=username,
-    )
-    is_medical_director = [
-        attr["Value"]
-        for attr in user.get("UserAttributes", [])
-        if attr["Name"] == "custom:is_medical_director"
-    ]
-    is_medical_director = is_medical_director[0] if is_medical_director else False
     groups = response.get("Groups", [])
     print(f"User with email {email} has {len(groups)} groups")
 
     return {
         "groups": groups,
         "user": username,
-        "attributes": {"isMedicalDirector": is_medical_director},
         "authorizer": authorizer,
     }
 
@@ -416,7 +391,6 @@ def update_user_groups(event, context):
     email = event["pathParameters"]["email"]
     authorizer_email = event["requestContext"]["authorizer"]["claims"]["email"]
     body_dict = json.loads(event.get("body"))
-    attributes = body_dict.get("attributes", {})
     chosen_groups = []
     removed_groups = []
 
@@ -429,27 +403,6 @@ def update_user_groups(event, context):
 
     username = get_username_by_email(email)
     authorizer = get_username_by_email(authorizer_email)
-
-    # update user attributes
-    if "isMedicalDirector" in attributes:
-        is_medical_director = attributes["isMedicalDirector"]
-        if is_medical_director:
-            cognito_client.admin_update_user_attributes(
-                UserPoolId=USER_POOL_ID,
-                Username=username,
-                UserAttributes=[
-                    {
-                        "Name": "custom:is_medical_director",
-                        "Value": "true",
-                    }
-                ],
-            )
-        else:
-            cognito_client.admin_delete_user_attributes(
-                UserPoolId=USER_POOL_ID,
-                Username=username,
-                UserAttributeNames=["custom:is_medical_director"],
-            )
 
     # admin cannot remove themself from administrators group
     if username == authorizer and "administrators" in removed_groups:
@@ -888,6 +841,9 @@ def get_permissions_matrix(event, context):
     """
     Get permissions formatted as a matrix for UI checkboxes
     Returns structure suitable for rendering permission table
+    
+    Matrix shows all possible action combinations, with disabled flag for invalid ones.
+    Valid permissions are seeded from Terraform config (dynamodb.tf)
 
     Returns:
     {
@@ -897,8 +853,8 @@ def get_permissions_matrix(event, context):
           "name": "project_onboarding",
           "label": "Project Onboarding",
           "permissions": {
-            "create": "project_onboarding.create",
-            "read": "project_onboarding.read",
+            "create": {"id": "project_onboarding.create", "disabled": false, "exists": true},
+            "read": {"id": "project_onboarding.read", "disabled": true, "exists": false},
             ...
           }
         }
@@ -906,50 +862,39 @@ def get_permissions_matrix(event, context):
     }
     """
     try:
-        permissions = list_all_permissions()
+        # Get all permissions from database (includes disabled flag from Terraform)
+        all_permissions = list_all_permissions_with_disabled()
 
         # Define standard actions
         standard_actions = ["create", "read", "update", "delete", "download"]
 
-        # Organize by resource
+        # Group permissions by resource
         resources_map = {}
-        for perm_id in permissions:
+        for perm in all_permissions:
+            perm_id = perm["permission_id"]
+            disabled = perm.get("disabled", False)
+            
             if "." in perm_id:
                 resource, action = perm_id.split(".", 1)
                 if resource not in resources_map:
                     resources_map[resource] = {}
-                resources_map[resource][action] = perm_id
+                
+                resources_map[resource][action] = {
+                    "id": perm_id,
+                    "disabled": disabled,
+                    "exists": not disabled  # Only non-disabled permissions are assignable
+                }
 
-        # Convert to array format with labels
-        resource_labels = {
-            "project_onboarding": "Project Onboarding",
-            "project_management": "Project Management",
-            "notebook_management": "Notebook Management",
-            "file_management": "File Management",
-            "my_project": "My Project",
-            "my_data": "My Data",
-            "my_notebook": "My Notebook",
-            "sbeacon_query": "sBeacon Query",
-            "sbeacon_filter": "sBeacon Filter",
-            "clinical_workflow_execution": "Clinical Workflow Execution",
-            "igv_viewer": "IGV Viewer",
-            "clinic_workflow_result": "Clinic Workflow Result",
-            "clinic_workflow_annotation": "Clinic Workflow Annotation",
-            "clinic_result_validation": "Clinic Result Validation",
-            "clinic_request_report": "Clinic Request Report",
-            "report_validation": "Report Validation",
-            "generate_report": "Generate Report",
-            "faq": "FAQ",
-            "admin": "Admin",
-            "profile": "Profile",
-        }
-
+        # Build matrix for all resources
         resources = []
-        for resource_name, perms in sorted(resources_map.items()):
+        for resource_name in sorted(resources_map.keys()):
+            # Create permission object for each standard action
+            permissions_obj = resources_map[resource_name]
+            
             resources.append({
                 "name": resource_name,
-                "label": resource_labels.get(resource_name, resource_name.replace("_", " ").title()),
-                "permissions": perms
+                "label": resource_name.replace("_", " ").title(),
+                "permissions": permissions_obj
             })
 
         return {
@@ -957,7 +902,7 @@ def get_permissions_matrix(event, context):
             "actions": standard_actions,
             "resources": resources,
             "total_resources": len(resources),
-            "total_permissions": len(permissions)
+            "total_permissions": len(existing_permissions)
         }
     except Exception as e:
         print(f"Error getting permissions matrix: {e}")

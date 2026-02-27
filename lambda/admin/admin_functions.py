@@ -31,6 +31,13 @@ from shared.dynamodb import (
     get_user_permissions,
 )
 
+# Import utilities from utils folder
+from utils import (
+    get_username_by_email,
+    logout_all_sessions,
+    delete_user_data_from_all_tables,
+)
+
 USER_POOL_ID = ENV_COGNITO.COGNITO_USER_POOL_ID
 COGNITO_REGISTRATION_EMAIL_LAMBDA = ENV_COGNITO.COGNITO_REGISTRATION_EMAIL_LAMBDA
 DYNAMO_JUPYTER_INSTANCES_TABLE = ENV_DYNAMO.DYNAMO_JUPYTER_INSTANCES_TABLE
@@ -41,22 +48,9 @@ sagemaker_client = boto3.client("sagemaker")
 router = LambdaRouter()
 
 
-def get_username_by_email(email):
-    response = cognito_client.list_users(
-        UserPoolId=USER_POOL_ID, Filter=f'email = "{email}"', Limit=1
-    )
-
-    if response.get("Users"):
-        return response["Users"][0]["Username"]
-
-    raise Exception(f"User with email {email} not found")
-
-
-def logout_all_sessions(email):
-    username = get_username_by_email(email)
-    cognito_client.admin_user_global_sign_out(
-        UserPoolId=USER_POOL_ID, Username=username
-    )
+# ============================================================================
+# User Management APIs
+# ============================================================================
 
 
 @router.attach("/admin/users", "post", require_permissions('admin.create'))
@@ -355,17 +349,30 @@ def delete_user(event, context):
                     "message": "There was a problem stopping the user's active notebook instances.",
                 }
 
-    # delete user quota
-    try:
-        quota = Quota.get(sub)
-        quota.delete()
-    except Quota.DoesNotExist:
-        print(f"Quota for user {sub} does not exist.")
+    # Delete user data from all 10 DynamoDB tables
+    print(f"Starting comprehensive data cleanup for user {sub}...")
+    cleanup_results = delete_user_data_from_all_tables(sub)
+    
+    # Log cleanup results
+    print(f"Cleanup results for user {sub}:")
+    print(f"  Deleted: {len(cleanup_results['deleted'])} items")
+    print(f"  Not found: {len(cleanup_results['not_found'])} tables")
+    print(f"  Errors: {len(cleanup_results['errors'])} errors")
+    if cleanup_results['errors']:
+        print(f"  Error details: {cleanup_results['errors']}")
 
+    # Delete user from Cognito
     cognito_client.admin_delete_user(UserPoolId=USER_POOL_ID, Username=username)
 
     print(f"User with email {email} removed successfully!")
-    return {"success": True}
+    return {
+        "success": True,
+        "cleanup_summary": {
+            "deleted_count": len(cleanup_results['deleted']),
+            "tables_with_no_data": cleanup_results['not_found'],
+            "errors": cleanup_results['errors']
+        }
+    }
 
 
 @router.attach("/admin/users/{email}/mfa", "delete", require_permissions('admin.delete'))

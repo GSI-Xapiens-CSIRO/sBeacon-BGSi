@@ -9,7 +9,7 @@ USER_POOL_ID = os.environ.get("USER_POOL_ID")
 
 
 @lru_cache(maxsize=128)
-def adget_user_from_attribute(attribute, value):
+def get_user_from_attribute(attribute, value):
     try:
         response = cognito_client.list_users(
             UserPoolId=USER_POOL_ID, Filter=f'{attribute} = "{value}"'

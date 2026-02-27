@@ -77,18 +77,19 @@ def list_project_users(event, context):
         raise PortalError(404, "Project not found")
 
     user_projects = ProjectUsers.query(name)
-    users = [
-        get_user_from_attribute("sub", user_project.uid)
-        for user_project in user_projects
-    ]
-    users = [
-        {
-            "firstName": get_user_attribute(user, "given_name"),
-            "lastName": get_user_attribute(user, "family_name"),
-            "email": get_user_attribute(user, "email"),
-        }
-        for user in users
-    ]
+    users = []
+    
+    for user_project in user_projects:
+        try:
+            user = get_user_from_attribute("sub", user_project.uid)
+            users.append({
+                "firstName": get_user_attribute(user, "given_name"),
+                "lastName": get_user_attribute(user, "family_name"),
+                "email": get_user_attribute(user, "email"),
+            })
+        except (PortalError, Exception) as e:
+            print(f"User {user_project.uid} not found in Cognito, skipping... Error: {str(e)}")
+            continue
 
     return users
 

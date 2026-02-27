@@ -443,7 +443,7 @@ locals {
     report_validation         = ["create", "read", "update"]
     generate_report           = ["create", "read", "update"]
     faq                       = ["read"]
-    admin                     = ["create", "read", "update", "delete", "download"]
+    admin                     = ["create", "read", "update", "delete"]
     profile                   = ["create", "read", "update"]
   }
 

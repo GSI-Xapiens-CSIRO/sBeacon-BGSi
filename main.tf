@@ -873,3 +873,24 @@ module "lambda-generateCohortVCfs" {
     local.binaries_layer,
   ]
 }
+
+#
+# authActivity Lambda Function (Public endpoint for logging auth events from Amplify)
+#
+module "lambda-authActivity" {
+  source = "terraform-aws-modules/lambda/aws"
+
+  function_name = "sbeacon-backend-authActivity"
+  description   = "Public endpoint to log authentication activities (login, MFA, password reset)"
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.12"
+  memory_size   = 256
+  timeout       = 10
+  source_path   = "${path.module}/lambda/authActivity"
+  tags          = var.common-tags
+
+  environment_variables = {
+    # No sensitive vars needed - logs go to CloudWatch
+    LOG_LEVEL = "INFO"
+  }
+}

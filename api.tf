@@ -365,6 +365,7 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       filesha1("${path.module}/api-projects.tf"),
       filesha1("${path.module}/api-resource-info.tf"),
       filesha1("${path.module}/api-runs.tf"),
+      filesha1("${path.module}/api-auth-activity.tf"),
     ]))
   }
 }

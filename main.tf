@@ -77,6 +77,11 @@ locals {
     DYNAMO_DATAPORTAL_LOCKS_TABLE            = aws_dynamodb_table.dataportal_locks_table.name
     DYNAMO_JUPYTER_INSTANCES_TABLE           = aws_dynamodb_table.juptyer_notebooks.name
     DYNAMO_USER_INFO_TABLE                   = aws_dynamodb_table.sbeacon_dataportal_users_info.name
+    DYNAMO_SAVED_QUERIES_TABLE               = aws_dynamodb_table.saved_queries.name
+    DYNAMO_CLINIC_JOBS_TABLE                 = aws_dynamodb_table.clinic_jobs.name
+    DYNAMO_CLINICAL_ANNOTATIONS_TABLE        = aws_dynamodb_table.clinical_annotations.name
+    DYNAMO_CLINICAL_VARIANTS_TABLE           = aws_dynamodb_table.clinical_variants.name
+    DYNAMO_CLI_UPLOAD_TABLE                  = aws_dynamodb_table.dataportal_cli_upload.name
     # RBAC Tables
     DYNAMO_ROLES_TABLE                       = aws_dynamodb_table.roles.name
     DYNAMO_PERMISSIONS_TABLE                 = aws_dynamodb_table.permissions.name

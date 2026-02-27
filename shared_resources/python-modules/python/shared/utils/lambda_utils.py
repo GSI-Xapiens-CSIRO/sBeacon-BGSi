@@ -300,6 +300,26 @@ class DynamoDBEnvironment:
     def DYNAMO_ROLE_PERMISSIONS_PERM_ID_INDEX(self):
         return os.environ["DYNAMO_ROLE_PERMISSIONS_PERM_ID_INDEX"]
 
+    @property
+    def DYNAMO_SAVED_QUERIES_TABLE(self):
+        return os.environ["DYNAMO_SAVED_QUERIES_TABLE"]
+
+    @property
+    def DYNAMO_CLINIC_JOBS_TABLE(self):
+        return os.environ["DYNAMO_CLINIC_JOBS_TABLE"]
+
+    @property
+    def DYNAMO_CLINICAL_ANNOTATIONS_TABLE(self):
+        return os.environ["DYNAMO_CLINICAL_ANNOTATIONS_TABLE"]
+
+    @property
+    def DYNAMO_CLINICAL_VARIANTS_TABLE(self):
+        return os.environ["DYNAMO_CLINICAL_VARIANTS_TABLE"]
+
+    @property
+    def DYNAMO_CLI_UPLOAD_TABLE(self):
+        return os.environ["DYNAMO_CLI_UPLOAD_TABLE"]
+
 
 # class SnsEnvironment:
 #     @property

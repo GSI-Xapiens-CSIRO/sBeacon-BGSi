@@ -389,10 +389,22 @@ data "aws_iam_policy_document" "admin-lambda-access" {
       "dynamodb:Query",
       "dynamodb:Scan",
       "dynamodb:DeleteItem",
+      "dynamodb:BatchWriteItem",
     ]
     resources = [
+      # User data tables - need delete access for user cleanup
       aws_dynamodb_table.juptyer_notebooks.arn,
       aws_dynamodb_table.sbeacon-dataportal-users-quota.arn,
+      aws_dynamodb_table.project_users.arn,
+      aws_dynamodb_table.clinic_jobs.arn,
+      aws_dynamodb_table.clinical_annotations.arn,
+      aws_dynamodb_table.clinical_variants.arn,
+      aws_dynamodb_table.saved_queries.arn,
+      aws_dynamodb_table.dataportal_cli_upload.arn,
+      # GSIs for querying by user
+      "${aws_dynamodb_table.project_users.arn}/index/*",
+      "${aws_dynamodb_table.clinic_jobs.arn}/index/*",
+      "${aws_dynamodb_table.dataportal_cli_upload.arn}/index/*",
     ]
   }
   statement {

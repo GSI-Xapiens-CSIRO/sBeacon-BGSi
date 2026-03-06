@@ -60,12 +60,30 @@ META_STRUCTURED_WHITELIST = {
 
 PII_PATTERNS = [
     r"\b[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b",  # Email
-    r"^(\+62|62)?[\s-]?0?8[1-9]{1}\d{1}[\s-]?\d{4}[\s-]?\d{2,5}$",  # Phone number
-    r"\b0\d{1,3}[\s-]?\d{6,8}\b",  # Fixed line phone (any area code)
-    r"\b\d{10,13}\b",  # General phone number (10-13 digits)
-    r"^(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}$",  # NIK
+
+    # Phone (HP Indonesia)
+    r"\b(?:\+?62[\s.-]*|0)8[1-9](?:[\s.-]?\d){7,10}\b",
+
+    # Landline with area code
+    r"\b0(?:\((?:2[1-9]|[3-9]\d)\)|(?:2[1-9]|[3-9]\d))(?:[\s.-]?\d){6,8}\b",
+
+    # NIK (without anchor, can be used for SIM also)
+    r"\b(1[1-9]|21|[37][1-6]|5[1-3]|6[1-5]|[89][12])\d{2}\d{2}([04][1-9]|[1256][0-9]|[37][01])(0[1-9]|1[0-2])\d{2}\d{4}\b",
+
     r"\b[A-Z]{1,2} \d{1,4}( [A-Z]{1,3})?\b",  # License plate with enforced spaces
+    r"\b(?:[A-Z]\d{6,7}[A-Z]?|[A-Z]{2}\d{6,7})\b",  # Passport
+    r"\b\d{13}\b",  # BPJS
+
+    r"\b\d{2}\.?\d{3}\.?\d{3}\.?\d{1}-?\d{3}\.?\d{3}\b",  # NPWP 15 digit
+    r"\b0\d{15}\b",  # NPWP 16 digit for foreigners
+
+    # Lat/Long pair 
+    r"(?<!\w)[+-]?(?:90(?:\.0+)?|[0-8]?\d(?:\.\d+)?)(?:\s*,\s*|\s+)[+-]?(?:180(?:\.0+)?|1[0-7]\d(?:\.\d+)?|[0-9]?\d(?:\.\d+)?)(?!\w)",
+
+    # Single lat/long value
+    r"(?<!\w)[+-]?(?:90(?:\.0+)?|[0-8]?\d)\.\d{4,}(?!\w)|(?<!\w)[+-]?(?:180(?:\.0+)?|1[0-7]\d|[0-9]?\d)\.\d{4,}(?!\w)",
 ]
+
 CASE_INSENSITIVE_PII_PATTERNS = [
     r"\b(?:(?:Jl\.|Jalan|Desa|Kelurahan|Kecamatan|Kab.|Kab|Kabupaten|Kec|Kec.|Kecamatan|Prov.|Provinsi|Prov|Kode\s?Pos)(?:\s?(?:\d{5}|RT\s?\d{1,2}/RW\s?\d{1,2}|[A-Z^RT]+[a-z]*(?:\.\s?\d+)?),?)+,?\s?)+\b",  # Address
     r"\b(?:Dr\.|Prof\.|Ir\.|Haji|Hajjah|Putra|Putri|Sri|Adi|Raden|Ny|H\.|Hj\.|Kiai|Kyai|K\.H\.|KH\.|Gus|Ning|Ir\.|Drs\.|Dra\.|Sultan|Pangeran|R\.M\.|R\.A\.|R\.Ay\.|Rr\.|Ust\.|Ustaz|Ustadz|Bapak|Bpk\.|Iibu|Saudara|Saudari|Sdr\.|Tuan|Tn\.|Nona|Nn\.|Dokter|Drg\.|Prof\.|Teungku|Teuku|Tgk\.|Datuk|Datuak|Tengku|Kemas|Nyimas|Kiagus|Nyanyu|Tubagus|Ratu|Rd\.|Rara|Roro|Anak Agung|Gusti|Dewa|Desak|Lalu|Umbu|ADaeng|Puang|Kapitan|Adi|Daeng|Karaeng|Arung|Opu|Petta|Latu|Upu)(?:\s[A-Z][a-z]+){1,2}\b",  # Name

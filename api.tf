@@ -349,6 +349,11 @@ resource "aws_api_gateway_deployment" "BeaconApi" {
       aws_api_gateway_integration.projects,
       aws_api_gateway_integration_response.projects,
       aws_api_gateway_method_response.projects,
+      # /auth_activity
+      aws_api_gateway_method.auth_activity_post,
+      aws_api_gateway_integration.auth_activity_post,
+      aws_api_gateway_integration_response.auth_activity_post,
+      aws_api_gateway_method_response.auth_activity_post,
       # CORS configurations - force redeploy when CORS headers change
       filesha1("${path.module}/api-admin.tf"),
       filesha1("${path.module}/api-analyses.tf"),
